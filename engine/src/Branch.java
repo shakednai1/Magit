@@ -11,6 +11,7 @@ public class Branch {
     public Branch(String name, Commit head){
         this.name = name;
         this.head = head;
+        startCommit = head;
     }
 
     public Commit getHead(){
@@ -30,7 +31,7 @@ public class Branch {
     public List<String> getCommitHistory(){
         List<String> res = new LinkedList<>();
         Commit currentCommit = head;
-        while (currentCommit != null){ // TODO currentCommit.sha1 != startCommit.sha1
+        while (currentCommit != startCommit){
             res.add(currentCommit.commitSha1 + Settings.delimiter + currentCommit.msg + Settings.delimiter +
                     currentCommit.commitTime + Settings.delimiter + currentCommit.rootFolder.userLastModified);
             currentCommit = currentCommit.previousCommit;

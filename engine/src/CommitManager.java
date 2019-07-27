@@ -63,9 +63,10 @@ public class CommitManager {
 
 
     private Map<String, List<String>> getChanges() {
-        //check for new and deleted files
+        /*check for new and deleted files
+        // newState.keySet() - currentState.keySet() return the files that exist in newState but not in currentState
+        currentState.keySet() - newState.keySet()) return the files that exist in currentState but not in newState*/
         newFiles = new ArrayList<>(CollectionUtils.subtract(newState.keySet(), currentState.keySet()));
-        // TODO remove newFiles and than find the deleted Files
         deletedFiles = new ArrayList<>(CollectionUtils.subtract(currentState.keySet(), newState.keySet()));
 
         //check for updated files

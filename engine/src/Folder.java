@@ -89,6 +89,7 @@ public class Folder extends Item {
 
     // recursive calculate sha1 for all the sub folders and files under the current directory
     // TODO : verify empty folder sha1 is not calculated
+    // TODO : create new tree, do not consoder existing items in subItems
     private void getAllItems() {
         File directory = new File(fullPath);
         File[] listOfItems = directory.listFiles();
