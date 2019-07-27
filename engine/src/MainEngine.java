@@ -5,10 +5,11 @@ public class MainEngine {
     public static String currentUser = "Admin";
 
     public MainEngine(){
-        Repository repository = new Repository("C:\\test");
-        RepositoryManager.switchActiveRepository(repository.getFullPath());
-        RepositoryManager.getAllRepositories().add(repository);
-        RepositoryManager.getActiveRepository().getCommitManager().start();
+
+        // TODO - remove before submit
+        String fullPath = "C:\\test";
+        Settings.setNewRepository(fullPath);
+        RepositoryManager.switchActiveRepository(fullPath);
     }
 
     public static Map<String ,List<String>> getWorkingCopyStatus(){
@@ -16,11 +17,12 @@ public class MainEngine {
     }
 
     public static boolean commit(String msg){
-        return RepositoryManager.getActiveRepository().getCommitManager().commit(msg);
+        return RepositoryManager.getActiveRepository().getBranchManager().commit(msg);
     }
 
-    public static void chnageCurrentUser(String user){
+    public static void changeCurrentUser(String user){
         currentUser = user;
+        RepositoryManager.getActiveRepository().setUser(user);
     }
 
     public static boolean changeActiveRepository(String fullPath){
@@ -34,7 +36,7 @@ public class MainEngine {
     }
 
     public static List<String> getCurrentCommitState(){
-        return RepositoryManager.getActiveRepository().getCommitManager().currentCommit.getAllItems();
+        return RepositoryManager.getActiveRepository().getCommitManager().rootFolder.getItemsData();
     }
 
     public static boolean createNewBranch(String name){

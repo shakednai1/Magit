@@ -4,75 +4,73 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class CommitManager {
+class CommitManager {
 
-    public Folder mf;
+    private String currentUser;
 
-    public String currentRootSha1 = null;
-    public String newRootSha1 = null;
+    Folder rootFolder;
 
-    public Map<String, String> currentState = new HashMap<>();
-    public Map<String, String> newState = new HashMap<>();
+    private String currentRootSha1;
+    private String newRootSha1 = null;
 
-    public Commit currentCommit = null;
-    public List<Commit> commitList = new LinkedList<>();
+    private Map<String, String> currentStateOfFiles = new HashMap<>();
+    private Map<String, String> newStateOfFiles = new HashMap<>();
 
-    public List<String> newFiles = new ArrayList<>();
-    public List<String> deletedFiles = new ArrayList<>();
-    public List<String> updatedFiles = new ArrayList<>();
+    private Commit currentCommit = null;
+    private List<Commit> commitList = new LinkedList<>();
+
+    private List<String> newFiles = new ArrayList<>();
+    private List<String> deletedFiles = new ArrayList<>();
+    private List<String> updatedFiles = new ArrayList<>();
 
 
 
-    public CommitManager(){
+    CommitManager(){
+        rootFolder = getRootFolder();
+        rootFolder.updateStateAndSetSha1();
+        currentRootSha1 = rootFolder.currentSHA1;
     }
 
-    public void start(){
-        mf = getRootFolder();
-        currentRootSha1 = mf.calculateSha1();
-        currentState.putAll(newState);
-        newState.clear();
-        Commit com = new Commit("", currentRootSha1, mf, null);
-        currentCommit = com;
-        RepositoryManager.getActiveRepository().getBranchManager().getActiveBranch().setHead(currentCommit);
-        mf.addAllItemsToCurentCommit();
-        commitList.add(com);
+    Commit getMasterCommit(){
+        return new Commit("", rootFolder.currentSHA1, rootFolder, null);
     }
 
+    void setCurrentUser(String currentUser){
+        this.currentUser = currentUser;
+    }
 
-    public boolean commit(String msg){
+    Commit commit(String msg){
+        rootFolder.updateStateAndSetSha1();
+
         if(haveChanges()){
-            currentState.clear();
-            currentState.putAll(newState);
-            newState.clear();
 
             currentRootSha1 = newRootSha1;
             newRootSha1 = null;
 
-            Commit com = new Commit(msg, currentRootSha1, mf, currentCommit);
+            Commit com = new Commit(msg, currentRootSha1, rootFolder, currentCommit);
             currentCommit = com;
-            RepositoryManager.getActiveRepository().getBranchManager().getActiveBranch().setHead(currentCommit);
-            mf.zipAll();
-            mf.addAllItemsToCurentCommit();
-            com.createCommit();
+
+            rootFolder.commit(currentUser, com.commitTime);
+            com.zipCommit();
             commitList.add(com);
 
-            return true;
+            return com;
         }
-        return false;
+        return null;
     }
 
 
     private Map<String, List<String>> getChanges() {
         /*check for new and deleted files
-        // newState.keySet() - currentState.keySet() return the files that exist in newState but not in currentState
-        currentState.keySet() - newState.keySet()) return the files that exist in currentState but not in newState*/
-        newFiles = new ArrayList<>(CollectionUtils.subtract(newState.keySet(), currentState.keySet()));
-        deletedFiles = new ArrayList<>(CollectionUtils.subtract(currentState.keySet(), newState.keySet()));
+        // newStateOfFiles.keySet() - currentStateOfFiles.keySet() return the files that exist in newStateOfFiles but not in currentStateOfFiles
+        currentStateOfFiles.keySet() - newStateOfFiles.keySet()) return the files that exist in currentStateOfFiles but not in newStateOfFiles*/
+        newFiles = new ArrayList<>(CollectionUtils.subtract(newStateOfFiles.keySet(), currentStateOfFiles.keySet()));
+        deletedFiles = new ArrayList<>(CollectionUtils.subtract(currentStateOfFiles.keySet(), newStateOfFiles.keySet()));
 
         //check for updated files
-        List<String> common = new ArrayList<>(CollectionUtils.retainAll(currentState.keySet(), newState.keySet()));
+        List<String> common = new ArrayList<>(CollectionUtils.retainAll(currentStateOfFiles.keySet(), newStateOfFiles.keySet()));
         for(String key : common){
-            if (!currentState.get(key).equals(newState.get(key))){
+            if (!currentStateOfFiles.get(key).equals(newStateOfFiles.get(key))){
                 updatedFiles.add(key);
             }
         }
@@ -83,23 +81,23 @@ public class CommitManager {
         return changes;
     }
 
-    public boolean haveChanges(){
-        newRootSha1 = calcNewSha1();
+    boolean haveChanges(){
+        newRootSha1 = rootFolder.currentSHA1;
         return !currentRootSha1.equals(newRootSha1);
     }
 
-    public Map<String ,List<String>> getWorkingCopy(){
+    Map<String ,List<String>> getWorkingCopy(){
         calcNewSha1();
         return getChanges();
     }
 
     private String calcNewSha1(){
-        newState = new HashMap<>();
-        return mf.calculateSha1();
+        newStateOfFiles = new HashMap<>();
+        return rootFolder.updateStateAndSetSha1();
     }
 
     private Folder getRootFolder(){
-        String repoLocation = RepositoryManager.getActiveRepository().getFullPath();
+        String repoLocation = Settings.repositoryFullPath;
         Path path = Paths.get(repoLocation);
         String repoName = path.getFileName().toString();
         return new Folder(repoLocation, repoName);

@@ -8,23 +8,35 @@ public class Repository {
     private String branchesFolderPath;
 
 
-    public Repository(String fullPath){
+    Repository(String fullPath){
         this.fullPath = fullPath;
-        objectsFolderPath = fullPath + "/.magit/.objects/";
-        branchesFolderPath = fullPath + "/.magit/.branches/";
-        branchManager =new BranchManager();
-        branchManager.createMasterBranch();
+        objectsFolderPath = fullPath + Settings.objectsFolderPath;
+        branchesFolderPath = fullPath + Settings.branchFolderPath;
+
         commitManager = new CommitManager();
+        branchManager = new BranchManager(commitManager);
+
+        Branch masterBranch = branchManager.createMasterBranch();
+        branchManager.addBranch(masterBranch);
+        branchManager.setActiveBranch(masterBranch);
     }
 
-    public String getFullPath(){ return fullPath; }
+    String getFullPath(){ return fullPath; }
 
-    public BranchManager getBranchManager(){ return branchManager; }
+    BranchManager getBranchManager(){ return branchManager; }
 
-    public CommitManager getCommitManager(){ return commitManager; }
+    CommitManager getCommitManager(){ return commitManager; }
 
-    public String getObjectsFolderPath(){ return objectsFolderPath; }
+    String getObjectsFolderPath(){ return objectsFolderPath; }
 
-    public String getBranchesFolderPath(){ return branchesFolderPath; }
+    String getBranchesFolderPath(){ return branchesFolderPath; }
+
+    public Branch getActiveBranch(){
+        return branchManager.getActiveBranch();
+    }
+
+    void setUser(String user){
+        commitManager.setCurrentUser(user);
+    }
 
 }

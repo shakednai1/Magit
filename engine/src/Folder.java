@@ -3,195 +3,167 @@ import org.apache.commons.codec.digest.DigestUtils;
 import java.io.File;
 import java.util.*;
 
-
 public class Folder extends Item {
 
-    private Set<Item> subItems = new LinkedHashSet<>();
-    private Set<Item> tmpItems = new LinkedHashSet<>();
-    private String folderDataString = "";
-    private String strForSha1 = "";
+    private Map<String, Blob> subFiles = new HashMap<>();
+    private Map<String, Folder> subFolders = new HashMap<>();
 
-    public Folder(String path, String name) {
+    private Map<String, Blob> curSubFiles = new HashMap<>();
+    private Map<String, Folder> curSubFolders = new HashMap<>();
+
+    Folder(String path, String name) {
         typeItem = "Folder";
         fullPath = path;
         this.name = name;
     }
 
     @Override
-    public String calculateSha1() {
-        folderDataString = "";
-        strForSha1 = "";
-        tmpItems.clear();
-        getAllItems();
-        subItems.clear();
-        subItems.addAll(tmpItems);
-        return sha1;
+    public String updateStateAndSetSha1() {
+        updateCurrentState();
+        setSHA1();
+        return currentSHA1;
     }
 
-    public void zipAll(){
-        recursiveUpdateUserDate();
-        updateUserAndDate();
+    private void setSHA1(){
+        String sha1Str = getStringToCalcSHA1();
+        currentSHA1 = DigestUtils.sha1Hex(sha1Str);
+    }
 
-        folderDataString = "";
-        clacFolderDataString();
-        recursiveUpdateFolderData();
+    boolean commit(String commitUser, String commitTime){
+        // function assume the items are up-to-date
 
-        recursiveZip();
+        boolean filesHadBeenUpdated;
+        boolean subFolderUpdatedFiles = false;
+
+        filesHadBeenUpdated = isFoldersChanged() | isFilesChanged();
+
+        subFolders = curSubFolders;
+        subFiles = curSubFiles;
+
+        for(Folder folder: subFolders.values()){
+            subFolderUpdatedFiles |= folder.commit(commitUser, commitTime);
+        }
+
+        if (subFolderUpdatedFiles | filesHadBeenUpdated) {
+            updateUserAndDate(commitUser, commitTime);
+            filesHadBeenUpdated = true;
+        }
+
         zipAndCopy();
+
+        return filesHadBeenUpdated;
     }
 
-    public void recursiveUpdateFolderData(){
-        for(Item item : subItems){
-            if (item instanceof Folder){
-                ((Folder) item).folderDataString = "";
-                ((Folder) item).clacFolderDataString();
-                ((Folder) item).recursiveUpdateFolderData();
-            }
+    private Boolean isFilesChanged(){    // TODO -  merge with    isFoldersChanged
+        for (Item item: subFiles.values()){
+            String newSHA1 = curSubFiles.get(item.fullPath).currentSHA1;
+
+            if(!newSHA1.equals(item.currentSHA1))
+                return true;
         }
+        return false;
     }
 
-    public void recursiveUpdateUserDate(){
-        for(Item item : subItems){
-            if (item instanceof Folder){
-                for (String key: RepositoryManager.getActiveRepository().getCommitManager().updatedFiles){
-                    if (key.startsWith(item.fullPath)){
-                        item.updateUserAndDate();
-                    }
-                }
+    private Boolean isFoldersChanged(){
+        for (Item item: subFolders.values()){
+          String newSHA1 = curSubFolders.get(item.fullPath).currentSHA1;
 
-                for (String key: RepositoryManager.getActiveRepository().getCommitManager().newFiles){
-                    if (key.startsWith(item.fullPath)){
-                        item.updateUserAndDate();
-                    }
-                }
-                ((Folder) item).recursiveUpdateUserDate();
-            }
-            else if (item instanceof Blob){
-                if (RepositoryManager.getActiveRepository().getCommitManager().newFiles.contains(item.fullPath) ||
-                        RepositoryManager.getActiveRepository().getCommitManager().updatedFiles.contains(item.fullPath)){
-                    item.updateUserAndDate();
-                }
-            }
+          if(!newSHA1.equals(item.currentSHA1))
+              return true;
         }
+        return false;
+
     }
 
-    public void recursiveZip(){
-        for(Item item : subItems){
-            if (item instanceof Folder){
-                ((Folder) item).recursiveZip();
-                item.zipAndCopy();
-            }
-            else if (item instanceof Blob){
-                item.zipAndCopy();
-            }
-        }
-    }
+    void updateCurrentState(){
+        curSubFiles.clear();
+        curSubFolders.clear();
 
-    // recursive calculate sha1 for all the sub folders and files under the current directory
-    // TODO : verify empty folder sha1 is not calculated
-    // TODO : create new tree, do not consoder existing items in subItems
-    private void getAllItems() {
         File directory = new File(fullPath);
         File[] listOfItems = directory.listFiles();
         for (File item : listOfItems) {
-            if (item.isDirectory() && !item.getName().equals(".magit")) {
-                Item folder = getItemFromSubItems(item.getPath());
-                if (folder == null){
+            if (item.isDirectory() && !item.getName().equals(Settings.gitFolder)) {
+                Folder folder = subFolders.get(item.getPath());
+
+                if (folder == null) {
                     folder = new Folder(item.getPath(), item.getName());
-                    ((Folder) folder).getAllItems();
-                    subItems.add(folder);
-                    tmpItems.add(folder);
                 }
-                else{
-                    tmpItems.add(folder);
-                    ((Folder) folder).getAllItems();
-                }
+                folder.updateCurrentState();
+                curSubFolders.put(folder.fullPath, folder);
             }
             else if(item.isFile()){
-                Item file = getItemFromSubItems(item.getPath());
-                if (file == null){
+                Blob file = subFiles.get(item.getPath());
+
+                if (file == null) {
                     file = new Blob(item.getPath(), item.getName());
-                    file.calculateSha1();
-                    subItems.add(file);
-                    tmpItems.add(file);
                 }
-                else{
-                    tmpItems.add(file);
-                    file.calculateSha1();
-                }
-                RepositoryManager.getActiveRepository().getCommitManager().newState.put(file.fullPath, file.sha1);
+
+                file.updateStateAndSetSha1();
+                curSubFiles.put(file.fullPath, file);
             }
         }
-        strForSha1 = "";
-        getStringToCalcSha1();
-        sha1 = DigestUtils.sha1Hex(strForSha1);
     }
 
-    public Item getItemFromSubItems(String path){
-        for(Item item : subItems){
-            if (item.fullPath.equals(path)){
-                return item;
-            }
-        }
-        return null;
-    }
-
-    // create string from the folder data to calculate sha1 + write to zip file under .objects
-    private void clacFolderDataString(){
-        for (Item item : subItems){
-            folderDataString = folderDataString + item.name + Settings.delimiter + item.sha1 +
+    // create string from the folder data to calculate currentSHA1 + write to zip file under .objects
+    private String getFolderDataString(){
+        String folderDataString = "";
+        for(Item item: getOrderedItems(subFiles, subFolders)){
+            folderDataString = folderDataString + item.name + Settings.delimiter + item.currentSHA1 +
                     Settings.delimiter + item.typeItem + Settings.delimiter + item.userLastModified +
                     Settings.delimiter + item.lastModified + "\r\n";
         }
+        return folderDataString;
     }
 
-    public void getStringToCalcSha1(){
-        for (Item item : subItems){
-            strForSha1 = strForSha1 + item.name + Settings.delimiter +  item.sha1 + Settings.delimiter
+    String getStringToCalcSHA1(){
+        String strForSha1 = "";
+        for(Item item: getOrderedItems(curSubFiles, curSubFolders)){
+            strForSha1 = strForSha1 + item.name + Settings.delimiter +  item.currentSHA1 + Settings.delimiter
                     + item.typeItem + "\r\n";
         }
+
+        return strForSha1;
+    }
+
+    private List<Item> getOrderedItems(Map<String , Blob> fileItems, Map<String , Folder> folderItems){
+        List<Item> ordItems = new LinkedList<>();
+
+        ordItems.addAll(fileItems.values());
+        ordItems.addAll(folderItems.values());
+
+        ordItems.sort(compareToOther);
+        return ordItems;
     }
 
     // create txt file with folder data - and zip the file. delete the txt file
     @Override
     public void zipAndCopy(){
         if (!isExistInObjects()){
-            Utils.createNewFile(getTxtFilePath(), folderDataString);
+            Utils.createNewFile(getTxtFilePath(), getFolderDataString());
             Utils.zip(getZipPath(), getTxtFilePath());
             Utils.deleteFile(getTxtFilePath());
         }
     }
 
 
-    // returns the txt file path (we create this file -> zip it -> delete)
     private String getTxtFilePath(){
-        return RepositoryManager.getActiveRepository().getObjectsFolderPath() + sha1 + ".txt";
+        // returns the txt file path (we create this file -> zip it -> delete)
+        return RepositoryManager.getActiveRepository().getObjectsFolderPath() + currentSHA1 + ".txt";
     }
 
-    public void addAllItemsToCurentCommit(){
-        RepositoryManager.getActiveRepository().getCommitManager().currentCommit.allItems.add(fullPath + Settings.delimiter + typeItem +
-                Settings.delimiter + sha1 + Settings.delimiter + userLastModified +
-                Settings.delimiter + lastModified);
-        getAllItemsToCommit();
-    }
+    List<String> getItemsData() {
+        List<String> itemsData = new ArrayList<>();
 
-    private void getAllItemsToCommit(){
-        for(Item item : subItems){
-            if (item instanceof Folder){
-                ((Folder) item).getAllItemsToCommit();
-                addToCommitAllItems(item);
-            }
-            else if (item instanceof Blob){
-                addToCommitAllItems(item);
-            }
+        for (Blob file : subFiles.values()) {
+            itemsData.add(file.getDataString());
         }
-    }
 
-    private void addToCommitAllItems(Item item){
-        RepositoryManager.getActiveRepository().getCommitManager().currentCommit.allItems.add(item.fullPath + Settings.delimiter + item.typeItem +
-                Settings.delimiter + item.sha1 + Settings.delimiter + item.userLastModified +
-                Settings.delimiter + item.lastModified);
-    }
+        for (Folder folder : subFolders.values()) {
+            itemsData.add(folder.getDataString());
+            itemsData.addAll(folder.getItemsData());
+        }
 
+        return itemsData;
+    }
 
 }

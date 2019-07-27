@@ -1,33 +1,44 @@
 import java.io.File;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Set;
+
 
 abstract public class Item {
 //TODO change class params to private and add appropriate methods
 
-    public String typeItem;
-    public String name;
-    public String sha1;
-    public String userLastModified;
-    public String lastModified;
-    public String fullPath;
+    String typeItem; // TODO enum
+    String name;
+    String currentSHA1;
+    String userLastModified;
+    String lastModified;
+    String fullPath;
 
-    abstract public String calculateSha1();
+    abstract public String updateStateAndSetSha1();
+
     abstract public void zipAndCopy();
 
-    public boolean isExistInObjects(){
-        File directory = new File(RepositoryManager.getActiveRepository().getObjectsFolderPath());
+    boolean isExistInObjects() {
+        File directory = new File(Settings.objectsFolderPath);
         File[] listOfItems = directory.listFiles();
-        return Arrays.stream(listOfItems).anyMatch(f -> f.getName().equals(sha1 + ".zip"));
+        return Arrays.stream(listOfItems).anyMatch(f -> f.getName().equals(currentSHA1 + ".zip"));
     }
 
-    public String getZipPath(){
-        return RepositoryManager.getActiveRepository().getObjectsFolderPath() + sha1 + ".zip";
+    String getZipPath() {
+        return RepositoryManager.getActiveRepository().getObjectsFolderPath() + currentSHA1 + ".zip";
     }
 
-    public void updateUserAndDate(){
-        userLastModified = MainEngine.currentUser;
-        lastModified = RepositoryManager.getActiveRepository().getCommitManager().currentCommit.commitTime;
+    void updateUserAndDate(String user, String commitTime) {
+        userLastModified = user;
+        lastModified = commitTime;
     }
 
+    Comparator<Item> compareToOther = (Item itemA, Item itemB) -> itemA.fullPath.compareTo(itemB.fullPath);
+
+    String getDataString(){
+        return fullPath + Settings.delimiter + typeItem +
+                Settings.delimiter + currentSHA1 + Settings.delimiter + userLastModified +
+                Settings.delimiter + lastModified;
+    }
 
 }
