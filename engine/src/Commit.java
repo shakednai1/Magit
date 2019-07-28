@@ -35,8 +35,12 @@ class Commit {
     }
 
     private String getCommitTxt(){
-        return rootSha1 + Settings.delimiter + msg + Settings.delimiter + commitTime +
-                Settings.delimiter + MainEngine.currentUser;
+        String commitStr =  rootSha1 + Settings.delimiter + msg + Settings.delimiter + commitTime +
+                Settings.delimiter + MainEngine.currentUser + Settings.delimiter;
+        if(previousCommit == null){
+            return commitStr + "null";
+        }
+        return commitStr + previousCommit.commitSha1;
     }
 
     void zipCommit(){
