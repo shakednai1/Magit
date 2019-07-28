@@ -1,41 +1,38 @@
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-public class RepositoryManager {
+class RepositoryManager {
 
-    private static List<Repository> repositories = new ArrayList<>();
+    private static Map<String, Repository> repositories = new HashMap<>();
     private static Repository activeRepository = null;
 
+    // TODO - delete content of .branchs and .objects - do not keep the state, faster dir scanner
 
-    public static Repository getActiveRepository(){
+    static Repository getActiveRepository(){
         return activeRepository;
     }
 
-    public static List<Repository> getAllRepositories(){
-        return repositories;
+    public static void createNewRepository(String repositoryFullPath){
+        Repository newRepository = new Repository(repositoryFullPath);
+        repositories.put(repositoryFullPath, newRepository);
+        activeRepository = newRepository;
     }
 
-    public static void addToRepositoriesList(Repository repository){
-        repositories.add(repository);
-    }
-
-    public static void switchActiveRepository(String fullPath){
-        for(Repository repository: repositories){
-            if (repository.getFullPath().equals(fullPath)){
-                activeRepository = repository;
-                return;
-            }
-        }
-        if(verifyRepoPath(fullPath)){
-            Repository newRepository = new Repository(fullPath);
-            addToRepositoriesList(newRepository);
-            activeRepository = newRepository;
-            activeRepository.getCommitManager().start();
-        }
-        else {
+    static void switchActiveRepository(String fullPath){
+        if(!verifyRepoPath(fullPath)){
             throw new IllegalArgumentException();
         }
+
+        Settings.setNewRepository(fullPath);
+
+        Repository rep = repositories.get(fullPath);
+        if (rep != null){
+            activeRepository = rep;
+            return;
+        }
+
+        createNewRepository(fullPath);
     }
 
     private static boolean verifyRepoPath(String fullPath) {

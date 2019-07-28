@@ -3,22 +3,22 @@ import java.util.List;
 
 public class BranchManager {
 
+
+    private CommitManager commitManager;
     private Branch activeBranch;
     private List<Branch> branches = new ArrayList<>();
 
+    BranchManager(CommitManager commitManager){ this.commitManager=commitManager;}
 
-    public BranchManager(){}
+    List<Branch> getAllBranches(){ return branches; }
 
-    public List<Branch> getAllBranches(){ return branches; }
-
-    public Branch getActiveBranch(){ return activeBranch; }
+    Branch getActiveBranch(){ return activeBranch; }
 
     private Commit getActiveBranchHead(){ return activeBranch.getHead(); }
 
-    public void setActiveBranch(Branch branch){ activeBranch = branch; }
+    void setActiveBranch(Branch branch){ activeBranch = branch; }
 
-    public void createNewBranch(String branchName){
-        String branchFolderPath = RepositoryManager.getActiveRepository().getBranchesFolderPath();
+    void createNewBranch(String branchName){
         for(Branch branch: branches){
             if (branch.getName().equals(branchName)){
                 throw new IllegalArgumentException();
@@ -27,16 +27,15 @@ public class BranchManager {
         Branch newBranch = new Branch(branchName, getActiveBranchHead());
         setActiveBranch(newBranch);
         branches.add(newBranch);
-        Utils.createNewFile(branchFolderPath + branchName + ".txt", newBranch.getHead().commitSha1);
+        Utils.createNewFile(Settings.branchFolderPath + branchName + ".txt", newBranch.getHead().commitSha1);
     }
 
-    public void createMasterBranch(){
-        Branch master = new Branch("master", null);
-        setActiveBranch(master);
-        branches.add(master);
+    Branch createMasterBranch(){
+        Commit masterCommit = commitManager.getMasterCommit();
+        return new Branch("master", masterCommit);
     }
 
-    public void deleteBranch(String branchName){
+    void deleteBranch(String branchName){
         if(getActiveBranch().getName().equals(branchName)){
             throw new IllegalArgumentException();
         }
@@ -45,6 +44,10 @@ public class BranchManager {
                 branches.remove(branch);
             }
         }
+    }
+
+    void addBranch(Branch branch){
+        branches.add(branch);
     }
 
     public void checkoutBranch(boolean force, String branchToCheckout){
@@ -60,6 +63,15 @@ public class BranchManager {
                 break;
             }
         }
+    }
+
+    boolean commit(String msg){
+        Commit newCommit = commitManager.commit(msg);
+        if (newCommit == null){
+            return false;
+        }
+        activeBranch.setHead(newCommit);
+        return true;
     }
 
 }

@@ -7,9 +7,9 @@ import java.nio.file.Paths;
 
 public class Blob extends Item {
 
-    public String path;
+    private String path;
 
-    public Blob(String path, String name){
+    Blob(String path, String name){
         typeItem = "File";
         fullPath = path;
         this.name = name;
@@ -17,11 +17,11 @@ public class Blob extends Item {
     }
 
     @Override
-    public String calculateSha1(){
+    public String updateStateAndSetSha1(){
         try {
             String contents = new String(Files.readAllBytes(Paths.get(fullPath)));
-            sha1 = DigestUtils.sha1Hex(contents);
-            return sha1;
+            currentSHA1 = DigestUtils.sha1Hex(contents);
+            return currentSHA1;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -30,7 +30,7 @@ public class Blob extends Item {
 
     @Override
     public void zipAndCopy(){
-        calculateSha1();
+        updateStateAndSetSha1();
         boolean exist = isExistInObjects();
         if(!exist){
             Utils.zip(getZipPath(), fullPath);
@@ -41,7 +41,7 @@ public class Blob extends Item {
         newBlob.fullPath = fullPath;
         newBlob.name = name;
         newBlob.path = path;
-        newBlob.sha1 = sha1;
+        newBlob.currentSHA1 = currentSHA1;
         newBlob.typeItem = typeItem;
         newBlob.lastModified = lastModified;
         newBlob.userLastModified = userLastModified;

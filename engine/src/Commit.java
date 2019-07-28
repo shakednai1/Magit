@@ -1,5 +1,4 @@
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -7,18 +6,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Commit {
+class Commit {
 //TODO change class params to private and add appropriate methods
 
-    public String msg;
-    public String commitTime;
-    public String commitSha1;
-    public String rootSha1;
-    public Folder rootFolder;
-    public List<String> allItems = new ArrayList<>();
-    public Commit previousCommit;
+    String msg;
+    String commitTime;
+    String commitSha1;
+    String rootSha1;
+    Folder rootFolder;
+    Commit previousCommit;
 
-    public Commit(String msg, String rootSha1, Folder rootFolder, Commit previousCommit){
+    private Boolean isMasterCommit;
+
+    Commit(String msg, String rootSha1, Folder rootFolder, Commit previousCommit){
         this.msg = msg;
         this.rootSha1 = rootSha1;
         this.rootFolder = rootFolder;
@@ -27,10 +27,7 @@ public class Commit {
         Date date = new Date();
         commitTime = dateFormat.format(date);
         commitSha1 = calcCommitSha1();
-    }
-
-    public List<String> getAllItems(){
-        return allItems;
+        isMasterCommit = this.previousCommit == null;
     }
 
     private String calcCommitSha1(){
@@ -42,8 +39,8 @@ public class Commit {
                 Settings.delimiter + MainEngine.currentUser;
     }
 
-    public void createCommit(){
-        String fileNameWOExtension = RepositoryManager.getActiveRepository().getObjectsFolderPath() + commitSha1;
+    void zipCommit(){
+        String fileNameWOExtension = Settings.objectsFolderPath + commitSha1;
         Utils.createNewFile(fileNameWOExtension+".txt", getCommitTxt());
         Utils.zip(fileNameWOExtension + ".zip",fileNameWOExtension + ".txt");
         Utils.deleteFile(fileNameWOExtension + ".txt");
