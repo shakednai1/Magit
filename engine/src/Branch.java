@@ -24,8 +24,8 @@ class Branch {
 
     void setHead(Commit newHead) {
         head = newHead;
-        Utils.deleteFile(RepositoryManager.getActiveRepository().getBranchesFolderPath() + name + ".txt");
-        Utils.createNewFile(RepositoryManager.getActiveRepository().getBranchesFolderPath() + name + ".txt", newHead.commitSha1);
+        Utils.deleteFile(Settings.branchFolderPath + name + ".txt");
+        Utils.createNewFile(Settings.branchFolderPath + name + ".txt", newHead.commitSha1);
     }
 
     List<String> getCommitHistory(){

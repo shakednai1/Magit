@@ -36,7 +36,7 @@ class Commit {
 
     private String getCommitTxt(){
         String commitStr =  rootSha1 + Settings.delimiter + msg + Settings.delimiter + commitTime +
-                Settings.delimiter + MainEngine.currentUser + Settings.delimiter;
+                Settings.delimiter + Settings.getUser()+ Settings.delimiter;
         if(previousCommit == null){
             return commitStr + "null";
         }

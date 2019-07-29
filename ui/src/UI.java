@@ -4,9 +4,11 @@ import java.util.Scanner;
 
 public class UI {
 
+    private static MainEngine engine ;
+
     public static void main(String args[]){
         Scanner input = new Scanner(System.in);
-        MainEngine engine = new MainEngine();
+        engine = new MainEngine();
         boolean toContinue = true;
 
         while(toContinue){
@@ -42,6 +44,9 @@ public class UI {
                 case 9:
                     deleteBranch(input);
                     break;
+                case 10:
+                    checkoutBranch(input);
+                    break;
                 case 11:
                     printBranchHistory();
                     break;
@@ -49,6 +54,7 @@ public class UI {
                     toContinue = false;
                     System.out.println("Bye Bye !");
                     System.out.println();
+                    exitSystem();
                     break;
                 default:
                     System.out.println("nothing");
@@ -59,8 +65,8 @@ public class UI {
     private static void printMenu(){
         System.out.println();
         System.out.println("Magit Menu");
-        System.out.println("Current logged in user: " + MainEngine.currentUser);
-        System.out.println("Current repository location: " + MainEngine.getCurrentRepoLocation());
+        System.out.println("Current logged in user: " + engine.getUser());
+        System.out.println("Current repository location: " + engine.getCurrentRepoLocation());
         System.out.println("1. Change user name");
         System.out.println("2. Load from XML");
         System.out.println("3. Switch repository");
@@ -83,7 +89,7 @@ public class UI {
     private static void getSetUser(Scanner input){
         System.out.println("Please enter username: ");
         String user = input.next();
-        MainEngine.changeCurrentUser(user);
+        engine.changeCurrentUser(user);
     }
 
     private static void switchRepository(Scanner input){
@@ -91,7 +97,7 @@ public class UI {
         while(!isValid){
             System.out.println("Please provide repository full path: ");
             String fullPath = input.next();
-            if (!MainEngine.changeActiveRepository(fullPath)){
+            if (!engine.changeActiveRepository(fullPath)){
                 System.out.println("Repository path is not found or path is not contains .magit folder!");
             }
             else {
@@ -101,7 +107,7 @@ public class UI {
     }
 
     private static void printCommitState(){
-        List<String> res = MainEngine.getCurrentCommitState();
+        List<String> res = engine.getCurrentCommitState();
         for(String item : res){
             System.out.println(item);
         }
@@ -109,7 +115,7 @@ public class UI {
     }
 
     private static void printWorkingCopyStatus(){
-        Map<String, List<String>> changes = MainEngine.getWorkingCopyStatus();
+        Map<String, List<String>> changes = engine.getWorkingCopyStatus();
         List<String> updatedFiles = changes.get("update");
         List<String> newFiles = changes.get("new");
         List<String> deletedFiles = changes.get("delete");
@@ -146,14 +152,14 @@ public class UI {
         // TODO not working with spaces - find the solution
         String msg = input.next();
         input.nextLine();
-        if (!MainEngine.commit(msg)){
+        if (!engine.commit(msg)){
             System.out.println("There are no changes to commit");
             System.out.println();
         }
     }
 
     private static void printBranches(){
-        List<String> allBranchesNames = MainEngine.getAllBranches();
+        List<String> allBranchesNames = engine.getAllBranches();
         allBranchesNames.forEach(System.out::println);
     }
 
@@ -162,7 +168,7 @@ public class UI {
         while(!isValidBranchName){
             System.out.println("Please provide branch name: ");
             String branchName = input.next();
-            if (!MainEngine.createNewBranch(branchName)){
+            if (!engine.createNewBranch(branchName)){
                 System.out.println("Branch name is already exist! ");
             }
             else{
@@ -172,23 +178,40 @@ public class UI {
     }
 
     private static void deleteBranch(Scanner input){
-        boolean isValidBranchToDelete = false;
-        while (!isValidBranchToDelete){
+        while (true){
             System.out.println("Please provide branch name to delete: ");
             String branchName = input.next();
-            if(!MainEngine.deleteBranch(branchName)){
-                System.out.println("Given branch name is the head branch. Cannot delete head branch! ");
+            if(engine.deleteBranch(branchName)){
+                break;
             }
             else {
-                isValidBranchToDelete = true;
+                System.out.println("Given branch name is the head branch. Cannot delete head branch! ");
             }
-        }    }
+        }
+    }
 
     private static void printBranchHistory(){
-        List<String> activeBranchHistory = MainEngine.getActiveBrancHistory();
+        List<String> activeBranchHistory = engine.getActiveBrancHistory();
         for (String item: activeBranchHistory){
             System.out.println(item);
         }
+    }
+
+    private static void checkoutBranch(Scanner input){
+        while (true){
+            System.out.println("Please provide branch name to checkout: ");
+            String branchName = input.next();
+            if(engine.checkoutBranch(branchName)){
+                break;
+            }
+            else {
+                System.out.println("Given branch name is not valid. Please provide an existing branch name ");
+            }
+        }
+    }
+
+    private static void exitSystem(){
+        engine.saveSystemState();
     }
 
 }

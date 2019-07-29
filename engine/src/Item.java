@@ -25,7 +25,7 @@ abstract public class Item {
     }
 
     String getZipPath() {
-        return RepositoryManager.getActiveRepository().getObjectsFolderPath() + currentSHA1 + ".zip";
+        return Settings.objectsFolderPath + currentSHA1 + ".zip";
     }
 
     void updateUserAndDate(String user, String commitTime) {

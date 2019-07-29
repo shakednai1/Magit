@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class BranchManager {
+class BranchManager {
 
 
     private CommitManager commitManager;
@@ -14,9 +14,13 @@ public class BranchManager {
 
     Branch getActiveBranch(){ return activeBranch; }
 
-    private Commit getActiveBranchHead(){ return activeBranch.getHead(); }
+    private void setActiveBranch(Branch branch){activeBranch = branch;}
 
-    void setActiveBranch(Branch branch){ activeBranch = branch; }
+    void createAndSetMasterBranch(){
+        Branch masterBranch = createMasterBranch();
+        branches.add(masterBranch);
+        setActiveBranch(masterBranch);
+    }
 
     void createNewBranch(String branchName){
         for(Branch branch: branches){
@@ -24,13 +28,13 @@ public class BranchManager {
                 throw new IllegalArgumentException();
             }
         }
-        Branch newBranch = new Branch(branchName, getActiveBranchHead());
+        Branch newBranch = new Branch(branchName, activeBranch.getHead());
         setActiveBranch(newBranch);
         branches.add(newBranch);
         Utils.createNewFile(Settings.branchFolderPath + branchName + ".txt", newBranch.getHead().commitSha1);
     }
 
-    Branch createMasterBranch(){
+    private Branch createMasterBranch(){
         Commit masterCommit = commitManager.getMasterCommit();
         return new Branch("master", masterCommit);
     }
@@ -46,12 +50,7 @@ public class BranchManager {
         }
     }
 
-    void addBranch(Branch branch){
-        branches.add(branch);
-    }
-
-    public void checkoutBranch(boolean force, String branchToCheckout){
-        CommitManager commitManager = RepositoryManager.getActiveRepository().getCommitManager();
+    void checkoutBranch(boolean force, String branchToCheckout){
         if(commitManager.haveChanges() && !force){
             throw new UnsupportedOperationException();
         }

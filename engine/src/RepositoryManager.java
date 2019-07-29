@@ -4,22 +4,22 @@ import java.util.Map;
 
 class RepositoryManager {
 
-    private static Map<String, Repository> repositories = new HashMap<>();
-    private static Repository activeRepository = null;
+    private Map<String, Repository> repositories = new HashMap<>();
+    private Repository activeRepository = null;
 
     // TODO - delete content of .branchs and .objects - do not keep the state, faster dir scanner
 
-    static Repository getActiveRepository(){
+    Repository getActiveRepository(){
         return activeRepository;
     }
 
-    public static void createNewRepository(String repositoryFullPath){
+    Repository createNewRepository(String repositoryFullPath){
         Repository newRepository = new Repository(repositoryFullPath);
         repositories.put(repositoryFullPath, newRepository);
-        activeRepository = newRepository;
+        return newRepository;
     }
 
-    static void switchActiveRepository(String fullPath){
+    void switchActiveRepository(String fullPath){
         if(!verifyRepoPath(fullPath)){
             throw new IllegalArgumentException();
         }
@@ -32,12 +32,16 @@ class RepositoryManager {
             return;
         }
 
-        createNewRepository(fullPath);
+        activeRepository = createNewRepository(fullPath);
     }
 
-    private static boolean verifyRepoPath(String fullPath) {
+    private boolean verifyRepoPath(String fullPath) {
         File directory = new File(fullPath + "\\.magit");
         return directory.exists();
+    }
+
+    void saveState(){
+        activeRepository.saveRepositoryActiveBranch();
     }
 
 }

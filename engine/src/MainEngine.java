@@ -2,32 +2,35 @@ import java.util.*;
 
 public class MainEngine {
 
-    public static String currentUser = "Admin";
+    private RepositoryManager repositoryManager;
 
     public MainEngine(){
-
         // TODO - remove before submit
         String fullPath = "C:\\test";
         Settings.setNewRepository(fullPath);
-        RepositoryManager.switchActiveRepository(fullPath);
+        repositoryManager = new RepositoryManager();
+        repositoryManager.switchActiveRepository(fullPath);
     }
 
-    public static Map<String ,List<String>> getWorkingCopyStatus(){
-        return RepositoryManager.getActiveRepository().getCommitManager().getWorkingCopy();
+    public Map<String ,List<String>> getWorkingCopyStatus(){
+        return repositoryManager.getActiveRepository().getCommitManager().getWorkingCopy();
     }
 
-    public static boolean commit(String msg){
-        return RepositoryManager.getActiveRepository().getBranchManager().commit(msg);
+    public boolean commit(String msg){
+        return repositoryManager.getActiveRepository().getBranchManager().commit(msg);
     }
 
-    public static void changeCurrentUser(String user){
-        currentUser = user;
-        RepositoryManager.getActiveRepository().setUser(user);
+    public String getUser(){
+        return Settings.getUser();
     }
 
-    public static boolean changeActiveRepository(String fullPath){
+    public void changeCurrentUser(String user){
+        Settings.setUser(user);
+    }
+
+    public boolean changeActiveRepository(String fullPath){
         try {
-            RepositoryManager.switchActiveRepository(fullPath);
+            repositoryManager.switchActiveRepository(fullPath);
             return true;
         }
         catch (IllegalArgumentException e){
@@ -35,13 +38,13 @@ public class MainEngine {
         }
     }
 
-    public static List<String> getCurrentCommitState(){
-        return RepositoryManager.getActiveRepository().getCommitManager().rootFolder.getItemsData();
+    public List<String> getCurrentCommitState(){
+        return repositoryManager.getActiveRepository().getCommitManager().rootFolder.getItemsData();
     }
 
-    public static boolean createNewBranch(String name){
+    public boolean createNewBranch(String name){
         try {
-            RepositoryManager.getActiveRepository().getBranchManager().createNewBranch(name);
+            repositoryManager.getActiveRepository().getBranchManager().createNewBranch(name);
             return true;
         }
         catch (IllegalArgumentException e){
@@ -49,10 +52,10 @@ public class MainEngine {
         }
     }
 
-    public static List<String> getAllBranches(){
+    public List<String> getAllBranches(){
         List<String> allBrnachesName = new ArrayList<>();
-        List<Branch> allBranches = RepositoryManager.getActiveRepository().getBranchManager().getAllBranches();
-        Branch headBranch = RepositoryManager.getActiveRepository().getBranchManager().getActiveBranch();
+        List<Branch> allBranches = repositoryManager.getActiveRepository().getBranchManager().getAllBranches();
+        Branch headBranch = repositoryManager.getActiveRepository().getBranchManager().getActiveBranch();
         for(Branch branch:allBranches){
             if (branch.getName().equals(headBranch.getName())){
                 allBrnachesName.add("**HEAD** " + branch.getName());
@@ -64,9 +67,9 @@ public class MainEngine {
         return allBrnachesName;
     }
 
-    public static boolean deleteBranch(String name){
+    public boolean deleteBranch(String name){
         try {
-            RepositoryManager.getActiveRepository().getBranchManager().deleteBranch(name);
+            repositoryManager.getActiveRepository().getBranchManager().deleteBranch(name);
             return true;
         }
         catch (IllegalArgumentException e){
@@ -74,11 +77,26 @@ public class MainEngine {
         }
     }
 
-    public static List<String> getActiveBrancHistory(){
-        return RepositoryManager.getActiveRepository().getBranchManager().getActiveBranch().getCommitHistory();
+    public boolean checkoutBranch(String name){
+        try {
+            repositoryManager.getActiveRepository().checkoutBranch(name);
+            return true;
+        }
+        catch (IllegalArgumentException e){
+            return false;
+        }
     }
 
-    public static String getCurrentRepoLocation() {
-        return RepositoryManager.getActiveRepository().getFullPath();
+    public List<String> getActiveBrancHistory(){
+        return repositoryManager.getActiveRepository().getBranchManager().getActiveBranch().getCommitHistory();
     }
+
+    public String getCurrentRepoLocation() {
+        return repositoryManager.getActiveRepository().getFullPath();
+    }
+
+    public void saveSystemState(){
+        repositoryManager.saveState();
+    }
+
 }

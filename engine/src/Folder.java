@@ -75,7 +75,7 @@ public class Folder extends Item {
 
     }
 
-    void updateCurrentState(){
+    private void updateCurrentState(){
         curSubFiles.clear();
         curSubFolders.clear();
 
@@ -115,7 +115,7 @@ public class Folder extends Item {
         return folderDataString;
     }
 
-    String getStringToCalcSHA1(){
+    private String getStringToCalcSHA1(){
         String strForSha1 = "";
         for(Item item: getOrderedItems(curSubFiles, curSubFolders)){
             strForSha1 = strForSha1 + item.name + Settings.delimiter +  item.currentSHA1 + Settings.delimiter
@@ -148,7 +148,7 @@ public class Folder extends Item {
 
     private String getTxtFilePath(){
         // returns the txt file path (we create this file -> zip it -> delete)
-        return RepositoryManager.getActiveRepository().getObjectsFolderPath() + currentSHA1 + ".txt";
+        return Settings.objectsFolderPath + currentSHA1 + ".txt";
     }
 
     List<String> getItemsData() {

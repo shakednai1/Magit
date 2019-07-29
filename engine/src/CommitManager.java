@@ -6,8 +6,6 @@ import java.util.*;
 
 class CommitManager {
 
-    private String currentUser;
-
     Folder rootFolder;
 
     private String currentRootSha1;
@@ -35,10 +33,6 @@ class CommitManager {
         return new Commit("", rootFolder.currentSHA1, rootFolder, null);
     }
 
-    void setCurrentUser(String currentUser){
-        this.currentUser = currentUser;
-    }
-
     Commit commit(String msg){
         rootFolder.updateStateAndSetSha1();
 
@@ -50,7 +44,7 @@ class CommitManager {
             Commit com = new Commit(msg, currentRootSha1, rootFolder, currentCommit);
             currentCommit = com;
 
-            rootFolder.commit(currentUser, com.commitTime);
+            rootFolder.commit(Settings.getUser(), com.commitTime);
             com.zipCommit();
             commitList.add(com);
 

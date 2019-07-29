@@ -1,24 +1,17 @@
+import java.io.FileWriter;
+import java.io.IOException;
 
-public class Repository {
+class Repository {
 
     private String fullPath;
     private BranchManager branchManager;
     private CommitManager commitManager;
-    private String objectsFolderPath;
-    private String branchesFolderPath;
-
 
     Repository(String fullPath){
         this.fullPath = fullPath;
-        objectsFolderPath = fullPath + Settings.objectsFolderPath;
-        branchesFolderPath = fullPath + Settings.branchFolderPath;
-
         commitManager = new CommitManager();
         branchManager = new BranchManager(commitManager);
-
-        Branch masterBranch = branchManager.createMasterBranch();
-        branchManager.addBranch(masterBranch);
-        branchManager.setActiveBranch(masterBranch);
+        branchManager.createAndSetMasterBranch();
     }
 
     String getFullPath(){ return fullPath; }
@@ -27,16 +20,21 @@ public class Repository {
 
     CommitManager getCommitManager(){ return commitManager; }
 
-    String getObjectsFolderPath(){ return objectsFolderPath; }
-
-    String getBranchesFolderPath(){ return branchesFolderPath; }
-
-    public Branch getActiveBranch(){
-        return branchManager.getActiveBranch();
+    void saveRepositoryActiveBranch(){
+        try{
+            FileWriter fileWriter = new FileWriter(Settings.activeBranchFilePath, false);
+            fileWriter.write(branchManager.getActiveBranch().getName());
+            fileWriter.close();
+        }
+        catch (IOException e){/*Lets assume all good*/}
     }
 
-    void setUser(String user){
-        commitManager.setCurrentUser(user);
+    boolean checkoutBranch(String name){
+        boolean force = false; // TODO give user to determine if force or not
+        branchManager.checkoutBranch(force, name);
+        saveRepositoryActiveBranch();
+        return true; //TODO return false when needed
     }
+
 
 }
