@@ -27,12 +27,16 @@ public class BranchManager {
         Branch newBranch = new Branch(branchName, getActiveBranchHead());
         setActiveBranch(newBranch);
         branches.add(newBranch);
-        Utils.createNewFile(Settings.branchFolderPath + branchName + ".txt", newBranch.getHead().commitSha1);
+        Utils.createNewFile(Settings.branchFolderPath + branchName + ".txt",
+                newBranch.getHead().commitSha1 + Settings.delimiter + newBranch.getStartCommit().commitSha1);
     }
 
     Branch createMasterBranch(){
         Commit masterCommit = commitManager.getMasterCommit();
-        return new Branch("master", masterCommit);
+        Branch branch =  new Branch("master", masterCommit);
+        Utils.createNewFile(Settings.branchFolderPath + "master" + ".txt",
+                masterCommit.commitSha1 + Settings.delimiter + masterCommit.commitSha1);
+        return branch;
     }
 
     void deleteBranch(String branchName){
@@ -66,7 +70,7 @@ public class BranchManager {
     }
 
     boolean commit(String msg){
-        Commit newCommit = commitManager.commit(msg);
+        Commit newCommit = commitManager.commit(msg, false);
         if (newCommit == null){
             return false;
         }

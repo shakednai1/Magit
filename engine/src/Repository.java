@@ -38,5 +38,4 @@ public class Repository {
     void setUser(String user){
         commitManager.setCurrentUser(user);
     }
-
 }
