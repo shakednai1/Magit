@@ -6,56 +6,40 @@ import java.util.*;
 
 class CommitManager {
 
-    Folder rootFolder;
-
-    private String currentRootSha1;
-    private String newRootSha1 = null;
+    private Folder rootFolder;
+    private Commit currentCommit = null;
 
     private Map<String, String> currentStateOfFiles = new HashMap<>();
     private Map<String, String> newStateOfFiles = new HashMap<>();
-
-    private Commit currentCommit = null;
-    private List<Commit> commitList = new LinkedList<>();
 
     private List<String> newFiles = new ArrayList<>();
     private List<String> deletedFiles = new ArrayList<>();
     private List<String> updatedFiles = new ArrayList<>();
 
-
-
     CommitManager(){
         rootFolder = getRootFolder();
-        //rootFolder.updateStateAndSetSha1();
-        currentRootSha1 = "";
-    }
-
-    Commit getMasterCommit(){
-        Commit commit = commit("", true);
-        for (Blob file : rootFolder.curSubFiles.values()) {
-            currentStateOfFiles.put(file.fullPath, file.currentSHA1);
-        }
-        return commit;
     }
 
     Commit commit(String msg, boolean force){
-        rootFolder.updateStateAndSetSha1();
+        rootFolder.updateState();
 
         if(haveChanges() || force){
-
-            currentRootSha1 = newRootSha1;
-            newRootSha1 = null;
-
-            Commit com = new Commit(msg, currentRootSha1, rootFolder, currentCommit);
+            Commit com = new Commit(msg, rootFolder.currentSHA1, rootFolder, currentCommit);
             currentCommit = com;
 
             rootFolder.commit(Settings.getUser(), com.commitTime);
             com.zipCommit();
-            commitList.add(com);
 
             currentStateOfFiles = newStateOfFiles;
 
             return com;
         }
+
+        // TODO commit need to update current state at commit manager
+//        for (Blob file : rootFolder.curSubFiles.values()) {
+//            currentStateOfFiles.put(file.fullPath, file.currentSHA1);
+//        }
+//
         return null;
     }
 
@@ -82,22 +66,20 @@ class CommitManager {
     }
 
     boolean haveChanges(){
-        newRootSha1 = rootFolder.currentSHA1;
-        return !currentRootSha1.equals(newRootSha1);
+        return currentCommit == null || !currentCommit.commitSha1.equals(rootFolder.currentSHA1);
     }
 
     Map<String ,List<String>> getWorkingCopy(){
-        calcNewSha1();
+        updateFilesState();
         return getChanges();
     }
 
-    private String calcNewSha1(){
+    private void updateFilesState(){ // TODO refactor
         newStateOfFiles = new HashMap<>();
-        String sha1 = rootFolder.updateStateAndSetSha1();
+        rootFolder.updateState();
         for (Blob file : rootFolder.curSubFiles.values()){
             newStateOfFiles.put(file.fullPath, file.currentSHA1);
         }
-        return sha1;
     }
 
     private Folder getRootFolder(){
@@ -105,6 +87,10 @@ class CommitManager {
         Path path = Paths.get(repoLocation);
         String repoName = path.getFileName().toString();
         return new Folder(repoLocation, repoName);
+    }
+
+    public List<String> getLastChanges(){
+        return rootFolder.getItemsData();
     }
 
 }

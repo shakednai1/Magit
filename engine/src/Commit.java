@@ -16,7 +16,7 @@ class Commit {
     Folder rootFolder;
     Commit previousCommit;
 
-    private Boolean isMasterCommit;
+//    private Boolean isMasterCommit;
 
     Commit(String msg, String rootSha1, Folder rootFolder, Commit previousCommit){
         this.msg = msg;
@@ -27,7 +27,7 @@ class Commit {
         Date date = new Date();
         commitTime = dateFormat.format(date);
         commitSha1 = calcCommitSha1();
-        isMasterCommit = this.previousCommit == null;
+//        isMasterCommit = this.previousCommit == null;
     }
 
     private String calcCommitSha1(){
@@ -35,12 +35,14 @@ class Commit {
     }
 
     private String getCommitTxt(){
-        String commitStr =  rootSha1 + Settings.delimiter + msg + Settings.delimiter + commitTime +
-                Settings.delimiter + Settings.getUser()+ Settings.delimiter;
-        if(previousCommit == null){
-            return commitStr + "null";
-        }
-        return commitStr + previousCommit.commitSha1;
+        String commitStr =  rootSha1 + Settings.delimiter +
+                msg + Settings.delimiter +
+                commitTime + Settings.delimiter +
+                Settings.getUser()+ Settings.delimiter;
+
+        commitStr = commitStr + ((previousCommit == null)? "null": previousCommit.commitSha1);
+
+        return commitStr;
     }
 
     void zipCommit(){

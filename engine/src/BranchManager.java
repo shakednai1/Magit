@@ -36,7 +36,7 @@ class BranchManager {
     }
 
     private Branch createMasterBranch(){
-        Commit masterCommit = commitManager.getMasterCommit();
+        Commit masterCommit = commitManager.commit("", true);
         Branch branch =  new Branch("master", masterCommit);
         Utils.createNewFile(Settings.branchFolderPath + "master" + ".txt",
                 masterCommit.commitSha1 + Settings.delimiter + masterCommit.commitSha1);

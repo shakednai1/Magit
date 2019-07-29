@@ -14,7 +14,7 @@ abstract public class Item {
     String lastModified;
     String fullPath;
 
-    abstract public String updateStateAndSetSha1();
+    abstract public void updateState();
 
     abstract public void zipAndCopy();
 

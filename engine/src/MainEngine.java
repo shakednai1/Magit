@@ -39,7 +39,7 @@ public class MainEngine {
     }
 
     public List<String> getCurrentCommitState(){
-        return repositoryManager.getActiveRepository().getCommitManager().rootFolder.getItemsData();
+        return repositoryManager.getActiveRepository().getCommitManager().getLastChanges();
     }
 
     public boolean createNewBranch(String name){

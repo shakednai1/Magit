@@ -17,65 +17,41 @@ public class Folder extends Item {
         this.name = name;
     }
 
-    @Override
-    public String updateStateAndSetSha1() {
-        updateCurrentState();
-        setSHA1();
-        return currentSHA1;
-    }
-
-    private void setSHA1(){
-        String sha1Str = getStringToCalcSHA1();
-        currentSHA1 = DigestUtils.sha1Hex(sha1Str);
-    }
-
     boolean commit(String commitUser, String commitTime){
         // function assume the items are up-to-date
-
-        boolean filesHadBeenUpdated;
-        boolean subFolderUpdatedFiles = false;
-
-        filesHadBeenUpdated = isFoldersChanged() || isFilesChanged();
+        boolean subItemsChanged = false;
 
         subFolders = curSubFolders;
-        subFiles = curSubFiles;
-
         for(Folder folder: subFolders.values()){
-            subFolderUpdatedFiles = subFolderUpdatedFiles || folder.commit(commitUser, commitTime);
+            subItemsChanged = subItemsChanged || folder.commit(commitUser, commitTime);
         }
 
-        if (subFolderUpdatedFiles || filesHadBeenUpdated) {
+        for(Blob file: curSubFiles.values()){
+            Blob prevFile = subFiles.get(file.fullPath);
+            if(prevFile == null || (!prevFile.currentSHA1.equals(file.currentSHA1))){
+                file.updateUserAndDate(commitUser, commitTime);
+                subItemsChanged = true;
+            }
+            file.zipAndCopy();
+        }
+        subFiles = curSubFiles;
+
+        if(subItemsChanged){
             updateUserAndDate(commitUser, commitTime);
-            filesHadBeenUpdated = true;
         }
 
         zipAndCopy();
 
-        return filesHadBeenUpdated;
+        return subItemsChanged;
     }
 
-    private Boolean isFilesChanged(){    // TODO -  merge with    isFoldersChanged
-        for (Item item: subFiles.values()){
-            String newSHA1 = curSubFiles.get(item.fullPath).currentSHA1;
-
-            if(!newSHA1.equals(item.currentSHA1))
-                return true;
-        }
-        return false;
+    private void setSHA1(){
+        String sha1Str = getStringToCalcSHA1();
+        currentSHA1 = (!sha1Str.equals("") ? DigestUtils.sha1Hex(sha1Str) : null) ;
     }
 
-    private Boolean isFoldersChanged(){
-        for (Item item: subFolders.values()){
-          String newSHA1 = curSubFolders.get(item.fullPath).currentSHA1;
-
-          if(!newSHA1.equals(item.currentSHA1))
-              return true;
-        }
-        return false;
-
-    }
-
-    private void updateCurrentState(){
+    @Override
+    public void updateState(){
         curSubFiles.clear();
         curSubFolders.clear();
 
@@ -88,8 +64,9 @@ public class Folder extends Item {
                 if (folder == null) {
                     folder = new Folder(item.getPath(), item.getName());
                 }
-                folder.updateCurrentState();
-                curSubFolders.put(folder.fullPath, folder);
+                folder.updateState();
+                if(folder.currentSHA1 != null)
+                    curSubFolders.put(folder.fullPath, folder);
             }
             else if(item.isFile()){
                 Blob file = subFiles.get(item.getPath());
@@ -98,19 +75,24 @@ public class Folder extends Item {
                     file = new Blob(item.getPath(), item.getName());
                 }
 
-                file.updateStateAndSetSha1();
+                file.updateState();
                 curSubFiles.put(file.fullPath, file);
             }
         }
+
+        setSHA1();
     }
 
     // create string from the folder data to calculate currentSHA1 + write to zip file under .objects
     private String getFolderDataString(){
         String folderDataString = "";
         for(Item item: getOrderedItems(subFiles, subFolders)){
-            folderDataString = folderDataString + item.name + Settings.delimiter + item.currentSHA1 +
-                    Settings.delimiter + item.typeItem + Settings.delimiter + item.userLastModified +
-                    Settings.delimiter + item.lastModified + "\r\n";
+            folderDataString = folderDataString +
+                    item.name + Settings.delimiter +
+                    item.currentSHA1 + Settings.delimiter +
+                    item.typeItem + Settings.delimiter +
+                    item.userLastModified + Settings.delimiter +
+                    item.lastModified + "\r\n";
         }
         return folderDataString;
     }
@@ -118,8 +100,10 @@ public class Folder extends Item {
     private String getStringToCalcSHA1(){
         String strForSha1 = "";
         for(Item item: getOrderedItems(curSubFiles, curSubFolders)){
-            strForSha1 = strForSha1 + item.name + Settings.delimiter +  item.currentSHA1 + Settings.delimiter
-                    + item.typeItem + "\r\n";
+            strForSha1 = strForSha1 +
+                    item.name + Settings.delimiter +
+                    item.currentSHA1 + Settings.delimiter +
+                    item.typeItem + "\r\n";
         }
 
         return strForSha1;
