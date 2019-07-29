@@ -25,7 +25,8 @@ class Branch {
     void setHead(Commit newHead) {
         head = newHead;
         Utils.deleteFile(Settings.branchFolderPath + name + ".txt");
-        Utils.createNewFile(Settings.branchFolderPath + name + ".txt", newHead.commitSha1);
+        Utils.createNewFile(Settings.branchFolderPath + name + ".txt", newHead.commitSha1 + Settings.delimiter + startCommit.commitSha1);
+
     }
 
     List<String> getCommitHistory(){
@@ -37,5 +38,9 @@ class Branch {
             currentCommit = currentCommit.previousCommit;
         }
         return res;
+    }
+
+    public Commit getStartCommit(){
+        return startCommit;
     }
 }

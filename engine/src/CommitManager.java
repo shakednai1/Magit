@@ -25,18 +25,22 @@ class CommitManager {
 
     CommitManager(){
         rootFolder = getRootFolder();
-        rootFolder.updateStateAndSetSha1();
-        currentRootSha1 = rootFolder.currentSHA1;
+        //rootFolder.updateStateAndSetSha1();
+        currentRootSha1 = "";
     }
 
     Commit getMasterCommit(){
-        return new Commit("", rootFolder.currentSHA1, rootFolder, null);
+        Commit commit = commit("", true);
+        for (Blob file : rootFolder.curSubFiles.values()) {
+            currentStateOfFiles.put(file.fullPath, file.currentSHA1);
+        }
+        return commit;
     }
 
-    Commit commit(String msg){
+    Commit commit(String msg, boolean force){
         rootFolder.updateStateAndSetSha1();
 
-        if(haveChanges()){
+        if(haveChanges() || force){
 
             currentRootSha1 = newRootSha1;
             newRootSha1 = null;
@@ -47,6 +51,8 @@ class CommitManager {
             rootFolder.commit(Settings.getUser(), com.commitTime);
             com.zipCommit();
             commitList.add(com);
+
+            currentStateOfFiles = newStateOfFiles;
 
             return com;
         }
@@ -87,7 +93,11 @@ class CommitManager {
 
     private String calcNewSha1(){
         newStateOfFiles = new HashMap<>();
-        return rootFolder.updateStateAndSetSha1();
+        String sha1 = rootFolder.updateStateAndSetSha1();
+        for (Blob file : rootFolder.curSubFiles.values()){
+            newStateOfFiles.put(file.fullPath, file.currentSHA1);
+        }
+        return sha1;
     }
 
     private Folder getRootFolder(){

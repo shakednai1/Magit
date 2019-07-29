@@ -35,6 +35,4 @@ class Repository {
         saveRepositoryActiveBranch();
         return true; //TODO return false when needed
     }
-
-
 }

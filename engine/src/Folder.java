@@ -8,7 +8,7 @@ public class Folder extends Item {
     private Map<String, Blob> subFiles = new HashMap<>();
     private Map<String, Folder> subFolders = new HashMap<>();
 
-    private Map<String, Blob> curSubFiles = new HashMap<>();
+    public Map<String, Blob> curSubFiles = new HashMap<>();
     private Map<String, Folder> curSubFolders = new HashMap<>();
 
     Folder(String path, String name) {
@@ -35,16 +35,16 @@ public class Folder extends Item {
         boolean filesHadBeenUpdated;
         boolean subFolderUpdatedFiles = false;
 
-        filesHadBeenUpdated = isFoldersChanged() | isFilesChanged();
+        filesHadBeenUpdated = isFoldersChanged() || isFilesChanged();
 
         subFolders = curSubFolders;
         subFiles = curSubFiles;
 
         for(Folder folder: subFolders.values()){
-            subFolderUpdatedFiles |= folder.commit(commitUser, commitTime);
+            subFolderUpdatedFiles = subFolderUpdatedFiles || folder.commit(commitUser, commitTime);
         }
 
-        if (subFolderUpdatedFiles | filesHadBeenUpdated) {
+        if (subFolderUpdatedFiles || filesHadBeenUpdated) {
             updateUserAndDate(commitUser, commitTime);
             filesHadBeenUpdated = true;
         }
