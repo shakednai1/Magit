@@ -1,3 +1,5 @@
+import org.omg.CosNaming.NamingContextPackage.NotFound;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,12 +57,13 @@ class BranchManager {
     }
 
     void checkoutBranch(boolean force, String branchToCheckout){
-        if(commitManager.haveChanges() && !force){
-            throw new UnsupportedOperationException();
-        }
+//        if(commitManager.haveChanges() && !force){
+//            throw new UnsupportedOperationException();
+//        }
         for(Branch branch:branches){
             if(branch.getName().equals(branchToCheckout)){
                 setActiveBranch(branch);
+                branch.open();
                 // TODO update HEAD file to the newActiveBranch.getName();
                 // TODO open all zip file of the commit
                 break;
