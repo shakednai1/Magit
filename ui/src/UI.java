@@ -54,7 +54,6 @@ public class UI {
                     toContinue = false;
                     System.out.println("Bye Bye !");
                     System.out.println();
-                    exitSystem();
                     break;
                 default:
                     System.out.println("nothing");
@@ -98,7 +97,7 @@ public class UI {
             System.out.println("Please provide repository full path: ");
             String fullPath = input.next();
             if (!engine.changeActiveRepository(fullPath)){
-                System.out.println("Repository path is not found or path is not contains .magit folder!");
+                System.out.println("engine.Repository path is not found or path is not contains .magit folder!");
             }
             else {
                 isValid = true;
@@ -169,7 +168,7 @@ public class UI {
             System.out.println("Please provide branch name: ");
             String branchName = input.next();
             if (!engine.createNewBranch(branchName)){
-                System.out.println("Branch name is already exist! ");
+                System.out.println("engine.Branch name is already exist! ");
             }
             else{
                 isValidBranchName=true;
@@ -208,10 +207,6 @@ public class UI {
                 System.out.println("Given branch name is not valid. Please provide an existing branch name ");
             }
         }
-    }
-
-    private static void exitSystem(){
-        engine.saveSystemState();
     }
 
 }

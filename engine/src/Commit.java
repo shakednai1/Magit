@@ -2,21 +2,16 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 class Commit {
-//TODO change class params to private and add appropriate methods
 
-    String msg;
-    String commitTime;
-    String commitSha1;
-    String rootSha1;
-    Folder rootFolder;
-    Commit previousCommit;
-
-//    private Boolean isMasterCommit;
+    private String msg;
+    private String commitTime;
+    private String commitSha1;
+    private String rootSha1;
+    private Folder rootFolder;
+    private Commit previousCommit;
 
     Commit(String msg, String rootSha1, Folder rootFolder, Commit previousCommit){
         this.msg = msg;
@@ -27,7 +22,19 @@ class Commit {
         Date date = new Date();
         commitTime = dateFormat.format(date);
         commitSha1 = calcCommitSha1();
-//        isMasterCommit = this.previousCommit == null;
+    }
+
+    String getSHA1(){return rootSha1;}
+
+    String getCommitTime(){ return commitTime; }
+
+    Commit getPreviousCommit(){ return previousCommit; }
+
+    public String toString(){
+        return commitSha1 + Settings.delimiter +
+                msg + Settings.delimiter +
+                commitTime + Settings.delimiter +
+                rootFolder.userLastModified ;
     }
 
     private String calcCommitSha1(){

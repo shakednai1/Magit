@@ -81,4 +81,14 @@ public class Utils {
         file.delete();
     }
 
+    static void writeFile(String fullPath, String fileContent, boolean append){
+        try{
+            FileWriter fileWriter = new FileWriter(fullPath, append);
+            fileWriter.write(fileContent);
+            fileWriter.close();
+        }
+        catch (IOException e){/*Lets assume all good*/
+        }
+    }
+
 }

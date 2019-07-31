@@ -40,8 +40,5 @@ class RepositoryManager {
         return directory.exists();
     }
 
-    void saveState(){
-        activeRepository.saveRepositoryActiveBranch();
-    }
 
 }

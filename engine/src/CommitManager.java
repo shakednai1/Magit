@@ -12,44 +12,66 @@ class CommitManager {
     private Map<String, String> currentStateOfFiles = new HashMap<>();
     private Map<String, String> newStateOfFiles = new HashMap<>();
 
-    private List<String> newFiles = new ArrayList<>();
-    private List<String> deletedFiles = new ArrayList<>();
-    private List<String> updatedFiles = new ArrayList<>();
-
     CommitManager(){
         rootFolder = getRootFolder();
     }
 
+    // TODO think of a flow where we do not need that function
+    void setCurrentCommit(Commit newCommit){ currentCommit = newCommit; }
+
+    private Folder getRootFolder(){
+        String repoLocation = Settings.repositoryFullPath;
+        Path path = Paths.get(repoLocation);
+        String repoName = path.getFileName().toString();
+        return new Folder(repoLocation, repoName);
+    }
+
+    boolean haveChanges(){
+        return currentCommit == null || !currentCommit.getSHA1().equals(rootFolder.currentSHA1);
+    }
+
     Commit commit(String msg, boolean force){
-        rootFolder.updateState();
+        updateState();
 
         if(haveChanges() || force){
             Commit com = new Commit(msg, rootFolder.currentSHA1, rootFolder, currentCommit);
-            currentCommit = com;
 
-            rootFolder.commit(Settings.getUser(), com.commitTime);
+            rootFolder.commit(Settings.getUser(), com.getCommitTime());
             com.zipCommit();
 
-            currentStateOfFiles = newStateOfFiles;
+            currentCommit = com;
+            setNewStateToCurrent();
 
             return com;
         }
 
-        // TODO commit need to update current state at commit manager
-//        for (Blob file : rootFolder.curSubFiles.values()) {
-//            currentStateOfFiles.put(file.fullPath, file.currentSHA1);
-//        }
-//
         return null;
     }
 
+    private void setNewStateToCurrent(){
+        currentStateOfFiles = newStateOfFiles;
+        newStateOfFiles = new HashMap<>();
+    }
 
-    private Map<String, List<String>> getChanges() {
-        /*check for new and deleted files
-        // newStateOfFiles.keySet() - currentStateOfFiles.keySet() return the files that exist in newStateOfFiles but not in currentStateOfFiles
-        currentStateOfFiles.keySet() - newStateOfFiles.keySet()) return the files that exist in currentStateOfFiles but not in newStateOfFiles*/
-        newFiles = new ArrayList<>(CollectionUtils.subtract(newStateOfFiles.keySet(), currentStateOfFiles.keySet()));
-        deletedFiles = new ArrayList<>(CollectionUtils.subtract(currentStateOfFiles.keySet(), newStateOfFiles.keySet()));
+    private void updateState(){ // TODO should be in branch method
+        rootFolder.updateState();
+        updateChangedFilesState();
+    }
+
+    private void updateChangedFilesState(){ // TODO better name for function
+        newStateOfFiles.clear();
+        newStateOfFiles = rootFolder.getItemsState();
+    }
+
+    Map<String ,List<String>> getWorkingCopy(){
+        updateState();
+        return getFilesChanges();
+    }
+
+    private Map<String, List<String>> getFilesChanges() {
+        List<String> newFiles = new ArrayList<>(CollectionUtils.subtract(newStateOfFiles.keySet(), currentStateOfFiles.keySet()));
+        List<String> deletedFiles = new ArrayList<>(CollectionUtils.subtract(currentStateOfFiles.keySet(), newStateOfFiles.keySet()));
+        List<String> updatedFiles = new ArrayList<>();
 
         //check for updated files
         List<String> common = new ArrayList<>(CollectionUtils.retainAll(currentStateOfFiles.keySet(), newStateOfFiles.keySet()));
@@ -65,31 +87,7 @@ class CommitManager {
         return changes;
     }
 
-    boolean haveChanges(){
-        return currentCommit == null || !currentCommit.commitSha1.equals(rootFolder.currentSHA1);
-    }
-
-    Map<String ,List<String>> getWorkingCopy(){
-        updateFilesState();
-        return getChanges();
-    }
-
-    private void updateFilesState(){ // TODO refactor
-        newStateOfFiles = new HashMap<>();
-        rootFolder.updateState();
-        for (Blob file : rootFolder.curSubFiles.values()){
-            newStateOfFiles.put(file.fullPath, file.currentSHA1);
-        }
-    }
-
-    private Folder getRootFolder(){
-        String repoLocation = Settings.repositoryFullPath;
-        Path path = Paths.get(repoLocation);
-        String repoName = path.getFileName().toString();
-        return new Folder(repoLocation, repoName);
-    }
-
-    public List<String> getLastChanges(){
+    List<String> getCommittedItemsData(){
         return rootFolder.getItemsData();
     }
 

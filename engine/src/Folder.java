@@ -52,8 +52,8 @@ public class Folder extends Item {
 
     @Override
     public void updateState(){
-        curSubFiles.clear();
-        curSubFolders.clear();
+        curSubFiles = new HashMap<>();
+        curSubFolders = new HashMap<>();
 
         File directory = new File(fullPath);
         File[] listOfItems = directory.listFiles();
@@ -148,6 +148,20 @@ public class Folder extends Item {
         }
 
         return itemsData;
+    }
+
+    Map<String, String > getItemsState(){
+        Map<String, String > itemsState = new HashMap<>();
+
+        for (Blob file : curSubFiles.values()){
+            itemsState.put(file.fullPath, file.currentSHA1);
+        }
+
+        for (Folder folder: curSubFolders.values()){
+            itemsState.putAll(folder.getItemsState());
+        }
+
+        return itemsState;
     }
 
 }

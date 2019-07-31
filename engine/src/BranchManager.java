@@ -2,25 +2,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 class BranchManager {
+    // TODO isn't that too much hirarchy?
 
-
-    private CommitManager commitManager;
     private Branch activeBranch;
     private List<Branch> branches = new ArrayList<>();
 
-    BranchManager(CommitManager commitManager){ this.commitManager=commitManager;}
+    BranchManager(){}
 
     List<Branch> getAllBranches(){ return branches; }
 
     Branch getActiveBranch(){ return activeBranch; }
 
-    private void setActiveBranch(Branch branch){activeBranch = branch;}
-
-    void createAndSetMasterBranch(){
-        Branch masterBranch = createMasterBranch();
-        branches.add(masterBranch);
-        setActiveBranch(masterBranch);
-    }
+    private void setActiveBranch(Branch branch){
+        activeBranch = branch;  }
 
     void createNewBranch(String branchName){
         for(Branch branch: branches){
@@ -28,20 +22,14 @@ class BranchManager {
                 throw new IllegalArgumentException();
             }
         }
-        Branch newBranch = new Branch(branchName, activeBranch.getHead());
+
+        Commit newBranchHead = (activeBranch == null)? null :activeBranch.getHead();
+        Branch newBranch = new Branch(branchName, newBranchHead);
         setActiveBranch(newBranch);
+
         branches.add(newBranch);
-        Utils.createNewFile(Settings.branchFolderPath + branchName + ".txt",
-                newBranch.getHead().commitSha1 + Settings.delimiter + newBranch.getStartCommit().commitSha1);
     }
 
-    private Branch createMasterBranch(){
-        Commit masterCommit = commitManager.commit("", true);
-        Branch branch =  new Branch("master", masterCommit);
-        Utils.createNewFile(Settings.branchFolderPath + "master" + ".txt",
-                masterCommit.commitSha1 + Settings.delimiter + masterCommit.commitSha1);
-        return branch;
-    }
 
     void deleteBranch(String branchName){
         if(getActiveBranch().getName().equals(branchName)){
@@ -55,7 +43,7 @@ class BranchManager {
     }
 
     void checkoutBranch(boolean force, String branchToCheckout){
-        if(commitManager.haveChanges() && !force){
+        if(activeBranch.haveChanges() && !force){
             throw new UnsupportedOperationException();
         }
         for(Branch branch:branches){
@@ -68,13 +56,8 @@ class BranchManager {
         }
     }
 
-    boolean commit(String msg){
-        Commit newCommit = commitManager.commit(msg, false);
-        if (newCommit == null){
-            return false;
-        }
-        activeBranch.setHead(newCommit);
-        return true;
+    boolean commit(String msg) {
+        return activeBranch.commit(msg, false);
     }
 
 }
