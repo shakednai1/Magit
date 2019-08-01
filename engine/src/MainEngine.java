@@ -77,14 +77,12 @@ public class MainEngine {
         }
     }
 
-    public boolean checkoutBranch(String name){
-        try {
-            repositoryManager.getActiveRepository().checkoutBranch(name);
-            return true;
-        }
-        catch (IllegalArgumentException e){
-            return false;
-        }
+    public void checkoutBranch(String name){
+       repositoryManager.getActiveRepository().checkoutBranch(name);
+    }
+
+    public boolean haveOpenChanges(){
+        return repositoryManager.haveOpenChanges();
     }
 
     public List<String> getActiveBrancHistory(){
@@ -93,6 +91,10 @@ public class MainEngine {
 
     public String getCurrentRepoLocation() {
         return repositoryManager.getActiveRepository().getFullPath();
+    }
+
+    public boolean validBranchName(String branchName){
+        return repositoryManager.validBranchName(branchName);
     }
 
 

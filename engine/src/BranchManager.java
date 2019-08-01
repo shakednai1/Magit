@@ -44,10 +44,11 @@ class BranchManager {
         }
     }
 
-    void checkoutBranch(boolean force, String branchToCheckout){
-        if(activeBranch.haveChanges() && !force){
-            throw new UnsupportedOperationException();
-        }
+    public boolean haveChangesInActiveBranch(){
+        return activeBranch.haveChanges();
+    }
+
+    void checkoutBranch(String branchToCheckout){
         for(Branch branch:branches){
             if(branch.getName().equals(branchToCheckout)){
                 setActiveBranch(branch);

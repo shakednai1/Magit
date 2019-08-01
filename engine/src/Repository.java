@@ -24,11 +24,9 @@ class Repository {
         return branchManager.getActiveBranch().getCommitManager().getWorkingCopy();
     }
 
-    boolean checkoutBranch(String name){
-        boolean force = false; // TODO give user to determine if force or not
-        branchManager.checkoutBranch(force, name);
+    void checkoutBranch(String name){
+        branchManager.checkoutBranch(name);
         saveRepositoryActiveBranch();
-        return true; //TODO return false when needed
     }
 
     void createNewBranch(String name){
@@ -43,4 +41,12 @@ class Repository {
     }
 
 
+    public boolean validBranchName(String branchName) {
+        for(Branch branch: branchManager.getAllBranches()){
+            if(branch.getName().equals(branchName)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

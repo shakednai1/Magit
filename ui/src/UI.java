@@ -197,15 +197,33 @@ public class UI {
     }
 
     private static void checkoutBranch(Scanner input){
-        while (true){
+        while (true) {
             System.out.println("Please provide branch name to checkout: ");
             String branchName = input.next();
-            if(engine.checkoutBranch(branchName)){
+            if (engine.validBranchName(branchName)) {
+                checkoutToValidBranch(input, branchName);
                 break;
-            }
-            else {
+            } else {
                 System.out.println("Given branch name is not valid. Please provide an existing branch name ");
             }
+        }
+    }
+
+    private static void checkoutToValidBranch(Scanner input, String branchName){
+        if(engine.haveOpenChanges()){
+            System.out.println("Given Branch has open changes. you need to commit then or force checkout and the " +
+                    "changes will remove ");
+            System.out.println("force commit ? Y/N");
+            String response = input.next();
+            if(response.equals("Y")){
+                engine.checkoutBranch(branchName);
+            }
+            else{
+                checkoutBranch(input);
+            }
+        }
+        else{
+            engine.checkoutBranch(branchName);
         }
     }
 
