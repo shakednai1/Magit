@@ -95,4 +95,9 @@ public class MainEngine {
         return repositoryManager.getActiveRepository().getFullPath();
     }
 
+
+    public void saveSystemState(){
+        repositoryManager.saveState();
+    }
+
 }

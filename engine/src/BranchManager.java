@@ -1,3 +1,5 @@
+import org.omg.CosNaming.NamingContextPackage.NotFound;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,8 +51,8 @@ class BranchManager {
         for(Branch branch:branches){
             if(branch.getName().equals(branchToCheckout)){
                 setActiveBranch(branch);
+                branch.open();
                 // TODO update HEAD file to the newActiveBranch.getName();
-                // TODO open all zip file of the commit
                 break;
             }
         }
