@@ -24,7 +24,7 @@ class Commit {
         commitSha1 = calcCommitSha1();
     }
 
-    String getSHA1(){return rootSha1;}
+    String getSHA1(){return commitSha1;}
 
     String getCommitTime(){ return commitTime; }
 
@@ -47,7 +47,7 @@ class Commit {
                 commitTime + Settings.delimiter +
                 Settings.getUser()+ Settings.delimiter;
 
-        commitStr = commitStr + ((previousCommit == null)? "null": previousCommit.commitSha1);
+        commitStr = commitStr + ((previousCommit == null)? "null": previousCommit.getSHA1());
 
         return commitStr;
     }

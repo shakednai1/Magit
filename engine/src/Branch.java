@@ -115,11 +115,11 @@ class Branch {
 
     private String getRootSha1(){
         //String newCommitDir = Settings.objectsFolderPath + head.commitSha1 + "tmp" + ".txt";
-        Utils.unzip(Settings.objectsFolderPath + head.commitSha1 + ".zip", Settings.objectsFolderPath);
+        Utils.unzip(Settings.objectsFolderPath + head.getSHA1() + ".zip", Settings.objectsFolderPath);
         try {
             String contents = new String(Files.readAllBytes(Paths.get(
-                    Settings.objectsFolderPath + head.commitSha1 + ".txt")));
-            Utils.deleteFile(Settings.objectsFolderPath + head.commitSha1 + ".txt");
+                    Settings.objectsFolderPath + head.getSHA1() + ".txt")));
+            Utils.deleteFile(Settings.objectsFolderPath + head.getSHA1() + ".txt");
             return contents.split(Settings.delimiter)[0];
         } catch (IOException e) {
             e.printStackTrace();
