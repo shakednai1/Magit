@@ -41,7 +41,6 @@ public class Utils {
             while(ze != null){
                 String fileName = ze.getName();
                 File newFile = new File(destDir + File.separator + fileName);
-                System.out.println("Unzipping to "+newFile.getAbsolutePath());
                 //create directories for sub directories in zip
                 new File(newFile.getParent()).mkdirs();
                 FileOutputStream fos = new FileOutputStream(newFile);
@@ -74,6 +73,11 @@ public class Utils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void createFolder(String folderPath){
+        File file = new File(folderPath);
+        file.mkdir();
     }
 
     public static void deleteFile(String filePath){
