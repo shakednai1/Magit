@@ -96,8 +96,4 @@ public class MainEngine {
     }
 
 
-    public void saveSystemState(){
-        repositoryManager.saveState();
-    }
-
 }
