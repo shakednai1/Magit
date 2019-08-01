@@ -53,7 +53,6 @@ class BranchManager {
             if(branch.getName().equals(branchToCheckout)){
                 setActiveBranch(branch);
                 branch.open();
-                // TODO update HEAD file to the newActiveBranch.getName();
                 break;
             }
         }
