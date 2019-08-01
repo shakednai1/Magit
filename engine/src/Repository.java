@@ -1,32 +1,27 @@
-import java.io.FileWriter;
-import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 class Repository {
 
     private String fullPath;
     private BranchManager branchManager;
-    private CommitManager commitManager;
 
     Repository(String fullPath){
         this.fullPath = fullPath;
-        commitManager = new CommitManager();
-        branchManager = new BranchManager(commitManager);
-        branchManager.createAndSetMasterBranch();
+        branchManager = new BranchManager();
+        branchManager.createNewBranch("master");
     }
 
     String getFullPath(){ return fullPath; }
 
-    BranchManager getBranchManager(){ return branchManager; }
+    Branch getActiveBranch(){ return branchManager.getActiveBranch(); }
 
-    CommitManager getCommitManager(){ return commitManager; }
+    List<Branch> getAllBranches(){ return branchManager.getAllBranches(); }
 
-    void saveRepositoryActiveBranch(){
-        try{
-            FileWriter fileWriter = new FileWriter(Settings.activeBranchFilePath, false);
-            fileWriter.write(branchManager.getActiveBranch().getName());
-            fileWriter.close();
-        }
-        catch (IOException e){/*Lets assume all good*/}
+    BranchManager getBranchManager(){ return branchManager; } // TODO hide them
+
+    Map<String ,List<String>> getWorkingCopy(){
+        return branchManager.getActiveBranch().getCommitManager().getWorkingCopy();
     }
 
     boolean checkoutBranch(String name){
@@ -35,4 +30,17 @@ class Repository {
         saveRepositoryActiveBranch();
         return true; //TODO return false when needed
     }
+
+    void createNewBranch(String name){
+        branchManager.createNewBranch(name);
+        saveRepositoryActiveBranch();
+    }
+
+    private void saveRepositoryActiveBranch(){
+        Utils.writeFile(Settings.activeBranchFilePath,
+                branchManager.getActiveBranch().getName(),
+                false);
+    }
+
+
 }

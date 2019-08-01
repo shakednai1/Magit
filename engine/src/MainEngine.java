@@ -13,7 +13,7 @@ public class MainEngine {
     }
 
     public Map<String ,List<String>> getWorkingCopyStatus(){
-        return repositoryManager.getActiveRepository().getCommitManager().getWorkingCopy();
+        return repositoryManager.getActiveRepository().getWorkingCopy();
     }
 
     public boolean commit(String msg){
@@ -39,12 +39,12 @@ public class MainEngine {
     }
 
     public List<String> getCurrentCommitState(){
-        return repositoryManager.getActiveRepository().getCommitManager().getLastChanges();
+        return repositoryManager.getActiveRepository().getActiveBranch().getCommittedState();
     }
 
     public boolean createNewBranch(String name){
         try {
-            repositoryManager.getActiveRepository().getBranchManager().createNewBranch(name);
+            repositoryManager.getActiveRepository().createNewBranch(name);
             return true;
         }
         catch (IllegalArgumentException e){
@@ -54,7 +54,7 @@ public class MainEngine {
 
     public List<String> getAllBranches(){
         List<String> allBrnachesName = new ArrayList<>();
-        List<Branch> allBranches = repositoryManager.getActiveRepository().getBranchManager().getAllBranches();
+        List<Branch> allBranches = repositoryManager.getActiveRepository().getAllBranches();
         Branch headBranch = repositoryManager.getActiveRepository().getBranchManager().getActiveBranch();
         for(Branch branch:allBranches){
             if (branch.getName().equals(headBranch.getName())){
@@ -95,7 +95,9 @@ public class MainEngine {
         return repositoryManager.getActiveRepository().getFullPath();
     }
 
+
     public void saveSystemState(){
         repositoryManager.saveState();
     }
+
 }

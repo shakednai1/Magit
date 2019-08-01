@@ -1,5 +1,3 @@
-
-
 public class Settings {
 
     private static String currentUser = "Administrator";
