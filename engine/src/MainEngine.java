@@ -98,5 +98,14 @@ public class MainEngine {
         return repositoryManager.validBranchName(branchName);
     }
 
+    public String isXmlValid(String xmlPath){
+        XmlLoader xmlLoader = new XmlLoader(xmlPath);
+        try {
+            xmlLoader.checkValidXml();
+            return null;
+        } catch (XmlException e) {
+            return e.message;
+        }
+    }
 
 }

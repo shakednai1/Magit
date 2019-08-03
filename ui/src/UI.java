@@ -21,7 +21,7 @@ public class UI {
                     getSetUser(input);
                     break;
                 case 2:
-                    // TODO load XML
+                    loadFromXml(input);
                     break;
                 case 3:
                     switchRepository(input);
@@ -224,6 +224,15 @@ public class UI {
         }
         else{
             engine.checkoutBranch(branchName);
+        }
+    }
+
+    private static void loadFromXml(Scanner input){
+        System.out.println("Please provide XML file");
+        String response = input.next();
+        String validationMsg = engine.isXmlValid(response);
+        if(validationMsg != null){
+            System.out.println(validationMsg);
         }
     }
 
