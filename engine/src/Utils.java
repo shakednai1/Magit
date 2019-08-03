@@ -75,14 +75,14 @@ public class Utils {
         }
     }
 
-    public static void createFolder(String folderPath){
+    public static boolean createFolder(String folderPath){
         File file = new File(folderPath);
-        file.mkdir();
+        return file.mkdir();
     }
 
-    public static void deleteFile(String filePath){
+    public static boolean deleteFile(String filePath){
         File file = new File(filePath);
-        file.delete();
+        return file.delete();
     }
 
     static void writeFile(String fullPath, String fileContent, boolean append){

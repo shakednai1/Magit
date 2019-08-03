@@ -4,8 +4,8 @@ public class Settings {
 
     final static String delimiter = ",";
     final private static String magitFolder = "/.magit";
-    final private static String objectsFolder = magitFolder + "/.objects/";
-    final private static String branchFolder = magitFolder + "/.branches/";
+    final private static String objectsFolder = magitFolder + "/objects/";
+    final private static String branchFolder = magitFolder + "/branches/";
     final private static String activeBranchFile = branchFolder + "HEAD";
 
     static String repositoryFullPath = "";

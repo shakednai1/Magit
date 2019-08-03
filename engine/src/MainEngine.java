@@ -17,7 +17,8 @@ public class MainEngine {
     }
 
     public boolean commit(String msg){
-        return repositoryManager.getActiveRepository().getBranchManager().commit(msg);
+        boolean force = false; // TODO add functionality for 'true' option
+        return repositoryManager.getActiveRepository().getActiveBranch().commit(msg, force);
     }
 
     public String getUser(){
@@ -55,7 +56,7 @@ public class MainEngine {
     public List<String> getAllBranches(){
         List<String> allBrnachesName = new ArrayList<>();
         List<Branch> allBranches = repositoryManager.getActiveRepository().getAllBranches();
-        Branch headBranch = repositoryManager.getActiveRepository().getBranchManager().getActiveBranch();
+        Branch headBranch = repositoryManager.getActiveRepository().getActiveBranch();
         for(Branch branch:allBranches){
             if (branch.getName().equals(headBranch.getName())){
                 allBrnachesName.add("**HEAD** " + branch.getName());
@@ -69,7 +70,7 @@ public class MainEngine {
 
     public boolean deleteBranch(String name){
         try {
-            repositoryManager.getActiveRepository().getBranchManager().deleteBranch(name);
+            repositoryManager.getActiveRepository().deleteBranch(name);
             return true;
         }
         catch (IllegalArgumentException e){
@@ -82,11 +83,11 @@ public class MainEngine {
     }
 
     public boolean haveOpenChanges(){
-        return repositoryManager.haveOpenChanges();
+        return repositoryManager.getActiveRepository().haveOpenChanges();
     }
 
-    public List<String> getActiveBrancHistory(){
-        return repositoryManager.getActiveRepository().getBranchManager().getActiveBranch().getCommitHistory();
+    public List<String> getActiveBranchHistory(){
+        return repositoryManager.getActiveRepository().getActiveBranch().getCommitHistory();
     }
 
     public String getCurrentRepoLocation() {

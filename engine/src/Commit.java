@@ -3,32 +3,35 @@ import org.apache.commons.codec.digest.DigestUtils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 class Commit {
 
     private String msg;
     private String commitTime;
     private String commitSha1;
-    private String rootSha1;
     private Folder rootFolder;
+    private String rootSha1;
     private Commit previousCommit;
 
-    Commit(String msg, String rootSha1, Folder rootFolder, Commit previousCommit){
+    Commit(String msg,Folder rootFolder, Commit previousCommit){
         this.msg = msg;
-        this.rootSha1 = rootSha1;
         this.rootFolder = rootFolder;
         this.previousCommit = previousCommit;
+        this.rootSha1 = rootFolder.currentSHA1;
+
         DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss:SSS");
-        Date date = new Date();
-        commitTime = dateFormat.format(date);
+        commitTime = dateFormat.format(new Date());
+
+        rootFolder.commit(Settings.getUser(), commitTime);
         commitSha1 = calcCommitSha1();
     }
 
     String getSHA1(){return commitSha1;}
 
-    String getCommitTime(){ return commitTime; }
-
     Commit getPreviousCommit(){ return previousCommit; }
+
+    Folder getRootFolder() { return rootFolder; }
 
     public String toString(){
         return commitSha1 + Settings.delimiter +
@@ -42,7 +45,7 @@ class Commit {
     }
 
     private String getCommitTxt(){
-        String commitStr =  rootSha1 + Settings.delimiter +
+        String commitStr =  rootFolder.currentSHA1 + Settings.delimiter +
                 msg + Settings.delimiter +
                 commitTime + Settings.delimiter +
                 Settings.getUser()+ Settings.delimiter;
@@ -58,5 +61,12 @@ class Commit {
         Utils.zip(fileNameWOExtension + ".zip",fileNameWOExtension + ".txt");
         Utils.deleteFile(fileNameWOExtension + ".txt");
     }
+
+    List<String> getCommittedItemsData(){ return rootFolder.getItemsData(); }
+
+    boolean haveChanges(){
+        rootFolder.updateState();
+        return !rootSha1.equals(rootFolder.currentSHA1); }
+
 
 }

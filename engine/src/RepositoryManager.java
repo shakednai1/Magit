@@ -41,7 +41,7 @@ class RepositoryManager {
     }
 
     public boolean haveOpenChanges(){
-        return activeRepository.getBranchManager().haveChangesInActiveBranch();
+        return activeRepository.haveOpenChanges();
     }
 
     public boolean validBranchName(String branchName){

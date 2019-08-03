@@ -17,7 +17,7 @@ abstract public class Item {
 
     abstract public void zipAndCopy();
 
-    boolean isExistInObjects() {
+    boolean isExistInObjects() { // TODO get the specific file we look for
         File directory = new File(Settings.objectsFolderPath);
         File[] listOfItems = directory.listFiles();
         return Arrays.stream(listOfItems).anyMatch(f -> f.getName().equals(currentSHA1 + ".zip"));

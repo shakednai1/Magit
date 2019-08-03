@@ -23,7 +23,9 @@ public class Folder extends Item {
 
         subFolders = curSubFolders;
         for(Folder folder: subFolders.values()){
-            subItemsChanged = subItemsChanged || folder.commit(commitUser, commitTime);
+            boolean subFolderChanged = folder.commit(commitUser, commitTime);
+
+            subItemsChanged = subItemsChanged || subFolderChanged;
         }
 
         for(Blob file: curSubFiles.values()){
@@ -39,6 +41,9 @@ public class Folder extends Item {
         if(subItemsChanged){
             updateUserAndDate(commitUser, commitTime);
         }
+
+        curSubFiles = new HashMap<>();
+        curSubFolders = new HashMap<>();
 
         zipAndCopy();
 
@@ -150,15 +155,26 @@ public class Folder extends Item {
         return itemsData;
     }
 
-    Map<String, String > getItemsState(){
+    Map<String, String > getCommittedItemsState(){
+        return getItemsState(true);
+    }
+
+    Map<String, String > getCurrentItemsState(){
+        return getItemsState(false);
+    }
+
+    private Map<String, String > getItemsState(boolean committed){
         Map<String, String > itemsState = new HashMap<>();
 
-        for (Blob file : curSubFiles.values()){
+        Map<String, Blob> files = (committed)? subFiles : curSubFiles;
+        Map<String, Folder> folders = (committed)? subFolders: curSubFolders;
+
+        for (Blob file : files.values()){
             itemsState.put(file.fullPath, file.currentSHA1);
         }
 
-        for (Folder folder: curSubFolders.values()){
-            itemsState.putAll(folder.getItemsState());
+        for (Folder folder: folders.values()){
+            itemsState.putAll(folder.getItemsState(committed));
         }
 
         return itemsState;

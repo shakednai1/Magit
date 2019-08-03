@@ -1,31 +1,46 @@
-import javax.rmi.CORBA.Util;
+import org.apache.commons.collections4.CollectionUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 class Branch {
 
-    private Commit startCommit; //TODO add load commit - do not change it after define it
+    private Commit startCommit;
     private Commit head;
     private String name;
-    private CommitManager commitManager;
+    private Folder rootFolder;
+
+    private Map<String, String> currentStateOfFiles = new HashMap<>();
+    private Map<String, String> newStateOfFiles = new HashMap<>();
 
     Branch(String name, Commit head){
-
-        commitManager = new CommitManager();
-        if(head == null){
-            head = commitManager.commit("", true);
-        }
-        commitManager.setCurrentCommit(head);
-
         this.name = name;
-        this.head = head;
-        startCommit = head;
 
-        writeBranchInfoFile();
+        if(head == null){
+            rootFolder = getRootFolder();
+            rootFolder.updateState();
+            commit("", true);
+
+        }
+        else{
+            this.head = head;
+            startCommit = head;
+            rootFolder = head.getRootFolder();
+            writeBranchInfoFile();
+
+            currentStateOfFiles = rootFolder.getCommittedItemsState();
+        }
+    }
+
+    private Folder getRootFolder(){
+        String repoLocation = Settings.repositoryFullPath;
+        Path path = Paths.get(repoLocation);
+        String repoName = path.getFileName().toString();
+        return new Folder(repoLocation, repoName);
     }
 
     Commit getHead(){ return head; }
@@ -34,34 +49,42 @@ class Branch {
         return name;
     }
 
-    CommitManager getCommitManager(){ return commitManager; }
-
-    boolean haveChanges(){ return commitManager.haveChanges(); }
+    boolean haveChanges(){ return head.haveChanges(); }
 
     boolean commit(String msg, boolean force){
-        Commit newCommit = commitManager.commit(msg, force);
+        if(head == null || haveChanges() || force){
+            Commit com = new Commit(msg, rootFolder, head);
+            com.zipCommit();
 
-        if (newCommit == null)
-            return false;
+            setHead(com);
 
-        setHead(newCommit);
-        return true;
+            currentStateOfFiles = rootFolder.getCommittedItemsState();
+            return true;
+        }
+
+        return false;
     }
 
-    void setHead(Commit newHead) {
+    private void updateChangedFilesState(){ // TODO better name for function
+        newStateOfFiles.clear();
+        newStateOfFiles = rootFolder.getCurrentItemsState();
+    }
+
+    private void setHead(Commit newHead) {
         head = newHead;
+        if (startCommit == null) startCommit = head;
+
         writeBranchInfoFile();
     }
 
-    void writeBranchInfoFile(){
+    private void writeBranchInfoFile(){
         String branchFileContent =  head.getSHA1()+ Settings.delimiter + startCommit.getSHA1();
-        Utils.writeFile(getBranchFilePath(), branchFileContent, false);
+        Utils.writeFile(getBranchFilePath(name), branchFileContent, false);
     }
 
-    private String getBranchFilePath(){
-        return Settings.branchFolderPath + getName() + ".txt";
+    private static String getBranchFilePath(String branchName){
+        return Settings.branchFolderPath + branchName + ".txt";
     }
-
 
     List<String> getCommitHistory(){
         List<String> res = new LinkedList<>();
@@ -74,9 +97,8 @@ class Branch {
     }
 
     List<String> getCommittedState(){
-        return commitManager.getCommittedItemsData();
+        return head.getCommittedItemsData();
     }
-
 
     public void open() {
         clearCurrentWC();
@@ -157,6 +179,36 @@ class Branch {
 
     private void openFile(String itemSha1, String filePath){
         Utils.unzip(Settings.objectsFolderPath + itemSha1 + ".zip", filePath);
+    }
+
+
+    Map<String ,List<String>> getWorkingCopy(){
+        rootFolder.updateState();
+        updateChangedFilesState();
+        return getFilesChanges();
+    }
+
+    private Map<String, List<String>> getFilesChanges() {
+        List<String> newFiles = new ArrayList<>(CollectionUtils.subtract(newStateOfFiles.keySet(), currentStateOfFiles.keySet()));
+        List<String> deletedFiles = new ArrayList<>(CollectionUtils.subtract(currentStateOfFiles.keySet(), newStateOfFiles.keySet()));
+        List<String> updatedFiles = new ArrayList<>();
+
+        //check for updated files
+        List<String> common = new ArrayList<>(CollectionUtils.retainAll(currentStateOfFiles.keySet(), newStateOfFiles.keySet()));
+        for(String key : common){
+            if (!currentStateOfFiles.get(key).equals(newStateOfFiles.get(key))){
+                updatedFiles.add(key);
+            }
+        }
+        Map<String, List<String>> changes = new HashMap<>();
+        changes.put("update", updatedFiles);
+        changes.put("new", newFiles);
+        changes.put("delete", deletedFiles);
+        return changes;
+    }
+
+    static boolean deleteBranch(String branchName){
+        return Utils.deleteFile(getBranchFilePath(branchName));
     }
 
 }

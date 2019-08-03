@@ -190,7 +190,7 @@ public class UI {
     }
 
     private static void printBranchHistory(){
-        List<String> activeBranchHistory = engine.getActiveBrancHistory();
+        List<String> activeBranchHistory = engine.getActiveBranchHistory();
         for (String item: activeBranchHistory){
             System.out.println(item);
         }
