@@ -1,10 +1,12 @@
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DateFormat;
 import java.util.*;
 
 class Branch {
@@ -14,29 +16,52 @@ class Branch {
     private String name;
     private Folder rootFolder;
 
+    private Map<String, Commit> commitData = new HashMap<>();
+
     private Map<String, String> currentStateOfFiles = new HashMap<>();
     private Map<String, String> newStateOfFiles = new HashMap<>();
 
-    Branch(String name, Commit head){
+    Branch(String name){
+        // constractor for master branch
         this.name = name;
 
-        if(head == null){
-            rootFolder = getRootFolder();
-            rootFolder.updateState();
-            commit("", true);
-
-        }
-        else{
-            this.head = head;
-            startCommit = head;
-            rootFolder = head.getRootFolder();
-            writeBranchInfoFile();
-
-            currentStateOfFiles = rootFolder.getCommittedItemsState();
-        }
+        rootFolder = createRootFolder();
+        rootFolder.updateState();
+        commit("", true);
     }
 
-    private Folder getRootFolder(){
+    Branch(String name, Commit head, Folder rootFolder){
+        // constractor for new branch
+        this.name = name;
+        this.rootFolder = rootFolder;
+
+        setHead(head);
+        currentStateOfFiles = rootFolder.getCommittedItemsState();
+    }
+
+    private Branch(String name, String headCommitSha1, String startCommitSha1){
+        // constractor for loading an existing branch
+
+        this.name = name;
+
+        commitData = Commit.loadAll(startCommitSha1, headCommitSha1);
+        this.head = commitData.get(headCommitSha1);
+        this.startCommit = commitData.get(startCommitSha1);
+
+        clearCurrentWC();
+        File  rootFolderPath = new File(Settings.repositoryFullPath);
+        rootFolder = new Folder(rootFolderPath,
+                this.head.getRootFolderSHA1(), head.getUserLastModified(),
+                head.getCommitTime());
+
+        currentStateOfFiles = rootFolder.getCommittedItemsState();
+    }
+
+    private void addCommitToHistory(Commit commit){
+        commitData.put(commit.getCommitSHA1(), commit);
+    }
+
+    private Folder createRootFolder(){
         String repoLocation = Settings.repositoryFullPath;
         Path path = Paths.get(repoLocation);
         String repoName = path.getFileName().toString();
@@ -45,20 +70,40 @@ class Branch {
 
     Commit getHead(){ return head; }
 
-    String getName(){
-        return name;
+    String getName(){ return name; }
+
+    Folder getRootFolder(){ return rootFolder; }
+
+    static Branch load(String branchName){
+        // TODO deprecate load function and build constractor that knows how to handle only branch name
+
+        List<String> branchData = Utils.getFileLines(getBranchFilePath(branchName));
+        String[] branchCommits = branchData.get(0).split(Settings.delimiter);
+
+        String headCommitSha1 = branchCommits[0];
+        String startCommitSha1 = branchCommits[1];
+
+        return new Branch(branchName, headCommitSha1, startCommitSha1);
     }
 
-    boolean haveChanges(){ return head.haveChanges(); }
+    boolean haveChanges(){
+        rootFolder.updateState();
+        return !head.getRootFolderSHA1().equals(rootFolder.currentSHA1);
+    }
 
     boolean commit(String msg, boolean force){
         if(head == null || haveChanges() || force){
-            Commit com = new Commit(msg, rootFolder, head);
+
+            String commitTime = Commit.commitDateFormat.format(new Date());
+            rootFolder.commit(Settings.getUser(), commitTime);
+
+            String prevCommitSha1 = (head==null)? null : head.getCommitSHA1();
+            Commit com = new Commit(msg, rootFolder.currentSHA1, rootFolder.userLastModified, commitTime,prevCommitSha1);
             com.zipCommit();
 
             setHead(com);
-
             currentStateOfFiles = rootFolder.getCommittedItemsState();
+
             return true;
         }
 
@@ -74,11 +119,12 @@ class Branch {
         head = newHead;
         if (startCommit == null) startCommit = head;
 
+        addCommitToHistory(head);
         writeBranchInfoFile();
     }
 
     private void writeBranchInfoFile(){
-        String branchFileContent =  head.getSHA1()+ Settings.delimiter + startCommit.getSHA1();
+        String branchFileContent =  head.getCommitSHA1()+ Settings.delimiter + startCommit.getCommitSHA1();
         Utils.writeFile(getBranchFilePath(name), branchFileContent, false);
     }
 
@@ -91,19 +137,18 @@ class Branch {
         Commit currentCommit = head;
         while (currentCommit != startCommit){
             res.add(currentCommit.toString());
-            currentCommit = currentCommit.getPreviousCommit();
+            currentCommit = commitData.get(currentCommit.getPreviousCommitSHA1());
         }
         return res;
     }
 
-    List<String> getCommittedState(){
-        return head.getCommittedItemsData();
-    }
+    List<String> getCommittedState(){  return rootFolder.getItemsData(); }
 
-    public void open() {
-        clearCurrentWC();
-        recursiveOpenAllFiles(getRootSha1(), Settings.repositoryFullPath);
-    }
+//    public void open() {
+//        clearCurrentWC();
+//        recursiveOpenAllFiles(getRootSha1(), Settings.repositoryFullPath);
+//    }
+//
 
     private void clearCurrentWC() {
         File directory = new File(Settings.repositoryFullPath);
@@ -133,54 +178,6 @@ class Branch {
         }
         Utils.deleteFile(folder.getPath());
     }
-
-
-    private String getRootSha1(){
-        //String newCommitDir = Settings.objectsFolderPath + head.commitSha1 + "tmp" + ".txt";
-        Utils.unzip(Settings.objectsFolderPath + head.getSHA1() + ".zip", Settings.objectsFolderPath);
-        try {
-            String contents = new String(Files.readAllBytes(Paths.get(
-                    Settings.objectsFolderPath + head.getSHA1() + ".txt")));
-            Utils.deleteFile(Settings.objectsFolderPath + head.getSHA1() + ".txt");
-            return contents.split(Settings.delimiter)[0];
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private void recursiveOpenAllFiles(String sha1, String location){
-        //String newFile = Settings.objectsFolderPath + sha1 + "tmp" + ".txt";
-        Utils.unzip(Settings.objectsFolderPath + sha1 + ".zip", Settings.objectsFolderPath);
-        try {
-            String contents = new String(Files.readAllBytes(Paths.get(Settings.objectsFolderPath + sha1 + ".txt")));
-            Utils.deleteFile(Settings.objectsFolderPath + sha1 + ".txt");
-            String[] folderItems = contents.split("\\r\\n");
-            for(String item: folderItems){
-                String[] itemData = item.split(",");
-                String typeOfItem = itemData[2];
-                String itemSha1 = itemData[1];
-                String itemName = itemData[0];
-                String path = location + "/" + itemName;
-                if(typeOfItem.equals("File")){
-                    openFile(itemSha1, location);
-                }
-                else{
-                    Utils.createFolder(path);
-                    recursiveOpenAllFiles(itemSha1, path);
-                }
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void openFile(String itemSha1, String filePath){
-        Utils.unzip(Settings.objectsFolderPath + itemSha1 + ".zip", filePath);
-    }
-
 
     Map<String ,List<String>> getWorkingCopy(){
         rootFolder.updateState();

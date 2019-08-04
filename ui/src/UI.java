@@ -1,6 +1,9 @@
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import exceptions.InvalidBranchNameError;
+import exceptions.UncommittedChangesError;
+
+import java.io.File;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class UI {
 
@@ -51,6 +54,9 @@ public class UI {
                     printBranchHistory();
                     break;
                 case 12:
+                    createNewRepository(input);
+                    break;
+                case 13:
                     toContinue = false;
                     System.out.println("Bye Bye !");
                     System.out.println();
@@ -77,7 +83,9 @@ public class UI {
         System.out.println("9. Delete branch");
         System.out.println("10. Checkout branch");
         System.out.println("11. Show current branch history");
-        System.out.println("12. Exit");
+        System.out.println("12. Create new repository");
+
+        System.out.println("13. Exit");
     }
 
     private static void validateMenu(){
@@ -163,15 +171,22 @@ public class UI {
     }
 
     private static void createBranch(Scanner input){
-        boolean isValidBranchName = false;
-        while(!isValidBranchName){
+        while(true){
             System.out.println("Please provide branch name: ");
             String branchName = input.next();
-            if (!engine.createNewBranch(branchName)){
-                System.out.println("engine.Branch name is already exist! ");
+
+            System.out.println("Would you like to checkout to the new branch ? [Y/n]");
+            String checkout = input.next();
+
+            try{
+                engine.createNewBranch(branchName, checkout.equalsIgnoreCase("Y"));
+                break;
             }
-            else{
-                isValidBranchName=true;
+            catch (InvalidBranchNameError e){
+                System.out.println(branchName + " branch name is already exist! ");
+            }
+            catch (UncommittedChangesError e){
+                System.out.println(" There are open changes. Did not checkout to "+ branchName);
             }
         }
     }
@@ -180,10 +195,14 @@ public class UI {
         while (true){
             System.out.println("Please provide branch name to delete: ");
             String branchName = input.next();
-            if(engine.deleteBranch(branchName)){
+            try{
+                engine.deleteBranch(branchName);
                 break;
             }
-            else {
+            catch (InvalidBranchNameError e){
+                System.out.println("Given branch name doesn't exist. Please provide existing branch ");
+            }
+            catch (IllegalArgumentException e){
                 System.out.println("Given branch name is the head branch. Cannot delete head branch! ");
             }
         }
@@ -197,33 +216,27 @@ public class UI {
     }
 
     private static void checkoutBranch(Scanner input){
-        while (true) {
-            System.out.println("Please provide branch name to checkout: ");
-            String branchName = input.next();
-            if (engine.validBranchName(branchName)) {
-                checkoutToValidBranch(input, branchName);
-                break;
-            } else {
-                System.out.println("Given branch name is not valid. Please provide an existing branch name ");
-            }
-        }
-    }
+        boolean force = false;
+        String branchName = "";
 
-    private static void checkoutToValidBranch(Scanner input, String branchName){
-        if(engine.haveOpenChanges()){
-            System.out.println("Given Branch has open changes. you need to commit then or force checkout and the " +
-                    "changes will remove ");
-            System.out.println("force commit ? Y/N");
-            String response = input.next();
-            if(response.equals("Y")){
-                engine.checkoutBranch(branchName);
+        while (true) {
+            if(!force){
+                System.out.println("Please provide branch name to checkout: ");
+                branchName = input.next();
             }
-            else{
-                checkoutBranch(input);
+
+            try {
+                engine.checkoutBranch(branchName, force);
+                break;
+            } catch (InvalidBranchNameError e) {
+                System.out.println("Given branch name is not valid. Please provide an existing branch name ");
+            } catch (UncommittedChangesError e) {
+                System.out.println("Given Branch has open changes. you need to commit then or force checkout and the " +
+                        "changes will remove ");
+                System.out.println("force commit ? Y/N");
+                String forceInput = input.next();
+                if (forceInput.equals("Y")) force = true;
             }
-        }
-        else{
-            engine.checkoutBranch(branchName);
         }
     }
 
@@ -234,6 +247,11 @@ public class UI {
         if(validationMsg != null){
             System.out.println(validationMsg);
         }
+    }
+
+    private static void createNewRepository(Scanner input){
+        System.out.println("Please provide full path of the new repository");
+        engine.createNewRepository(input.next());
     }
 
 }

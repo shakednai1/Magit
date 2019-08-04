@@ -1,4 +1,9 @@
+import exceptions.InvalidBranchNameError;
+import exceptions.UncommittedChangesError;
+
+import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -6,62 +11,109 @@ class Repository {
 
     private String fullPath;
     private Branch activeBranch;
-    private List<Branch> branches = new ArrayList<>(); // TODO convert to list of names
+    private List<String> branches = new LinkedList<>();
 
 
     Repository(String fullPath){
         this.fullPath = fullPath;
+        try{
+            createNewBranch("master", true);
+        }
+        catch (UncommittedChangesError | InvalidBranchNameError e){ /* cant be ?*/ }
+    }
 
-        // TODO check if load or create
-        createNewBranch("master");
+    private Repository(String fullPath, Branch activeBranch){
+        this.fullPath = fullPath;
+        loadBranchesData();
+
+        this.activeBranch = activeBranch;
+        saveRepositoryActiveBranch();
+
     }
 
     String getFullPath(){ return fullPath; }
 
     Branch getActiveBranch(){ return activeBranch; }
 
-    List<Branch> getAllBranches(){ return branches; }
+    List<String> getAllBranches(){ return branches; }
+
+    static Repository load(String repositoryPath){
+        // we know that the repo exists and valid
+
+        Settings.setNewRepository(repositoryPath);
+
+        List<String> contentByLines = Utils.getFileLines(Settings.activeBranchFilePath);
+        String activeBranchName = contentByLines.get(0);
+
+        Branch activeBranch = Branch.load(activeBranchName);
+        return new Repository(Settings.repositoryFullPath, activeBranch);
+    }
+
+    private void loadBranchesData(){
+        branches.clear();
+
+        File directory = new File(Settings.branchFolderPath);
+        File[] listOfItems = directory.listFiles();
+        for(File item: listOfItems){
+            if(!item.getName().equals(Settings.activeBranchFileName)){
+                String[] name= item.getName().split("\\.");
+                branches.add(name[0]);
+            }
+        }
+    }
+
 
     Map<String ,List<String>> getWorkingCopy(){
         return activeBranch.getWorkingCopy();
     }
 
-    void createNewBranch(String branchName){
-        for(Branch branch: branches){
-            if (branch.getName().equals(branchName)){
-                throw new IllegalArgumentException();
-            }
+    void createNewBranch(String branchName, boolean checkout) throws UncommittedChangesError, InvalidBranchNameError{
+        if(branches.stream().anyMatch(name-> name.equals(branchName)))
+            throw new InvalidBranchNameError("");
+
+        Branch newBranch;
+        if (activeBranch == null){
+            newBranch = new Branch(branchName);
         }
+        else{
+            newBranch = new Branch(branchName, activeBranch.getHead(),
+                    activeBranch.getRootFolder());
+        }
+        branches.add(branchName);
 
-        Commit newBranchHead = (activeBranch == null)? null :activeBranch.getHead();
-        Branch newBranch = new Branch(branchName, newBranchHead);
-        activeBranch = newBranch;
-        saveRepositoryActiveBranch();
+        if (checkout){
+            if (activeBranch != null && haveOpenChanges())
+                throw new UncommittedChangesError("Cannot checkout on open changes");
 
-        branches.add(newBranch);
+            setActiveBranch(newBranch);
+        }
     }
 
-    void checkoutBranch(String name){
-        for(Branch branch:branches){
-            if(branch.getName().equals(name)){
-                activeBranch = branch;
-                branch.open();
-                break;
-            }
-        }
+    private void setActiveBranch(Branch branch){
+        activeBranch = branch;
         saveRepositoryActiveBranch();
     }
 
-    void deleteBranch(String branchName){
+    void checkoutBranch(String name, boolean force) throws UncommittedChangesError, InvalidBranchNameError {
+        if (!validBranchName(name))
+            throw new InvalidBranchNameError("InvalidBranchNameError");
+
+        if(activeBranch.haveChanges() && !force)
+            throw new UncommittedChangesError("UncommittedChangesError");
+
+        setActiveBranch(Branch.load(name));
+    }
+
+    void deleteBranch(String branchName) throws InvalidBranchNameError{
+        if (!validBranchName(branchName))
+            throw new InvalidBranchNameError("InvalidBranchNameError");
+
         if(activeBranch.getName().equals(branchName)){
             throw new IllegalArgumentException();
         }
-        for(Branch branch: branches){
-            if(branch.getName().equals(branchName)){
-                Branch.deleteBranch(branchName);
-                branches.remove(branch);
-            }
-        }
+
+        branches.remove(branchName);
+        Branch.deleteBranch(branchName);
     }
 
     boolean haveOpenChanges(){ return activeBranch.haveChanges();}
@@ -70,13 +122,7 @@ class Repository {
         Utils.writeFile(Settings.activeBranchFilePath, activeBranch.getName(), false);
     }
 
-
-    public boolean validBranchName(String branchName) {
-        for(Branch branch: branches){
-            if(branch.getName().equals(branchName)){
-                return true;
-            }
-        }
-        return false;
+    boolean validBranchName(String branchName) {
+        return branches.stream().anyMatch(name -> name.equals(branchName));
     }
 }

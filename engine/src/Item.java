@@ -6,15 +6,15 @@ import java.util.Comparator;
 abstract public class Item {
 //TODO change class params to private and add appropriate methods
 
-    String typeItem; // TODO enum
     String name;
     String currentSHA1;
     String userLastModified;
     String lastModified;
     String fullPath;
 
-    abstract public void updateState();
 
+    abstract String getTypeItem();
+    abstract public void updateState();
     abstract public void zipAndCopy();
 
     boolean isExistInObjects() { // TODO get the specific file we look for
@@ -35,9 +35,10 @@ abstract public class Item {
     Comparator<Item> compareToOther = (Item itemA, Item itemB) -> itemA.fullPath.compareTo(itemB.fullPath);
 
     String getDataString(){
-        return fullPath + Settings.delimiter + typeItem +
-                Settings.delimiter + currentSHA1 + Settings.delimiter + userLastModified +
-                Settings.delimiter + lastModified;
+        return fullPath + Settings.delimiter +
+                getTypeItem() + Settings.delimiter +
+                currentSHA1 + Settings.delimiter +
+                userLastModified + Settings.delimiter +
+                lastModified;
     }
-
 }

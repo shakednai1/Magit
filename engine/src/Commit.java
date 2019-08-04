@@ -1,43 +1,60 @@
 import org.apache.commons.codec.digest.DigestUtils;
 
+import javax.rmi.CORBA.Util;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class Commit {
+
+    static DateFormat commitDateFormat = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss:SSS");
 
     private String msg;
     private String commitTime;
     private String commitSha1;
-    private Folder rootFolder;
     private String rootSha1;
-    private Commit previousCommit;
+    private String previousCommitSHA1;
+    private String userLastModified;
 
-    Commit(String msg,Folder rootFolder, Commit previousCommit){
+    Commit(String msg, String rootFolderSha, String userLastModified, String commitTime, String previousCommitSHA1){
         this.msg = msg;
-        this.rootFolder = rootFolder;
-        this.previousCommit = previousCommit;
-        this.rootSha1 = rootFolder.currentSHA1;
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss:SSS");
-        commitTime = dateFormat.format(new Date());
-
-        rootFolder.commit(Settings.getUser(), commitTime);
+        this.previousCommitSHA1 = previousCommitSHA1;
+        this.rootSha1 = rootFolderSha;
+        this.commitTime = commitTime;
+        this.userLastModified = userLastModified;
         commitSha1 = calcCommitSha1();
     }
 
-    String getSHA1(){return commitSha1;}
+    private Commit(String commitSha1){
+        this.commitSha1 = commitSha1;
+        Utils.unzip(Settings.objectsFolderPath + commitSha1 + ".zip", Settings.objectsFolderPath, commitSha1 + ".txt");
+        List<String> content = Utils.getFileLines(Settings.objectsFolderPath + commitSha1 + ".txt");
+        Utils.deleteFile(Settings.objectsFolderPath + commitSha1 + ".txt");
 
-    Commit getPreviousCommit(){ return previousCommit; }
+        String[] commitData = content.get(0).split(Settings.delimiter);
 
-    Folder getRootFolder() { return rootFolder; }
+        this.rootSha1 = commitData[0];
+        this.msg = commitData[1];
+        this.commitTime = commitData[2];
+        this.userLastModified = commitData[3];
+        this.previousCommitSHA1 = commitData[4];
+    }
+
+    String getCommitSHA1(){return commitSha1;}
+    String getRootFolderSHA1(){ return rootSha1; }
+    String getPreviousCommitSHA1(){ return previousCommitSHA1; }
+    String getUserLastModified() { return userLastModified; }
+    String getCommitTime() { return commitTime; }
+
 
     public String toString(){
         return commitSha1 + Settings.delimiter +
                 msg + Settings.delimiter +
                 commitTime + Settings.delimiter +
-                rootFolder.userLastModified ;
+                userLastModified ;
     }
 
     private String calcCommitSha1(){
@@ -45,12 +62,12 @@ class Commit {
     }
 
     private String getCommitTxt(){
-        String commitStr =  rootFolder.currentSHA1 + Settings.delimiter +
+        String commitStr =  rootSha1 + Settings.delimiter +
                 msg + Settings.delimiter +
                 commitTime + Settings.delimiter +
                 Settings.getUser()+ Settings.delimiter;
 
-        commitStr = commitStr + ((previousCommit == null)? "null": previousCommit.getSHA1());
+        commitStr = commitStr + ((previousCommitSHA1 == null)? "null": previousCommitSHA1);
 
         return commitStr;
     }
@@ -62,11 +79,19 @@ class Commit {
         Utils.deleteFile(fileNameWOExtension + ".txt");
     }
 
-    List<String> getCommittedItemsData(){ return rootFolder.getItemsData(); }
+    static Map<String, Commit> loadAll(String startCommitSha1, String endCommitSha1){
+        Map<String, Commit> commitMap = new HashMap<>();
 
-    boolean haveChanges(){
-        rootFolder.updateState();
-        return !rootSha1.equals(rootFolder.currentSHA1); }
+        String currCommitSha1 = endCommitSha1;
+        commitMap.put(currCommitSha1, new Commit(currCommitSha1));
+
+        while (!currCommitSha1.equals(startCommitSha1)){
+            currCommitSha1 = commitMap.get(currCommitSha1).getPreviousCommitSHA1();
+            commitMap.put(currCommitSha1, new Commit(currCommitSha1));
+        }
+
+        return commitMap;
+    }
 
 
 }

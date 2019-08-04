@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -27,7 +29,7 @@ public class Utils {
 
     }
 
-    public static void unzip(String zipFilePath, String destDir) {
+    public static void unzip(String zipFilePath, String destDir, String newFileName) {
         File dir = new File(destDir);
         // create output directory if it doesn't exist
         if(!dir.exists()) dir.mkdirs();
@@ -38,23 +40,38 @@ public class Utils {
             fis = new FileInputStream(zipFilePath);
             ZipInputStream zis = new ZipInputStream(fis);
             ZipEntry ze = zis.getNextEntry();
-            while(ze != null){
-                String fileName = ze.getName();
-                File newFile = new File(destDir + File.separator + fileName);
-                //create directories for sub directories in zip
-                new File(newFile.getParent()).mkdirs();
-                FileOutputStream fos = new FileOutputStream(newFile);
-                int len;
-                while ((len = zis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
-                }
-                fos.close();
-                //close this ZipEntry
-                zis.closeEntry();
-                ze = zis.getNextEntry();
+
+            // LETS TRY WITH ONLY ONE ENTRY FOR NOW
+
+            File newFile = new File(destDir + File.separator + newFileName);
+            //create directories for sub directories in zip
+            new File(newFile.getParent()).mkdirs();
+            FileOutputStream fos = new FileOutputStream(newFile);
+            int len;
+            while ((len = zis.read(buffer)) > 0) {
+                fos.write(buffer, 0, len);
             }
-            //close last ZipEntry
+            fos.close();
+            //close this ZipEntry
             zis.closeEntry();
+
+//            while(ze != null){
+//                String fileName = ze.getName();
+//                File newFile = new File(destDir + File.separator + fileName);
+//                //create directories for sub directories in zip
+//                new File(newFile.getParent()).mkdirs();
+//                FileOutputStream fos = new FileOutputStream(newFile);
+//                int len;
+//                while ((len = zis.read(buffer)) > 0) {
+//                    fos.write(buffer, 0, len);
+//                }
+//                fos.close();
+//                //close this ZipEntry
+//                zis.closeEntry();
+//                ze = zis.getNextEntry();
+//            }
+            //close last ZipEntry
+//            zis.closeEntry();
             zis.close();
             fis.close();
         } catch (IOException e) {
@@ -91,8 +108,17 @@ public class Utils {
             fileWriter.write(fileContent);
             fileWriter.close();
         }
-        catch (IOException e){/*Lets assume all good*/
-        }
+        catch (IOException e){e.printStackTrace(); }
     }
+
+    static List<String> getFileLines(String filePath){
+        try{
+            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            return br.lines().collect(Collectors.toList());
+        }
+        catch (IOException e){e.printStackTrace();}
+        return null;
+    }
+
 
 }

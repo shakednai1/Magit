@@ -2,11 +2,14 @@ public class Settings {
 
     private static String currentUser = "Administrator";
 
-    final static String delimiter = ",";
+
     final private static String magitFolder = "/.magit";
     final private static String objectsFolder = magitFolder + "/objects/";
     final private static String branchFolder = magitFolder + "/branches/";
-    final private static String activeBranchFile = branchFolder + "HEAD";
+
+    final static String activeBranchFileName = "HEAD";
+    final private static String activeBranchFile = branchFolder + activeBranchFileName;
+    final static String delimiter = ",";
 
     static String repositoryFullPath = "";
     static String objectsFolderPath = "";

@@ -1,9 +1,12 @@
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 
 public class Folder extends Item {
+
+    final private String typeItem = "Folder";
 
     private Map<String, Blob> subFiles = new HashMap<>();
     private Map<String, Folder> subFolders = new HashMap<>();
@@ -12,10 +15,41 @@ public class Folder extends Item {
     private Map<String, Folder> curSubFolders = new HashMap<>();
 
     Folder(String path, String name) {
-        typeItem = "Folder";
         fullPath = path;
         this.name = name;
     }
+
+    Folder(File folderPath, String folderSha1, String lastUser, String lastModified ){
+         this.name = folderPath.getName();
+         this.fullPath = folderPath.getPath();
+         this.userLastModified = lastUser;
+         this.lastModified = lastModified;
+         this.currentSHA1 = folderSha1;
+
+        Utils.unzip(Settings.objectsFolderPath + folderSha1 + ".zip", Settings.objectsFolderPath , folderSha1 + ".txt");
+        List<String > content = Utils.getFileLines(Settings.objectsFolderPath + folderSha1 + ".txt");
+        Utils.deleteFile(Settings.objectsFolderPath + folderSha1 + ".txt");
+
+        for (String itemData: content){
+            String[] item = itemData.split(Settings.delimiter);
+
+            String itemName = item[0];
+            String itemFullPath = this.fullPath + "/" + itemName;
+            String itemSha1 = item[1];
+            String itemType = item[2];
+            String itemLastUser = item[3];
+            String itemLastModified = item[4];
+
+            if (itemType.equals("File")){
+                subFiles.put(itemFullPath, new Blob(new File(itemFullPath), itemSha1, itemLastUser, itemLastModified));
+            }
+            else{
+                subFolders.put(itemFullPath, new Folder(new File(this.fullPath +"/"+ itemName),
+                        itemSha1, itemLastUser, itemLastModified));
+            }
+        }
+    }
+
 
     boolean commit(String commitUser, String commitTime){
         // function assume the items are up-to-date
@@ -95,7 +129,7 @@ public class Folder extends Item {
             folderDataString = folderDataString +
                     item.name + Settings.delimiter +
                     item.currentSHA1 + Settings.delimiter +
-                    item.typeItem + Settings.delimiter +
+                    item.getTypeItem() + Settings.delimiter +
                     item.userLastModified + Settings.delimiter +
                     item.lastModified + "\r\n";
         }
@@ -108,7 +142,7 @@ public class Folder extends Item {
             strForSha1 = strForSha1 +
                     item.name + Settings.delimiter +
                     item.currentSHA1 + Settings.delimiter +
-                    item.typeItem + "\r\n";
+                    item.getTypeItem() + "\r\n";
         }
 
         return strForSha1;
@@ -133,7 +167,6 @@ public class Folder extends Item {
             Utils.deleteFile(getTxtFilePath());
         }
     }
-
 
     private String getTxtFilePath(){
         // returns the txt file path (we create this file -> zip it -> delete)
@@ -179,5 +212,8 @@ public class Folder extends Item {
 
         return itemsState;
     }
+
+    String getTypeItem(){ return this.typeItem; }
+
 
 }

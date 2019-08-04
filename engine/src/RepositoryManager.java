@@ -4,7 +4,6 @@ import java.util.Map;
 
 class RepositoryManager {
 
-    private Map<String, Repository> repositories = new HashMap<>();
     private Repository activeRepository = null;
 
     // TODO - delete content of .branchs and .objects - do not keep the state, faster dir scanner
@@ -13,10 +12,19 @@ class RepositoryManager {
         return activeRepository;
     }
 
-    Repository createNewRepository(String repositoryFullPath){
-        Repository newRepository = new Repository(repositoryFullPath);
-        repositories.put(repositoryFullPath, newRepository);
-        return newRepository;
+    void createNewRepository(String repositoryFullPath){
+        Settings.setNewRepository(repositoryFullPath);
+
+        File objectsPath = new File(Settings.objectsFolderPath);
+        if(!objectsPath.exists())
+            objectsPath.mkdirs();
+
+        File branchesPath = new File(Settings.branchFolderPath);
+        if(!branchesPath.exists())
+            branchesPath.mkdirs();
+
+        Repository repo = new Repository(repositoryFullPath);
+        activeRepository = repo;
     }
 
     void switchActiveRepository(String fullPath){
@@ -25,27 +33,12 @@ class RepositoryManager {
         }
 
         Settings.setNewRepository(fullPath);
-
-        Repository rep = repositories.get(fullPath);
-        if (rep != null){
-            activeRepository = rep;
-            return;
-        }
-
-        activeRepository = createNewRepository(fullPath);
+        activeRepository = Repository.load(fullPath);
     }
 
     private boolean verifyRepoPath(String fullPath) {
         File directory = new File(fullPath + "\\.magit");
         return directory.exists();
-    }
-
-    public boolean haveOpenChanges(){
-        return activeRepository.haveOpenChanges();
-    }
-
-    public boolean validBranchName(String branchName){
-        return activeRepository.validBranchName(branchName);
     }
 
 

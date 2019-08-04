@@ -1,19 +1,32 @@
 import org.apache.commons.codec.digest.DigestUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 
 public class Blob extends Item {
+    final private String typeItem = "File";
 
     private String path;
 
     Blob(String path, String name){
-        typeItem = "File";
         fullPath = path;
         this.name = name;
         this.path = fullPath.substring(0, fullPath.lastIndexOf("/") +1);
+    }
+
+    Blob(File itemPath, String sha1, String lastUser, String lastModified ){
+        this.fullPath = itemPath.getPath();
+        this.name = itemPath.getName();
+        this.currentSHA1 = sha1;
+        this.userLastModified = lastUser;
+        this.lastModified = lastModified;
+
+        Utils.unzip(Settings.objectsFolderPath + this.currentSHA1 + ".zip",
+                itemPath.getParent(), this.name );
+
     }
 
     @Override
@@ -33,4 +46,8 @@ public class Blob extends Item {
             e.printStackTrace();
         }
     }
+
+    String getTypeItem(){ return this.typeItem; }
+
+
 }
