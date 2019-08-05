@@ -23,10 +23,6 @@ public class Blob extends Item {
         this.currentSHA1 = sha1;
         this.userLastModified = lastUser;
         this.lastModified = lastModified;
-
-        Utils.unzip(Settings.objectsFolderPath + this.currentSHA1 + ".zip",
-                itemPath.getParent(), this.name );
-
     }
 
     @Override
