@@ -1,6 +1,4 @@
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 class RepositoryManager {
 
@@ -12,7 +10,7 @@ class RepositoryManager {
         return activeRepository;
     }
 
-    void createNewRepository(String repositoryFullPath){
+    void createNewRepository(String repositoryFullPath, String name){
         Settings.setNewRepository(repositoryFullPath);
 
         File objectsPath = new File(Settings.objectsFolderPath);
@@ -23,7 +21,7 @@ class RepositoryManager {
         if(!branchesPath.exists())
             branchesPath.mkdirs();
 
-        Repository repo = new Repository(repositoryFullPath);
+        Repository repo = new Repository(repositoryFullPath, name);
         activeRepository = repo;
     }
 

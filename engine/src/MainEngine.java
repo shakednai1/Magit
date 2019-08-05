@@ -76,8 +76,8 @@ public class MainEngine {
         return repositoryManager.getActiveRepository().getActiveBranch().getCommitHistory();
     }
 
-    public String getCurrentRepoLocation() {
-        return repositoryManager.getActiveRepository().getFullPath();
+    public String getCurrentRepoName() {
+        return repositoryManager.getActiveRepository().getName();
     }
 
     public String isXmlValid(String xmlPath){
@@ -90,8 +90,8 @@ public class MainEngine {
         }
     }
 
-    public void createNewRepository(String newRepositoryPath){
-        repositoryManager.createNewRepository(newRepositoryPath);
+    public void createNewRepository(String newRepositoryPath, String name){
+        repositoryManager.createNewRepository(newRepositoryPath, name);
     }
 
 }

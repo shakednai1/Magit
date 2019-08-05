@@ -9,12 +9,15 @@ public class Settings {
 
     final static String activeBranchFileName = "HEAD";
     final private static String activeBranchFile = branchFolder + activeBranchFileName;
+    final private static String repositoryDetailsFile = magitFolder + "/repo";
+
     final static String delimiter = ",";
 
     static String repositoryFullPath = "";
     static String objectsFolderPath = "";
     static String branchFolderPath = "";
     static String activeBranchFilePath = "";
+    static String repositoryDetailsFilePath = "";
 
     final static String gitFolder = ".magit";
 
@@ -23,6 +26,7 @@ public class Settings {
         objectsFolderPath = repositoryFullPath+objectsFolder;
         branchFolderPath = repositoryFullPath + branchFolder;
         activeBranchFilePath = repositoryFullPath + activeBranchFile;
+        repositoryDetailsFilePath = repositoryFullPath + repositoryDetailsFile;
     }
 
     static String getUser(){return currentUser;}
