@@ -48,7 +48,7 @@ class Branch {
         this.head = commitData.get(headCommitSha1);
         this.startCommit = commitData.get(startCommitSha1);
 
-        clearCurrentWC();
+        Utils.clearCurrentWC();
         File  rootFolderPath = new File(Settings.repositoryFullPath);
         rootFolder = new Folder(rootFolderPath,
                 this.head.getRootFolderSHA1(), head.getUserLastModified(),
@@ -110,6 +110,11 @@ class Branch {
         return false;
     }
 
+    void commit(String msg, String user, String time, Commit commit){
+        rootFolder.commit(user, time);
+        commit.zipCommit();
+    }
+
     private void updateChangedFilesState(){ // TODO better name for function
         newStateOfFiles.clear();
         newStateOfFiles = rootFolder.getCurrentItemsState();
@@ -150,34 +155,7 @@ class Branch {
 //    }
 //
 
-    private void clearCurrentWC() {
-        File directory = new File(Settings.repositoryFullPath);
-        File[] listOfItems = directory.listFiles();
-        for(File item: listOfItems){
-            if(item.isDirectory()){
-                if(!item.getName().equals(Settings.gitFolder)){
-                    deleteSubFilesRec(item);
-                }
-            }
-            else{
-                Utils.deleteFile(item.getPath());
-            }
-        }
-    }
 
-    private void deleteSubFilesRec(File folder) {
-        File directory = new File(folder.getPath());
-        File[] listOfItems = directory.listFiles();
-        for (File item : listOfItems) {
-            if (item.isDirectory()) {
-                deleteSubFilesRec(item);
-            }
-            else{
-                Utils.deleteFile(item.getPath());
-            }
-        }
-        Utils.deleteFile(folder.getPath());
-    }
 
     Map<String ,List<String>> getWorkingCopy(){
         rootFolder.updateState();

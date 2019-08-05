@@ -60,7 +60,9 @@ public class Folder extends Item {
 
     public void setSubItems(Map<String, Blob> subFiles, Map<String, Folder> subFolders){
         this.subFiles = subFiles;
+        this.curSubFiles = subFiles;
         this.subFolders = subFolders;
+        this.curSubFolders = subFolders;
     }
 
     boolean commit(String commitUser, String commitTime){

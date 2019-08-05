@@ -4,8 +4,8 @@ public class Settings {
 
 
     final private static String magitFolder = "/.magit";
-    final private static String objectsFolder = magitFolder + "/.objects/";
-    final private static String branchFolder = magitFolder + "/.branches/";
+    final private static String objectsFolder = magitFolder + "/objects/";
+    final private static String branchFolder = magitFolder + "/branches/";
 
     final static String activeBranchFileName = "HEAD";
     final private static String activeBranchFile = branchFolder + activeBranchFileName;
