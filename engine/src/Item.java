@@ -41,4 +41,8 @@ abstract public class Item {
                 userLastModified + Settings.delimiter +
                 lastModified;
     }
+
+    public String getCurrentSHA1(){
+        return currentSHA1;
+    }
 }

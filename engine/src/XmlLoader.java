@@ -1,3 +1,4 @@
+import javax.rmi.CORBA.Util;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -54,6 +55,56 @@ public class XmlLoader {
         checkBranchPointers();
         checkHeadPointer();
     }
+
+    public void loadRepo(){
+        // TODO change this method
+        RepositoryManager repositoryManager = new RepositoryManager();
+        repositoryManager.createNewRepository(magitRepository.getLocation());
+        for(MagitSingleBranch magitBranch : magitBranches.getMagitSingleBranch()) {
+            MagitSingleCommit magitCommit = commitMap.get(magitBranch.getPointedCommit().getId());
+            MagitSingleFolder magitRootFolder = folderMap.get(magitCommit.getRootFolder().getId());
+            Folder rootFolder = createFilesTree(magitRootFolder, magitRepository.getLocation());
+            Commit commit = new Commit(magitCommit.getMessage(), rootFolder.getCurrentSHA1(), magitCommit.getAuthor(),
+                    magitCommit.getDateOfCreation(), ""); // TODO get the previous commit
+            Branch branch = new Branch(magitBranch.getName(), commit, rootFolder);
+            branch.commit(magitCommit.getMessage(), true);
+        }
+    }
+
+    private Folder createFilesTree(MagitSingleFolder magitRootFolder, String path){
+        List<Item> items = magitRootFolder.getItems().getItem();
+        Map<String, Blob> subBlobs = new HashMap<>();
+        Map<String, Folder> subFolders = new HashMap<>();
+
+        Folder rootFolder = new Folder(path, magitRootFolder.getName(), magitRootFolder.getLastUpdater(),
+                magitRootFolder.getLastUpdateDate());
+        File directory = new File(path);
+        directory.mkdir();
+
+        for( Item item : items){
+            String itemId = item.getId();
+            switch (item.getType()){
+                case "blob":
+                    MagitBlob magitBlob = blobMap.get(itemId);
+                    Blob blob = new Blob(path, magitBlob.getName(), magitBlob.getContent(),
+                            magitBlob.getLastUpdater(), magitBlob.getLastUpdateDate());
+                    Utils.createNewFile(path + "/" + magitBlob.getName(), magitBlob.getContent());
+                    subBlobs.put(blob.getCurrentSHA1(), blob);
+                    break;
+                case "folder":
+                    MagitSingleFolder magitFolder = folderMap.get(itemId);
+                    String folderPath = path +  "/" + magitFolder.getName();
+                    Folder newFolder = createFilesTree(magitFolder, folderPath);
+                    subFolders.put(newFolder.getCurrentSHA1(), newFolder);
+                    break;
+            }
+        }
+        rootFolder.setSubItems(subBlobs, subFolders);
+        return rootFolder;
+    }
+
+
+
 
     private void checkMagitBlolb() throws XmlException {
         Set<String> ids = new HashSet<>();

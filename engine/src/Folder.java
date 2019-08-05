@@ -50,6 +50,18 @@ public class Folder extends Item {
         }
     }
 
+    Folder(String path, String name,  String lastUser, String lastModified) {
+        fullPath = path;
+        this.name = name;
+        this.lastModified = lastModified;
+        this.userLastModified = lastUser;
+    }
+
+
+    public void setSubItems(Map<String, Blob> subFiles, Map<String, Folder> subFolders){
+        this.subFiles = subFiles;
+        this.subFolders = subFolders;
+    }
 
     boolean commit(String commitUser, String commitTime){
         // function assume the items are up-to-date

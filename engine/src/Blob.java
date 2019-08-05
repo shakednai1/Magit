@@ -29,6 +29,14 @@ public class Blob extends Item {
 
     }
 
+    Blob(String Path, String name, String content, String lastUser, String lastModified){
+        this.fullPath = Path;
+        this.name = name;
+        this.currentSHA1 = DigestUtils.sha1Hex(content);
+        this.userLastModified = lastUser;
+        this.lastModified = lastModified;
+    }
+
     @Override
     public void zipAndCopy(){
         updateState();
