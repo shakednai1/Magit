@@ -84,14 +84,16 @@ public class MainEngine {
         XmlLoader xmlLoader = new XmlLoader(xmlPath);
         try {
             xmlLoader.checkValidXml();
+            xmlLoader.loadRepo();
             return null;
         } catch (XmlException e) {
             return e.message;
         }
     }
 
+
     public void createNewRepository(String newRepositoryPath, String name){
-        repositoryManager.createNewRepository(newRepositoryPath, name);
+        repositoryManager.createNewRepository(newRepositoryPath, name, false);
     }
 
 }

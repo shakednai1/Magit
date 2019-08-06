@@ -10,7 +10,7 @@ class RepositoryManager {
         return activeRepository;
     }
 
-    void createNewRepository(String repositoryFullPath, String name){
+    void createNewRepository(String repositoryFullPath, String name, boolean empty){
         Settings.setNewRepository(repositoryFullPath);
 
         File objectsPath = new File(Settings.objectsFolderPath);
@@ -21,7 +21,7 @@ class RepositoryManager {
         if(!branchesPath.exists())
             branchesPath.mkdirs();
 
-        Repository repo = new Repository(repositoryFullPath, name);
+        Repository repo = new Repository(repositoryFullPath, name, empty);
         activeRepository = repo;
     }
 

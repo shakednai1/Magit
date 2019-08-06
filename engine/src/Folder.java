@@ -50,6 +50,21 @@ public class Folder extends Item {
         }
     }
 
+    Folder(String path, String name,  String lastUser, String lastModified) {
+        fullPath = path;
+        this.name = name;
+        this.lastModified = lastModified;
+        this.userLastModified = lastUser;
+    }
+
+
+    public void setSubItems(Map<String, Blob> subFiles, Map<String, Folder> subFolders){
+        this.subFiles = subFiles;
+        this.curSubFiles = subFiles;
+        this.subFolders = subFolders;
+        this.curSubFolders = subFolders;
+
+    }
 
     boolean commit(String commitUser, String commitTime){
         // function assume the items are up-to-date
@@ -84,9 +99,20 @@ public class Folder extends Item {
         return subItemsChanged;
     }
 
-    private void setSHA1(){
+    public void setSHA1(){
         String sha1Str = getStringToCalcSHA1();
         currentSHA1 = DigestUtils.sha1Hex(sha1Str) ;
+    }
+
+    public void zipRec(){
+        for (Blob blob: subFiles.values()){
+            blob.zipAndCopy();
+        }
+
+        for(Folder folder: subFolders.values()){
+            folder.zipRec();
+        }
+        zipAndCopy();
     }
 
     @Override
