@@ -39,7 +39,7 @@ class Branch {
         currentStateOfFiles = rootFolder.getCommittedItemsState();
     }
 
-    private Branch(String name, String headCommitSha1, String startCommitSha1){
+    private Branch(String name, String headCommitSha1, String startCommitSha1, boolean rewriteFS){
         // constractor for loading an existing branch
         this.name = name;
 
@@ -50,7 +50,8 @@ class Branch {
         File  rootFolderPath = new File(Settings.repositoryFullPath);
         rootFolder = new Folder(rootFolderPath,
                 this.head.getRootFolderSHA1(), head.getUserLastModified(),
-                head.getCommitTime());
+                head.getCommitTime(),
+                rewriteFS);
 
         currentStateOfFiles = rootFolder.getCommittedItemsState();
     }
@@ -72,7 +73,7 @@ class Branch {
 
     Folder getRootFolder(){ return rootFolder; }
 
-    static Branch load(String branchName){
+    static Branch load(String branchName, boolean rewriteWC){
         // TODO deprecate load function and build constractor that knows how to handle only branch name
 
         List<String> branchData = Utils.getFileLines(getBranchFilePath(branchName));
@@ -81,7 +82,7 @@ class Branch {
         String headCommitSha1 = branchCommits[0];
         String startCommitSha1 = branchCommits[1];
 
-        return new Branch(branchName, headCommitSha1, startCommitSha1);
+        return new Branch(branchName, headCommitSha1, startCommitSha1, rewriteWC);
     }
 
     boolean haveChanges(){

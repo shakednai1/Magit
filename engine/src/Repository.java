@@ -17,6 +17,9 @@ class Repository {
     Repository(String fullPath, String name, boolean empty) {
         this.fullPath = fullPath;
         this.name = name;
+
+        saveRepositoryDetails();
+
         if (!empty) {
             try {
                 createNewBranch("master", true);
@@ -54,7 +57,7 @@ class Repository {
         List<String> contentByLines = Utils.getFileLines(Settings.activeBranchFilePath);
         String activeBranchName = contentByLines.get(0);
 
-        Branch activeBranch = Branch.load(activeBranchName);
+        Branch activeBranch = Branch.load(activeBranchName, false);
         return new Repository(Settings.repositoryFullPath, activeBranch);
     }
 
@@ -110,7 +113,10 @@ class Repository {
         if(activeBranch.haveChanges() && !force)
             throw new UncommittedChangesError("UncommittedChangesError");
 
-        setActiveBranch(Branch.load(name));
+        Utils.clearCurrentWC();
+
+        Branch checkedoutBranch = Branch.load(name, true);
+        setActiveBranch(checkedoutBranch);
     }
 
     void deleteBranch(String branchName) throws InvalidBranchNameError{

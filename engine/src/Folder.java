@@ -19,7 +19,7 @@ public class Folder extends Item {
         this.name = name;
     }
 
-    Folder(File folderPath, String folderSha1, String lastUser, String lastModified ){
+    Folder(File folderPath, String folderSha1, String lastUser, String lastModified , boolean rewriteFS){
          this.name = folderPath.getName();
          this.fullPath = folderPath.getPath();
          this.userLastModified = lastUser;
@@ -41,11 +41,11 @@ public class Folder extends Item {
             String itemLastModified = item[4];
 
             if (itemType.equals("File")){
-                subFiles.put(itemFullPath, new Blob(new File(itemFullPath), itemSha1, itemLastUser, itemLastModified));
+                subFiles.put(itemFullPath, new Blob(new File(itemFullPath), itemSha1, itemLastUser, itemLastModified, rewriteFS));
             }
             else{
                 subFolders.put(itemFullPath, new Folder(new File(this.fullPath +"/"+ itemName),
-                        itemSha1, itemLastUser, itemLastModified));
+                        itemSha1, itemLastUser, itemLastModified, rewriteFS));
             }
         }
     }

@@ -17,12 +17,17 @@ public class Blob extends Item {
         this.path = fullPath.substring(0, fullPath.lastIndexOf("/") +1);
     }
 
-    Blob(File itemPath, String sha1, String lastUser, String lastModified ){
+    Blob(File itemPath, String sha1, String lastUser, String lastModified, boolean rewriteFS){
         this.fullPath = itemPath.getPath();
         this.name = itemPath.getName();
         this.currentSHA1 = sha1;
         this.userLastModified = lastUser;
         this.lastModified = lastModified;
+
+        if (rewriteFS)
+            Utils.unzip(Settings.objectsFolderPath + this.currentSHA1 + ".zip",
+                    itemPath.getParent(), this.name );
+
     }
 
     Blob(String Path, String name, String content, String lastUser, String lastModified){
