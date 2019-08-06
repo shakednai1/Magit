@@ -6,6 +6,8 @@ import java.io.File;
 import java.util.*;
 
 import com.sun.javaws.exceptions.InvalidArgumentException;
+import exceptions.InvalidBranchNameError;
+import exceptions.UncommittedChangesError;
 import fromXml.*;
 import fromXml.Item;
 
@@ -63,6 +65,13 @@ public class XmlLoader {
                 openCommitRec(magitSingleCommit, null);
                 break;
             }
+        }
+        try {
+            repositoryManager.getActiveRepository().checkoutBranch(magitBranches.getHead(), true);
+        } catch (UncommittedChangesError uncommittedChangesError) {
+            uncommittedChangesError.printStackTrace();
+        } catch (InvalidBranchNameError invalidBranchNameError) {
+            invalidBranchNameError.printStackTrace();
         }
     }
 
