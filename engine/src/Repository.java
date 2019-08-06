@@ -14,12 +14,14 @@ class Repository {
     private List<String> branches = new LinkedList<>();
 
 
-    Repository(String fullPath){
+    Repository(String fullPath, boolean empty){
         this.fullPath = fullPath;
-        try{
-            createNewBranch("master", true);
+        if (!empty){
+            try{
+                createNewBranch("master", true);
+            }
+            catch (UncommittedChangesError | InvalidBranchNameError e){ /* cant be ?*/ }
         }
-        catch (UncommittedChangesError | InvalidBranchNameError e){ /* cant be ?*/ }
     }
 
     private Repository(String fullPath, Branch activeBranch){
@@ -89,7 +91,7 @@ class Repository {
         }
     }
 
-    private void setActiveBranch(Branch branch){
+    public void setActiveBranch(Branch branch){
         activeBranch = branch;
         saveRepositoryActiveBranch();
     }
@@ -124,5 +126,9 @@ class Repository {
 
     boolean validBranchName(String branchName) {
         return branches.stream().anyMatch(name -> name.equals(branchName));
+    }
+
+    public void addNewBranch(Branch branch){
+        branches.add(branch.getName());
     }
 }

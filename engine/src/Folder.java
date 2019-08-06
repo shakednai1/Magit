@@ -63,6 +63,7 @@ public class Folder extends Item {
         this.curSubFiles = subFiles;
         this.subFolders = subFolders;
         this.curSubFolders = subFolders;
+
     }
 
     boolean commit(String commitUser, String commitTime){
@@ -98,9 +99,20 @@ public class Folder extends Item {
         return subItemsChanged;
     }
 
-    private void setSHA1(){
+    public void setSHA1(){
         String sha1Str = getStringToCalcSHA1();
         currentSHA1 = (!sha1Str.equals("") ? DigestUtils.sha1Hex(sha1Str) : null) ;
+    }
+
+    public void zipRec(){
+        for (Blob blob: subFiles.values()){
+            blob.zipAndCopy();
+        }
+
+        for(Folder folder: subFolders.values()){
+            folder.zipRec();
+        }
+        zipAndCopy();
     }
 
     @Override

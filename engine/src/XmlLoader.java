@@ -21,6 +21,8 @@ public class XmlLoader {
     private Map<String, MagitSingleFolder> folderMap = new HashMap<>();
     private Map<String, MagitSingleCommit> commitMap = new HashMap<>();
 
+    RepositoryManager repositoryManager = new RepositoryManager();
+
     private String repositoryPath;
 
 
@@ -39,10 +41,6 @@ public class XmlLoader {
             e.printStackTrace();
             // TODO - verify if the file is not exist or not .xml file - this exception is thrown
         }
-//        MAGIT_DIR_PATH = this._path.concat("/.magit");
-//        OBJECTS_DIR_PATH = MAGIT_DIR_PATH.concat("/Objects");
-//        BRANCHES_DIR_PATH = MAGIT_DIR_PATH.concat("/Branches");
-//        HEAD_PATH = BRANCHES_DIR_PATH.concat("/HEAD");
     }
 
 
@@ -57,49 +55,46 @@ public class XmlLoader {
     }
 
     public void loadRepo(){
-        RepositoryManager repositoryManager = new RepositoryManager();
-        repositoryManager.createNewRepository(magitRepository.getLocation());
-        // TODO verify
-        MagitSingleCommit commit = null;
-        for(MagitSingleBranch magitSingleBranch: magitBranches.getMagitSingleBranch()){
-            if (magitBranches.getHead().equals(magitSingleBranch.getName())){
-                commit = commitMap.get(magitSingleBranch.getPointedCommit().getId());
+        //create empty repository
+        repositoryManager.createNewRepository(magitRepository.getLocation(), true);
+        // search for the first commit and create it
+        for(MagitSingleCommit magitSingleCommit: magitCommits.getMagitSingleCommit()){
+            if (magitSingleCommit.getPrecedingCommits() == null){
+                openCommitRec(magitSingleCommit, null);
                 break;
             }
         }
-        openCommitRec(commit);
-        // TODO connect bracnh to commits + open the head branch on file system
     }
 
-    public String openCommitRec(MagitSingleCommit commit){
-        List<PrecedingCommits.PrecedingCommit> precedingCommits =
-                commitMap.get(commit.getId()).getPrecedingCommits().getPrecedingCommit();
-        Commit commitObj = null;
-        for(PrecedingCommits.PrecedingCommit precedingCommit : precedingCommits){
-            MagitSingleCommit magitCommit = commitMap.get(precedingCommit.getId());
-             if(!magitCommit.getPrecedingCommits().getPrecedingCommit().isEmpty()){
-                String prevSha1 = openCommitRec(magitCommit);
-                commitObj = openCommit(magitCommit.getId(), prevSha1);
-             }
-             else{
-                 commitObj = openCommit(magitCommit.getId(), null);
+    public void openCommitRec(MagitSingleCommit commit, String prevCommitSha1){
+        // open my commit and than
+        // search for the commits that the prev commit its me and open them
+        Commit commitObj = openCommit(commit.getId(), prevCommitSha1);
+        for (MagitSingleCommit magitSingleCommit: magitCommits.getMagitSingleCommit()){
+            if(magitSingleCommit.getPrecedingCommits() != null) {
+                for(PrecedingCommits.PrecedingCommit precedingCommit: magitSingleCommit.getPrecedingCommits().getPrecedingCommit()){
+                    if(commit.getId().equals(precedingCommit.getId())){
+                        openCommitRec(magitSingleCommit, commitObj.getCommitSHA1());
+                    }
+                }
              }
         }
-        return commitObj.getCommitSHA1();
     }
 
     public Commit openCommit(String commitID, String prevCommit){
         MagitSingleCommit magitCommit = commitMap.get(commitID);
         MagitSingleFolder magitRootFolder = folderMap.get(magitCommit.getRootFolder().getId());
-        String path = Settings.repositoryFullPath + "/" + magitRootFolder.getName();
-        Folder rootFolder = createFilesTree(magitRootFolder, path);
+        Folder rootFolder = createFilesTree(magitRootFolder, Settings.repositoryFullPath);
         Commit commit = new Commit(magitCommit.getMessage(), rootFolder.getCurrentSHA1(), magitCommit.getAuthor(),
-                magitCommit.getDateOfCreation(), prevCommit); // TODO get the previous commit
+                magitCommit.getDateOfCreation(), prevCommit);
         for(MagitSingleBranch magitBranch : magitBranches.getMagitSingleBranch()){
             if (magitBranch.getPointedCommit().getId().equals(magitCommit.getId())){
                 Branch branch = new Branch(magitBranch.getName(), commit, rootFolder);
-                branch.commit(magitCommit.getMessage(), magitCommit.getAuthor(), magitCommit.getDateOfCreation(),
-                        commit);
+                repositoryManager.getActiveRepository().addNewBranch(branch);
+                if (magitBranches.getHead().equals(magitBranch.getName())) {
+                    repositoryManager.getActiveRepository().setActiveBranch(branch);
+                }
+                branch.commit(commit);
             }
         }
         Utils.clearCurrentWC();
@@ -121,7 +116,7 @@ public class XmlLoader {
             switch (item.getType()){
                 case "blob":
                     MagitBlob magitBlob = blobMap.get(itemId);
-                    Blob blob = new Blob(path, magitBlob.getName(), magitBlob.getContent(),
+                    Blob blob = new Blob(path + "/" + magitBlob.getName(), magitBlob.getName(), magitBlob.getContent(),
                             magitBlob.getLastUpdater(), magitBlob.getLastUpdateDate());
                     Utils.createNewFile(path + "/" + magitBlob.getName(), magitBlob.getContent());
                     subBlobs.put(blob.getCurrentSHA1(), blob);
@@ -135,11 +130,9 @@ public class XmlLoader {
             }
         }
         rootFolder.setSubItems(subBlobs, subFolders);
+        rootFolder.setSHA1();
         return rootFolder;
     }
-
-
-
 
     private void checkMagitBlolb() throws XmlException {
         Set<String> ids = new HashSet<>();
@@ -237,7 +230,5 @@ public class XmlLoader {
             throw new XmlException("Head: " + head + " is not an existing branch");
         }
     }
-
-
 
 }

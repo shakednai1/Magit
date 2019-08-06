@@ -110,8 +110,8 @@ class Branch {
         return false;
     }
 
-    void commit(String msg, String user, String time, Commit commit){
-        rootFolder.commit(user, time);
+    void commit(Commit commit){
+        rootFolder.zipRec();
         commit.zipCommit();
     }
 
