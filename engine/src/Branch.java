@@ -41,14 +41,12 @@ class Branch {
 
     private Branch(String name, String headCommitSha1, String startCommitSha1){
         // constractor for loading an existing branch
-
         this.name = name;
 
         commitData = Commit.loadAll(startCommitSha1, headCommitSha1);
         this.head = commitData.get(headCommitSha1);
         this.startCommit = commitData.get(startCommitSha1);
 
-        Utils.clearCurrentWC();
         File  rootFolderPath = new File(Settings.repositoryFullPath);
         rootFolder = new Folder(rootFolderPath,
                 this.head.getRootFolderSHA1(), head.getUserLastModified(),

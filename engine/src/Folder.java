@@ -101,7 +101,7 @@ public class Folder extends Item {
 
     public void setSHA1(){
         String sha1Str = getStringToCalcSHA1();
-        currentSHA1 = (!sha1Str.equals("") ? DigestUtils.sha1Hex(sha1Str) : null) ;
+        currentSHA1 = DigestUtils.sha1Hex(sha1Str) ;
     }
 
     public void zipRec(){

@@ -71,7 +71,7 @@ public class UI {
         System.out.println();
         System.out.println("Magit Menu");
         System.out.println("Current logged in user: " + engine.getUser());
-        System.out.println("Current repository location: " + engine.getCurrentRepoLocation());
+        System.out.println("Current repository location: " + engine.getCurrentRepoName());
         System.out.println("1. Change user name");
         System.out.println("2. Load from XML");
         System.out.println("3. Switch repository");
@@ -251,7 +251,12 @@ public class UI {
 
     private static void createNewRepository(Scanner input){
         System.out.println("Please provide full path of the new repository");
-        engine.createNewRepository(input.next());
+        String repoPath = input.next();
+
+        System.out.println("Please provide new repository name");
+        String repoName = input.next();
+
+        engine.createNewRepository(repoPath, repoName);
     }
 
 }

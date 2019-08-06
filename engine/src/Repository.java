@@ -2,38 +2,45 @@ import exceptions.InvalidBranchNameError;
 import exceptions.UncommittedChangesError;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 class Repository {
 
+    private String name;
     private String fullPath;
     private Branch activeBranch;
     private List<String> branches = new LinkedList<>();
 
 
-    Repository(String fullPath, boolean empty){
+    Repository(String fullPath, String name, boolean empty) {
         this.fullPath = fullPath;
-        if (!empty){
-            try{
+        this.name = name;
+        if (!empty) {
+            try {
                 createNewBranch("master", true);
-            }
-            catch (UncommittedChangesError | InvalidBranchNameError e){ /* cant be ?*/ }
+            } catch (UncommittedChangesError | InvalidBranchNameError e) { /* cant be ?*/ }
         }
     }
 
     private Repository(String fullPath, Branch activeBranch){
         this.fullPath = fullPath;
+        this.name = loadRepositoryName();
+
         loadBranchesData();
 
         this.activeBranch = activeBranch;
         saveRepositoryActiveBranch();
+    }
 
+    private String loadRepositoryName(){
+        List<String> repoDetails = Utils.getFileLines(Settings.repositoryDetailsFilePath);
+        return repoDetails.get(0);
     }
 
     String getFullPath(){ return fullPath; }
+    String getName(){ return name; }
 
     Branch getActiveBranch(){ return activeBranch; }
 
@@ -119,6 +126,10 @@ class Repository {
     }
 
     boolean haveOpenChanges(){ return activeBranch.haveChanges();}
+
+    private void saveRepositoryDetails(){
+        Utils.writeFile(Settings.repositoryDetailsFilePath, name, false);
+    }
 
     private void saveRepositoryActiveBranch(){
         Utils.writeFile(Settings.activeBranchFilePath, activeBranch.getName(), false);

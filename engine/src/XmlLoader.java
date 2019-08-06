@@ -56,7 +56,7 @@ public class XmlLoader {
 
     public void loadRepo(){
         //create empty repository
-        repositoryManager.createNewRepository(magitRepository.getLocation(), true);
+        repositoryManager.createNewRepository(magitRepository.getLocation(), magitRepository.getName(), true);
         // search for the first commit and create it
         for(MagitSingleCommit magitSingleCommit: magitCommits.getMagitSingleCommit()){
             if (magitSingleCommit.getPrecedingCommits() == null){
