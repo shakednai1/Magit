@@ -61,7 +61,7 @@ public class XmlLoader {
         repositoryManager.createNewRepository(repositoryPath, magitRepository.getName(), true);
         // search for the first commit and create it
         for (MagitSingleCommit magitSingleCommit : magitCommits.getMagitSingleCommit()) {
-            if (magitSingleCommit.getPrecedingCommits() == null) {
+            if (magitSingleCommit.getPrecedingCommits().getPrecedingCommit().isEmpty()) {
                 openCommitRec(magitSingleCommit, null);
                 break;
             }
@@ -75,7 +75,7 @@ public class XmlLoader {
         // search for the commits that the prev commit its me and open them
         Commit commitObj = openCommit(commit.getId(), prevCommitSha1);
         for (MagitSingleCommit magitSingleCommit: magitCommits.getMagitSingleCommit()){
-            if(magitSingleCommit.getPrecedingCommits() != null) {
+            if(!magitSingleCommit.getPrecedingCommits().getPrecedingCommit().isEmpty()) {
                 for(PrecedingCommits.PrecedingCommit precedingCommit: magitSingleCommit.getPrecedingCommits().getPrecedingCommit()){
                     if(commit.getId().equals(precedingCommit.getId())){
                         openCommitRec(magitSingleCommit, commitObj.getCommitSHA1());
@@ -86,6 +86,7 @@ public class XmlLoader {
     }
 
     public Commit openCommit(String commitID, String prevCommit){
+        boolean isPointedBranch = false;
         MagitSingleCommit magitCommit = commitMap.get(commitID);
         MagitSingleFolder magitRootFolder = folderMap.get(magitCommit.getRootFolder().getId());
         Folder rootFolder = createFilesTree(magitRootFolder, Settings.repositoryFullPath);
@@ -93,12 +94,17 @@ public class XmlLoader {
                 magitCommit.getDateOfCreation(), prevCommit);
         for(MagitSingleBranch magitBranch : magitBranches.getMagitSingleBranch()){
             if (magitBranch.getPointedCommit().getId().equals(magitCommit.getId())){
+                isPointedBranch = true;
                 Branch branch = new Branch(magitBranch.getName(), commit, rootFolder);
                 repositoryManager.getActiveRepository().addNewBranch(branch);
                 if (magitBranches.getHead().equals(magitBranch.getName())) {
                     repositoryManager.getActiveRepository().setActiveBranch(branch);
                 }
                 branch.commit(commit);
+            }
+            if(!isPointedBranch){
+                rootFolder.zipRec();
+                commit.zipCommit();
             }
         }
         Utils.clearCurrentWC();

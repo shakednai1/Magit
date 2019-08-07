@@ -65,7 +65,7 @@ class Commit {
         String commitStr =  rootSha1 + Settings.delimiter +
                 msg + Settings.delimiter +
                 commitTime + Settings.delimiter +
-                Settings.getUser()+ Settings.delimiter;
+                userLastModified + Settings.delimiter;
 
         commitStr = commitStr + ((previousCommitSHA1 == null)? "null": previousCommitSHA1);
 
@@ -79,14 +79,17 @@ class Commit {
         Utils.deleteFile(fileNameWOExtension + ".txt");
     }
 
-    static Map<String, Commit> loadAll(String startCommitSha1, String endCommitSha1){
+    static Map<String, Commit> loadAll(String endCommitSha1){
         Map<String, Commit> commitMap = new HashMap<>();
 
         String currCommitSha1 = endCommitSha1;
         commitMap.put(currCommitSha1, new Commit(currCommitSha1));
 
-        while (!currCommitSha1.equals(startCommitSha1)){
+        while (true){
             currCommitSha1 = commitMap.get(currCommitSha1).getPreviousCommitSHA1();
+            if(currCommitSha1.equals("null")){
+                break;
+            }
             commitMap.put(currCommitSha1, new Commit(currCommitSha1));
         }
 
