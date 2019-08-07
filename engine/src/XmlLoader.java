@@ -18,14 +18,14 @@ public class XmlLoader {
     private MagitBranches magitBranches;
     private MagitFolders magitFolders;
     private MagitCommits magitCommits;
+    private String repositoryPath;
 
     private Map<String, MagitBlob> blobMap = new HashMap<>();
     private Map<String, MagitSingleFolder> folderMap = new HashMap<>();
     private Map<String, MagitSingleCommit> commitMap = new HashMap<>();
 
-    RepositoryManager repositoryManager = new RepositoryManager();
+    RepositoryManager repositoryManager = MainEngine.getRepositoryManager();
 
-    private String repositoryPath;
 
 
     public XmlLoader(String XmlPath){
@@ -56,24 +56,19 @@ public class XmlLoader {
         checkHeadPointer();
     }
 
-    public void loadRepo(){
+    public void loadRepo() throws UncommittedChangesError, InvalidBranchNameError {
         //create empty repository
-        repositoryManager.createNewRepository(magitRepository.getLocation(), magitRepository.getName(), true);
+        repositoryManager.createNewRepository(repositoryPath, magitRepository.getName(), true);
         // search for the first commit and create it
-        for(MagitSingleCommit magitSingleCommit: magitCommits.getMagitSingleCommit()){
-            if (magitSingleCommit.getPrecedingCommits() == null){
+        for (MagitSingleCommit magitSingleCommit : magitCommits.getMagitSingleCommit()) {
+            if (magitSingleCommit.getPrecedingCommits() == null) {
                 openCommitRec(magitSingleCommit, null);
                 break;
             }
         }
-        try {
-            repositoryManager.getActiveRepository().checkoutBranch(magitBranches.getHead(), true);
-        } catch (UncommittedChangesError uncommittedChangesError) {
-            uncommittedChangesError.printStackTrace();
-        } catch (InvalidBranchNameError invalidBranchNameError) {
-            invalidBranchNameError.printStackTrace();
-        }
+        repositoryManager.getActiveRepository().checkoutBranch(magitBranches.getHead(), true);
     }
+
 
     public void openCommitRec(MagitSingleCommit commit, String prevCommitSha1){
         // open my commit and than

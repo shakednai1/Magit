@@ -10,7 +10,7 @@ class Repository {
 
     private String name;
     private String fullPath;
-    private Branch activeBranch;
+    private Branch activeBranch = null;
     private List<String> branches = new LinkedList<>();
 
 

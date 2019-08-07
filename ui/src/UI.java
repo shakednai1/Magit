@@ -1,4 +1,5 @@
 import exceptions.InvalidBranchNameError;
+import exceptions.NoActiveRepositoryError;
 import exceptions.UncommittedChangesError;
 
 import java.io.File;
@@ -71,7 +72,7 @@ public class UI {
         System.out.println();
         System.out.println("Magit Menu");
         System.out.println("Current logged in user: " + engine.getUser());
-        System.out.println("Current repository location: " + engine.getCurrentRepoName());
+        System.out.println("Current repository location: " + getCurrentRepoName());
         System.out.println("1. Change user name");
         System.out.println("2. Load from XML");
         System.out.println("3. Switch repository");
@@ -114,44 +115,55 @@ public class UI {
     }
 
     private static void printCommitState(){
-        List<String> res = engine.getCurrentCommitState();
-        for(String item : res){
-            System.out.println(item);
+        try{
+            List<String> res = engine.getCurrentCommitState();
+            for(String item : res){
+                System.out.println(item);
+            }
+            System.out.println();
         }
-        System.out.println();
+        catch (NoActiveRepositoryError  | UncommittedChangesError e){
+            System.out.println(e.getMessage());
+        }
     }
 
     private static void printWorkingCopyStatus(){
-        Map<String, List<String>> changes = engine.getWorkingCopyStatus();
-        List<String> updatedFiles = changes.get("update");
-        List<String> newFiles = changes.get("new");
-        List<String> deletedFiles = changes.get("delete");
+        try{
+            Map<String, List<String>> changes = engine.getWorkingCopyStatus();
+            List<String> updatedFiles = changes.get("update");
+            List<String> newFiles = changes.get("new");
+            List<String> deletedFiles = changes.get("delete");
 
-        System.out.println();
-        System.out.println("============================");
-        System.out.println("Updated Files: ");
-        System.out.println("============================");
-        for(String updatedFile : updatedFiles){
-            System.out.println(updatedFile);
+            System.out.println();
+            System.out.println("============================");
+            System.out.println("Updated Files: ");
+            System.out.println("============================");
+            for(String updatedFile : updatedFiles){
+                System.out.println(updatedFile);
+            }
+
+            System.out.println();
+            System.out.println("============================");
+            System.out.println("New Files: ");
+            System.out.println("============================");
+            for(String newFile : newFiles){
+                System.out.println(newFile);
+            }
+
+            System.out.println();
+            System.out.println("============================");
+            System.out.println("Deleted Files: ");
+            System.out.println("============================");
+            for(String deletedFile : deletedFiles){
+                System.out.println(deletedFile);
+            }
+            System.out.println();
+            System.out.println();
+        }
+        catch (NoActiveRepositoryError e){
+            System.out.println(e.getMessage());
         }
 
-        System.out.println();
-        System.out.println("============================");
-        System.out.println("New Files: ");
-        System.out.println("============================");
-        for(String newFile : newFiles){
-            System.out.println(newFile);
-        }
-
-        System.out.println();
-        System.out.println("============================");
-        System.out.println("Deleted Files: ");
-        System.out.println("============================");
-        for(String deletedFile : deletedFiles){
-            System.out.println(deletedFile);
-        }
-        System.out.println();
-        System.out.println();
     }
 
     private static void commit(Scanner input){
@@ -166,8 +178,13 @@ public class UI {
     }
 
     private static void printBranches(){
-        List<String> allBranchesNames = engine.getAllBranches();
-        allBranchesNames.forEach(System.out::println);
+        try {
+            List<String> allBranchesNames = engine.getAllBranches();
+            allBranchesNames.forEach(System.out::println);
+        }
+        catch (NoActiveRepositoryError e){
+            System.out.println(e.getMessage());
+        }
     }
 
     private static void createBranch(Scanner input){
@@ -188,6 +205,10 @@ public class UI {
             catch (UncommittedChangesError e){
                 System.out.println(" There are open changes. Did not checkout to "+ branchName);
             }
+            catch (NoActiveRepositoryError e){
+                System.out.println(e.getMessage());
+                break;
+            }
         }
     }
 
@@ -205,13 +226,22 @@ public class UI {
             catch (IllegalArgumentException e){
                 System.out.println("Given branch name is the head branch. Cannot delete head branch! ");
             }
+            catch (NoActiveRepositoryError e){
+                System.out.println(e.getMessage());
+                break;
+            }
         }
     }
 
     private static void printBranchHistory(){
-        List<String> activeBranchHistory = engine.getActiveBranchHistory();
-        for (String item: activeBranchHistory){
-            System.out.println(item);
+        try{
+            List<String> activeBranchHistory = engine.getActiveBranchHistory();
+            for (String item: activeBranchHistory){
+                System.out.println(item);
+            }
+        }
+        catch (NoActiveRepositoryError e){
+            System.out.println(e.getMessage());
         }
     }
 
@@ -237,6 +267,10 @@ public class UI {
                 String forceInput = input.next();
                 if (forceInput.equals("Y")) force = true;
             }
+            catch (NoActiveRepositoryError e){
+                System.out.println(e.getMessage());
+                break;
+            }
         }
     }
 
@@ -257,6 +291,17 @@ public class UI {
         String repoName = input.next();
 
         engine.createNewRepository(repoPath, repoName);
+    }
+
+    private static String getCurrentRepoName(){
+        String repoName = null;
+        try {
+            repoName = engine.getCurrentRepoName();
+        }
+        catch (NoActiveRepositoryError e){
+            return "";
+        }
+        return repoName;
     }
 
 }

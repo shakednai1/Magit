@@ -11,8 +11,7 @@ import java.util.*;
 
 class Branch {
 
-    private Commit startCommit;
-    private Commit head;
+    private Commit head = null;
     private String name;
     private Folder rootFolder;
 
@@ -45,7 +44,6 @@ class Branch {
 
         commitData = Commit.loadAll(startCommitSha1, headCommitSha1);
         this.head = commitData.get(headCommitSha1);
-        this.startCommit = commitData.get(startCommitSha1);
 
         File  rootFolderPath = new File(Settings.repositoryFullPath);
         rootFolder = new Folder(rootFolderPath,
@@ -121,14 +119,13 @@ class Branch {
 
     private void setHead(Commit newHead) {
         head = newHead;
-        if (startCommit == null) startCommit = head;
 
         addCommitToHistory(head);
         writeBranchInfoFile();
     }
 
     private void writeBranchInfoFile(){
-        String branchFileContent =  head.getCommitSHA1()+ Settings.delimiter + startCommit.getCommitSHA1();
+        String branchFileContent =  head.getCommitSHA1();
         Utils.writeFile(getBranchFilePath(name), branchFileContent, false);
     }
 
@@ -139,7 +136,7 @@ class Branch {
     List<String> getCommitHistory(){
         List<String> res = new LinkedList<>();
         Commit currentCommit = head;
-        while (currentCommit != startCommit){
+        while (currentCommit != null){
             res.add(currentCommit.toString());
             currentCommit = commitData.get(currentCommit.getPreviousCommitSHA1());
         }
