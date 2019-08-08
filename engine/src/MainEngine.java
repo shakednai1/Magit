@@ -25,7 +25,7 @@ public class MainEngine {
 
     public boolean commit(String msg){
         boolean force = false; // TODO add functionality for 'true' option
-        return repositoryManager.getActiveRepository().getActiveBranch().commit(msg, force);
+        return repositoryManager.getActiveRepository().commitActiveBranch(msg, force);
     }
 
     public String getUser(){
@@ -48,9 +48,8 @@ public class MainEngine {
 
     public List<String> getCurrentCommitState()
             throws NoActiveRepositoryError, UncommittedChangesError{
-        if(repositoryManager.getActiveRepository() == null){
-            throw new NoActiveRepositoryError("No active repository yet");
-        }
+        validateActiveRepository();
+
         if(repositoryManager.getActiveRepository().getActiveBranch().getHead() == null){
             throw new UncommittedChangesError("No active commit");
         }
@@ -59,22 +58,22 @@ public class MainEngine {
 
     public void createNewBranch(String name, boolean checkout)
             throws InvalidBranchNameError, UncommittedChangesError, NoActiveRepositoryError{
-        if(repositoryManager.getActiveRepository() == null){
-            throw new NoActiveRepositoryError("No active repository yet");
-        }
+        validateActiveRepository();
+
         repositoryManager.getActiveRepository().createNewBranch(name, checkout);
     }
 
     public List<String> getAllBranches() throws NoActiveRepositoryError{
-        if(repositoryManager.getActiveRepository() == null){
-            throw new NoActiveRepositoryError("No active repository yet");
-        }
-        List<String> allBranchesName = repositoryManager.getActiveRepository().getAllBranches();
+        validateActiveRepository();
+
+        List<Map<String, String>> allBranches = repositoryManager.getActiveRepository().getAllBranches();
         String headBranch = repositoryManager.getActiveRepository().getActiveBranch().getName();
         List<String> res = new ArrayList<>();
 
-        for(String branch: allBranchesName){
-            String branchDisplay = (branch.equals(headBranch))? "**HEAD** " + branch : branch;
+        for(Map<String , String > branch: allBranches){
+            String branchDisplay = branch.get("name") + ", "+ branch.get("headSha1") + ", "+ branch.get("headMsg");
+            if (branch.get("name").equals(headBranch))
+                branchDisplay = "**HEAD** " + branchDisplay;
             res.add(branchDisplay);
         }
 
@@ -82,30 +81,28 @@ public class MainEngine {
     }
 
     public void deleteBranch(String name) throws InvalidBranchNameError, IllegalArgumentException, NoActiveRepositoryError{
-        if(repositoryManager.getActiveRepository() == null){
-            throw new NoActiveRepositoryError("No active repository yet");
-        }
+        validateActiveRepository();
         repositoryManager.getActiveRepository().deleteBranch(name);
     }
 
-    public void checkoutBranch(String name, boolean force) throws InvalidBranchNameError, UncommittedChangesError, NoActiveRepositoryError {
+    private void validateActiveRepository() throws NoActiveRepositoryError{
         if(repositoryManager.getActiveRepository() == null){
             throw new NoActiveRepositoryError("No active repository yet");
         }
-       repositoryManager.getActiveRepository().checkoutBranch(name, force);
+    }
+
+    public void checkoutBranch(String name, boolean force) throws InvalidBranchNameError, UncommittedChangesError, NoActiveRepositoryError {
+        validateActiveRepository();
+        repositoryManager.getActiveRepository().checkoutBranch(name, force);
     }
 
     public List<String> getActiveBranchHistory() throws NoActiveRepositoryError{
-        if(repositoryManager.getActiveRepository() == null){
-            throw new NoActiveRepositoryError("No active repository yet");
-        }
+        validateActiveRepository();
         return repositoryManager.getActiveRepository().getActiveBranch().getCommitHistory();
     }
 
     public String getCurrentRepoName() throws NoActiveRepositoryError{
-        if(repositoryManager.getActiveRepository() == null){
-            throw new NoActiveRepositoryError("No active repository yet");
-        }
+        validateActiveRepository();
         return repositoryManager.getActiveRepository() != null ? repositoryManager.getActiveRepository().getName() : "";
     }
 

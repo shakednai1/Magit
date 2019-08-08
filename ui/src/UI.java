@@ -72,7 +72,7 @@ public class UI {
         System.out.println();
         System.out.println("Magit Menu");
         System.out.println("Current logged in user: " + engine.getUser());
-        System.out.println("Current repository location: " + getCurrentRepoName());
+        System.out.println("Current repository name: " + getCurrentRepoName());
         System.out.println("1. Change user name");
         System.out.println("2. Load from XML");
         System.out.println("3. Switch repository");

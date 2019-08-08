@@ -28,7 +28,7 @@ class Commit {
         commitSha1 = calcCommitSha1();
     }
 
-    private Commit(String commitSha1){
+    Commit(String commitSha1){
         this.commitSha1 = commitSha1;
         Utils.unzip(Settings.objectsFolderPath + commitSha1 + ".zip", Settings.objectsFolderPath, commitSha1 + ".txt");
         List<String> content = Utils.getFileLines(Settings.objectsFolderPath + commitSha1 + ".txt");
@@ -48,6 +48,7 @@ class Commit {
     String getPreviousCommitSHA1(){ return previousCommitSHA1; }
     String getUserLastModified() { return userLastModified; }
     String getCommitTime() { return commitTime; }
+    String getMsg(){ return msg;}
 
 
     public String toString(){

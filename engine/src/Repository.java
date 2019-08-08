@@ -11,7 +11,7 @@ class Repository {
     private String name;
     private String fullPath;
     private Branch activeBranch = null;
-    private List<String> branches = new LinkedList<>();
+    private List<Map<String, String>> branches = new LinkedList<>();
 
 
     Repository(String fullPath, String name, boolean empty) {
@@ -47,7 +47,10 @@ class Repository {
 
     Branch getActiveBranch(){ return activeBranch; }
 
-    List<String> getAllBranches(){ return branches; }
+    List<Map<String , String >> getAllBranches(){
+        return branches;
+
+    }
 
     static Repository load(String repositoryPath){
         // we know that the repo exists and valid
@@ -69,11 +72,35 @@ class Repository {
         for(File item: listOfItems){
             if(!item.getName().equals(Settings.activeBranchFileName)){
                 String[] name= item.getName().split("\\.");
-                branches.add(name[0]);
+                branches.add(Branch.getBranchDisplayDetails(name[0]));
             }
         }
     }
 
+    boolean  commitActiveBranch(String msg, boolean force){
+        // this function is for assert that branch details at `branches` object will stay updated
+        // TODO make objects like branch, commit, folder, (or maybe dedicated loader objects) to serve them as data containers, not always loaded
+
+        boolean committed = activeBranch.commit(msg, force);
+        if (committed )
+            updateActiveBranchDataInHistory();
+
+        return committed;
+    }
+
+
+    private void updateActiveBranchDataInHistory(){
+        // TODO branches should have the branch object, even if not loaded not loaded
+        // should return updated branch details. the only that can change is the active branch commit
+
+        for(int i=0; i < branches.size(); i++){
+            Map<String, String> branchDetails = branches.get(i);
+            if(branchDetails.get("name").equals(activeBranch.getName())){
+                branchDetails.put("headSha1", activeBranch.getHead().getCommitSHA1());
+                branchDetails.put("headMsg", activeBranch.getHead().getMsg());
+            }
+        }
+    }
 
     Map<String ,List<String>> getWorkingCopy(){
         return activeBranch.getWorkingCopy();
@@ -91,7 +118,7 @@ class Repository {
             newBranch = new Branch(branchName, activeBranch.getHead(),
                     activeBranch.getRootFolder());
         }
-        branches.add(branchName);
+        addNewBranch(newBranch);
 
         if (checkout){
             if (activeBranch != null && haveOpenChanges())
@@ -142,10 +169,12 @@ class Repository {
     }
 
     boolean validBranchName(String branchName) {
-        return branches.stream().anyMatch(name -> name.equals(branchName));
+        return branches.stream().
+                map(branch -> branch.get("name")).
+                anyMatch(name -> name.equals(branchName));
     }
 
     public void addNewBranch(Branch branch){
-        branches.add(branch.getName());
+        branches.add(Branch.getFormattedBranchDetails(branch.getName(), branch.getHead().getCommitSHA1(), branch.getHead().getMsg()));
     }
 }

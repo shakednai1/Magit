@@ -80,6 +80,23 @@ class Branch {
         return new Branch(branchName, headCommitSha1, rewriteWC);
     }
 
+    static Map<String, String> getBranchDisplayDetails(String branchName){
+        List<String> branchData = Utils.getFileLines(getBranchFilePath(branchName));
+        String headCommitSha1 = branchData.get(0);
+        Commit headCommit = new Commit(headCommitSha1);
+
+        return getFormattedBranchDetails(branchName,  headCommit.getCommitSHA1(), headCommit.getMsg());
+    }
+
+    static Map<String, String> getFormattedBranchDetails(String branchName, String headCommitSha1, String headCommitMsg){
+        Map<String , String > res = new HashMap<>();
+        res.put("name", branchName);
+        res.put("headSha1", headCommitSha1);
+        res.put("headMsg", headCommitMsg);
+
+        return res;
+    }
+
     boolean haveChanges(){
         rootFolder.updateState();
         return !head.getRootFolderSHA1().equals(rootFolder.currentSHA1);
@@ -141,14 +158,6 @@ class Branch {
     }
 
     List<String> getCommittedState(){  return rootFolder.getItemsData(); }
-
-//    public void open() {
-//        clearCurrentWC();
-//        recursiveOpenAllFiles(getRootSha1(), Settings.repositoryFullPath);
-//    }
-//
-
-
 
     Map<String ,List<String>> getWorkingCopy(){
         rootFolder.updateState();
