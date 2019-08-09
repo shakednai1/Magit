@@ -168,13 +168,19 @@ public class UI {
 
     private static void commit(Scanner input){
         System.out.println("Please enter commit message: ");
-        // TODO not working with spaces - find the solution
-        String msg = input.next();
         input.nextLine();
-        if (!engine.commit(msg)){
-            System.out.println("There are no changes to commit");
-            System.out.println();
+        String msg = input.nextLine();
+
+        try{
+            if (!engine.commit(msg)){
+                System.out.println("There are no changes to commit");
+                System.out.println();
+            }
         }
+        catch (NoActiveRepositoryError e){
+            System.out.println(e.getMessage());
+        }
+
     }
 
     private static void printBranches(){
@@ -249,6 +255,17 @@ public class UI {
         boolean force = false;
         String branchName = "";
 
+        try{
+            if (engine.getAllBranches().size() <=1 ) {
+                System.out.println("There is only one branch in the system. Cannot perform checkout");
+                return;
+            }
+        }
+        catch (NoActiveRepositoryError e){
+            System.out.println(e.getMessage());
+            return;
+        }
+
         while (true) {
             if(!force){
                 System.out.println("Please provide branch name to checkout: ");
@@ -266,6 +283,7 @@ public class UI {
                 System.out.println("force commit ? Y/N");
                 String forceInput = input.next();
                 if (forceInput.equals("Y")) force = true;
+                else{break;}
             }
             catch (NoActiveRepositoryError e){
                 System.out.println(e.getMessage());

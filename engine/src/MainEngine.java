@@ -23,9 +23,9 @@ public class MainEngine {
         return repositoryManager.getActiveRepository().getWorkingCopy();
     }
 
-    public boolean commit(String msg){
-        boolean force = false; // TODO add functionality for 'true' option
-        return repositoryManager.getActiveRepository().commitActiveBranch(msg, force);
+    public boolean commit(String msg) throws NoActiveRepositoryError{
+        validateActiveRepository();
+        return repositoryManager.getActiveRepository().commitActiveBranch(msg, false);
     }
 
     public String getUser(){

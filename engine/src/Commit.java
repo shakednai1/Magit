@@ -3,10 +3,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import javax.rmi.CORBA.Util;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 class Commit {
 
@@ -37,10 +34,12 @@ class Commit {
         String[] commitData = content.get(0).split(Settings.delimiter);
 
         this.rootSha1 = commitData[0];
-        this.msg = commitData[1];
-        this.commitTime = commitData[2];
-        this.userLastModified = commitData[3];
-        this.previousCommitSHA1 = commitData[4];
+        this.commitTime = commitData[commitData.length - 3];
+        this.userLastModified = commitData[commitData.length - 2];
+        this.previousCommitSHA1 = commitData[commitData.length - 1];
+
+        String[] msgParts = Arrays.copyOfRange(commitData, 1, commitData.length - 3);
+        this.msg = String.join( Settings.delimiter, msgParts);
     }
 
     String getCommitSHA1(){return commitSha1;}

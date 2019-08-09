@@ -107,7 +107,7 @@ class Repository {
     }
 
     void createNewBranch(String branchName, boolean checkout) throws UncommittedChangesError, InvalidBranchNameError{
-        if(branches.stream().anyMatch(name-> name.equals(branchName)))
+        if(branches.stream().anyMatch(branch-> branch.get("name").equals(branchName)))
             throw new InvalidBranchNameError("");
 
         Branch newBranch;
@@ -154,8 +154,18 @@ class Repository {
             throw new IllegalArgumentException();
         }
 
-        branches.remove(branchName);
+        deleteBranchFromHistory(branchName);
         Branch.deleteBranch(branchName);
+    }
+
+    private void deleteBranchFromHistory(String branchName){
+        int i;
+        for(i = 0; i< branches.size(); i++){
+            if(branches.get(i).get("name").equals(branchName))
+                break;
+        }
+
+        branches.remove(i);
     }
 
     boolean haveOpenChanges(){ return activeBranch.haveChanges();}

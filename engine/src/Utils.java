@@ -1,4 +1,7 @@
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -55,23 +58,6 @@ public class Utils {
             //close this ZipEntry
             zis.closeEntry();
 
-//            while(ze != null){
-//                String fileName = ze.getName();
-//                File newFile = new File(destDir + File.separator + fileName);
-//                //create directories for sub directories in zip
-//                new File(newFile.getParent()).mkdirs();
-//                FileOutputStream fos = new FileOutputStream(newFile);
-//                int len;
-//                while ((len = zis.read(buffer)) > 0) {
-//                    fos.write(buffer, 0, len);
-//                }
-//                fos.close();
-//                //close this ZipEntry
-//                zis.closeEntry();
-//                ze = zis.getNextEntry();
-//            }
-            //close last ZipEntry
-//            zis.closeEntry();
             zis.close();
             fis.close();
         } catch (IOException e) {
@@ -97,9 +83,15 @@ public class Utils {
         return file.mkdir();
     }
 
-    public static boolean deleteFile(String filePath){
-        File file = new File(filePath);
-        return file.delete();
+    static boolean deleteFile(String filePath){
+        try{
+            return Files.deleteIfExists(Paths.get(filePath));
+        }
+        catch (IOException e){
+            System.out.println("Could not delete file " + filePath);
+            e.printStackTrace();
+        }
+        return false;
     }
 
     static void writeFile(String fullPath, String fileContent, boolean append){
@@ -114,7 +106,9 @@ public class Utils {
     static List<String> getFileLines(String filePath){
         try{
             BufferedReader br = new BufferedReader(new FileReader(filePath));
-            return br.lines().collect(Collectors.toList());
+            List<String> lines = br.lines().collect(Collectors.toList());
+            br.close();
+            return lines;
         }
         catch (IOException e){e.printStackTrace();}
         return null;
