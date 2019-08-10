@@ -34,7 +34,7 @@ public class Folder extends Item {
             String[] item = itemData.split(Settings.delimiter);
 
             String itemName = item[0];
-            String itemFullPath = this.fullPath + "/" + itemName;
+            String itemFullPath = this.fullPath + "\\" + itemName;
             String itemSha1 = item[1];
             String itemType = item[2];
             String itemLastUser = item[3];
@@ -44,7 +44,7 @@ public class Folder extends Item {
                 subFiles.put(itemFullPath, new Blob(new File(itemFullPath), itemSha1, itemLastUser, itemLastModified, rewriteFS));
             }
             else{
-                subFolders.put(itemFullPath, new Folder(new File(this.fullPath +"/"+ itemName),
+                subFolders.put(itemFullPath, new Folder(new File(this.fullPath +"\\"+ itemName),
                         itemSha1, itemLastUser, itemLastModified, rewriteFS));
             }
         }

@@ -9,12 +9,10 @@ import java.nio.file.Paths;
 public class Blob extends Item {
     final private String typeItem = "File";
 
-    private String path;
 
     Blob(String path, String name){
         fullPath = path;
         this.name = name;
-        this.path = fullPath.substring(0, fullPath.lastIndexOf("/") +1);
     }
 
     Blob(File itemPath, String sha1, String lastUser, String lastModified, boolean rewriteFS){
