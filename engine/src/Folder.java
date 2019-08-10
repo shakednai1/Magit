@@ -57,6 +57,10 @@ public class Folder extends Item {
         this.userLastModified = lastUser;
     }
 
+    boolean isEmpty(){
+        return (subFiles == null && subFolders == null);
+    }
+
 
     public void setSubItems(Map<String, Blob> subFiles, Map<String, Folder> subFolders){
         this.subFiles = subFiles;
@@ -73,7 +77,6 @@ public class Folder extends Item {
         subFolders = curSubFolders;
         for(Folder folder: subFolders.values()){
             boolean subFolderChanged = folder.commit(commitUser, commitTime);
-
             subItemsChanged = subItemsChanged || subFolderChanged;
         }
 
@@ -130,7 +133,7 @@ public class Folder extends Item {
                     folder = new Folder(item.getPath(), item.getName());
                 }
                 folder.updateState();
-                if(folder.currentSHA1 != null)
+                if(!folder.isEmpty())
                     curSubFolders.put(folder.fullPath, folder);
             }
             else if(item.isFile()){
