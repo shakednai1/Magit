@@ -208,7 +208,8 @@ public class UI {
     private static void createBranch(Scanner input){
         while(true){
             System.out.println("Please provide branch name: ");
-            String branchName = input.next();
+            input.nextLine();
+            String branchName = input.nextLine();
 
             System.out.println("Would you like to checkout to the new branch ? [Y/n]");
             String checkout = input.next();
