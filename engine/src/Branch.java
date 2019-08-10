@@ -26,7 +26,6 @@ class Branch {
 
         rootFolder = createRootFolder();
         rootFolder.updateState();
-        commit("", true);
     }
 
     Branch(String name, Commit head, Folder rootFolder){

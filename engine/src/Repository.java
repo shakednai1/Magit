@@ -107,7 +107,8 @@ class Repository {
     }
 
     void createNewBranch(String branchName, boolean checkout) throws UncommittedChangesError, InvalidBranchNameError{
-        if(branches.stream().anyMatch(branch-> branch.get("name").equals(branchName)))
+        if(branches.stream().anyMatch(branch-> branch.get("name").equals(branchName)) ||
+            branchName.contains(" "))
             throw new InvalidBranchNameError("");
 
         Branch newBranch;
@@ -185,6 +186,9 @@ class Repository {
     }
 
     public void addNewBranch(Branch branch){
-        branches.add(Branch.getFormattedBranchDetails(branch.getName(), branch.getHead().getCommitSHA1(), branch.getHead().getMsg()));
+        String headSha1 = (branch.getHead() == null)? "": branch.getHead().getCommitSHA1();
+        String headMsg = (branch.getHead() == null)? "": branch.getHead().getMsg();
+
+        branches.add(Branch.getFormattedBranchDetails(branch.getName(), headSha1, headMsg));
     }
 }

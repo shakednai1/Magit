@@ -19,7 +19,7 @@ public class UI {
             printMenu();
             validateMenu();
 
-            int number = input.nextInt();
+            int number = getMenuOption(input);
             switch (number){
                 case 1:
                     getSetUser(input);
@@ -85,8 +85,21 @@ public class UI {
         System.out.println("10. Checkout branch");
         System.out.println("11. Show current branch history");
         System.out.println("12. Create new repository");
-
         System.out.println("13. Exit");
+    }
+
+    static private int getMenuOption(Scanner input){
+        while(true){
+            System.out.println("Choose an action: ");
+            input.reset();
+            try{
+                return input.nextInt();
+            }
+            catch( InputMismatchException e){
+                System.out.println("Invalid input option");
+                input.nextLine();
+            }
+        }
     }
 
     private static void validateMenu(){
