@@ -333,8 +333,12 @@ public class UI {
 
         System.out.println("Please provide new repository name");
         String repoName = input.next();
-
-        engine.createNewRepository(repoPath, repoName);
+        try {
+            engine.createNewRepository(repoPath, repoName);
+        }
+        catch (IllegalArgumentException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     private static String getCurrentRepoName(){
