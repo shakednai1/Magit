@@ -3,6 +3,7 @@ import exceptions.NoActiveBranchError;
 import exceptions.NoActiveRepositoryError;
 import exceptions.UncommittedChangesError;
 
+import javax.xml.bind.UnmarshalException;
 import java.util.*;
 
 public class MainEngine {
@@ -107,8 +108,8 @@ public class MainEngine {
     }
 
     public String isXmlValid(String xmlPath){
-        XmlLoader xmlLoader = new XmlLoader(xmlPath);
         try {
+            XmlLoader xmlLoader = new XmlLoader(xmlPath);
             xmlLoader.checkValidXml();
             xmlLoader.loadRepo();
             return null;
