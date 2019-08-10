@@ -62,7 +62,7 @@ public class UI {
                     System.out.println();
                     break;
                 default:
-                    System.out.println("nothing");
+                    System.out.println("option not in range");
             }
         }
     }
