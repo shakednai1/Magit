@@ -34,11 +34,11 @@ class Commit {
         String[] commitData = content.get(0).split(Settings.delimiter);
 
         this.rootSha1 = commitData[0];
-        this.commitTime = commitData[commitData.length - 3];
-        this.userLastModified = commitData[commitData.length - 2];
-        this.previousCommitSHA1 = commitData[commitData.length - 1];
+        this.commitTime = commitData[commitData.length - 2];
+        this.userLastModified = commitData[commitData.length - 1];
+        this.previousCommitSHA1 = commitData[1];
 
-        String[] msgParts = Arrays.copyOfRange(commitData, 1, commitData.length - 3);
+        String[] msgParts = Arrays.copyOfRange(commitData, 2, commitData.length - 2);
         this.msg = String.join( Settings.delimiter, msgParts);
     }
 
@@ -62,14 +62,14 @@ class Commit {
     }
 
     private String getCommitTxt(){
-        String commitStr =  rootSha1 + Settings.delimiter +
+        String prevCommitStr = (previousCommitSHA1 == null)? "null": previousCommitSHA1;
+
+        return rootSha1 + Settings.delimiter +
+                prevCommitStr + Settings.delimiter +
                 msg + Settings.delimiter +
                 commitTime + Settings.delimiter +
                 userLastModified + Settings.delimiter;
 
-        commitStr = commitStr + ((previousCommitSHA1 == null)? "null": previousCommitSHA1);
-
-        return commitStr;
     }
 
     void zipCommit(){

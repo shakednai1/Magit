@@ -28,7 +28,7 @@ public class XmlLoader {
 
 
 
-    public XmlLoader(String XmlPath){
+    public XmlLoader(String XmlPath) throws XmlException{
         File file = new File(XmlPath);
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(MagitRepository.class);
@@ -40,8 +40,7 @@ public class XmlLoader {
             magitBlobs = magitRepository.getMagitBlobs();
             repositoryPath = magitRepository.getLocation();
         } catch (JAXBException e) {
-            e.printStackTrace();
-            // TODO - verify if the file is not exist or not .xml file - this exception is thrown
+            throw new XmlException("Given file has no XML extension OR XML file not exist");
         }
     }
 
