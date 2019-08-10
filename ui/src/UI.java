@@ -113,16 +113,10 @@ public class UI {
     }
 
     private static void switchRepository(Scanner input){
-        boolean isValid = false;
-        while(!isValid){
-            System.out.println("Please provide repository full path: ");
-            String fullPath = input.next();
-            if (!engine.changeActiveRepository(fullPath)){
-                System.out.println("engine.Repository path is not found or path is not contains .magit folder!");
-            }
-            else {
-                isValid = true;
-            }
+        System.out.println("Please provide repository full path: ");
+        String fullPath = input.next();
+        if (!engine.changeActiveRepository(fullPath)){
+            System.out.println("Repository path is not found or path is not contains .magit folder!");
         }
     }
 
@@ -206,49 +200,41 @@ public class UI {
     }
 
     private static void createBranch(Scanner input){
-        while(true){
-            System.out.println("Please provide branch name: ");
-            input.nextLine();
-            String branchName = input.nextLine();
+        System.out.println("Please provide branch name: ");
+        input.nextLine();
+        String branchName = input.nextLine();
 
-            System.out.println("Would you like to checkout to the new branch ? [Y/n]");
-            String checkout = input.next();
+        System.out.println("Would you like to checkout to the new branch ? [Y/N]");
+        String checkout = input.next();
 
-            try{
-                engine.createNewBranch(branchName, checkout.equalsIgnoreCase("Y"));
-                break;
-            }
-            catch (InvalidBranchNameError e){
-                System.out.println(branchName + " branch name is already exist! ");
-            }
-            catch (UncommittedChangesError e){
-                System.out.println(" There are open changes. Did not checkout to "+ branchName);
-            }
-            catch (NoActiveRepositoryError e){
-                System.out.println(e.getMessage());
-                break;
-            }
+        try{
+            engine.createNewBranch(branchName, checkout.equalsIgnoreCase("Y"));
+        }
+        catch (InvalidBranchNameError e){
+            System.out.println(branchName + " branch name is already exist! ");
+        }
+        catch (UncommittedChangesError e){
+            System.out.println(" There are open changes. Did not checkout to "+ branchName);
+        }
+        catch (NoActiveRepositoryError e){
+            System.out.println(e.getMessage());
         }
     }
 
     private static void deleteBranch(Scanner input){
-        while (true){
-            System.out.println("Please provide branch name to delete: ");
-            String branchName = input.next();
-            try{
-                engine.deleteBranch(branchName);
-                break;
-            }
-            catch (InvalidBranchNameError e){
-                System.out.println("Given branch name doesn't exist. Please provide existing branch ");
-            }
-            catch (IllegalArgumentException e){
-                System.out.println("Given branch name is the head branch. Cannot delete head branch! ");
-            }
-            catch (NoActiveRepositoryError e){
-                System.out.println(e.getMessage());
-                break;
-            }
+        System.out.println("Please provide branch name to delete: ");
+        String branchName = input.next();
+        try{
+            engine.deleteBranch(branchName);
+        }
+        catch (InvalidBranchNameError e){
+            System.out.println("Given branch name doesn't exist. Please provide existing branch ");
+        }
+        catch (IllegalArgumentException e){
+            System.out.println("Given branch name is the head branch. Cannot delete head branch! ");
+        }
+        catch (NoActiveRepositoryError e){
+            System.out.println(e.getMessage());
         }
     }
 
@@ -290,6 +276,7 @@ public class UI {
                 break;
             } catch (InvalidBranchNameError e) {
                 System.out.println("Given branch name is not valid. Please provide an existing branch name ");
+                break;
             } catch (UncommittedChangesError e) {
                 System.out.println("Given Branch has open changes. you need to commit then or force checkout and the " +
                         "changes will remove ");
