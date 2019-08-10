@@ -12,6 +12,7 @@ public class Settings {
     final private static String repositoryDetailsFile = magitFolder + "/repo";
 
     final static String delimiter = ",";
+    final static String YNquestion = "Y/N";
 
     static String repositoryFullPath = "";
     static String objectsFolderPath = "";

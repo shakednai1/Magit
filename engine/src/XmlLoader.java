@@ -1,13 +1,12 @@
-import javax.rmi.CORBA.Util;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.*;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import exceptions.InvalidBranchNameError;
 import exceptions.UncommittedChangesError;
+import exceptions.XmlException;
 import fromXml.*;
 import fromXml.Item;
 
@@ -28,7 +27,7 @@ public class XmlLoader {
 
 
 
-    public XmlLoader(String XmlPath) throws XmlException{
+    public XmlLoader(String XmlPath) throws XmlException {
         File file = new File(XmlPath);
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(MagitRepository.class);
@@ -240,4 +239,19 @@ public class XmlLoader {
         }
     }
 
+    public String checkRepoLocation() throws XmlException {
+        String repositoryLocation = magitRepository.getLocation();
+        File repoLocation = new File(repositoryLocation);
+        File magitRepoLocation = new File(repositoryLocation + "\\.magit");
+        if (repoLocation.exists()) {
+            if (!magitRepoLocation.exists()) {
+                throw new XmlException("Cannot create new repository in " +
+                        repositoryLocation + " ,already have existing files in this path");
+            } else {
+                return "Are you sure you want to override repository in " +
+                        repositoryLocation + "? " + Settings.YNquestion;
+            }
+        }
+         return null;
+    }
 }

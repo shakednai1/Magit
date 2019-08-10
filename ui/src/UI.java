@@ -1,9 +1,8 @@
 import exceptions.InvalidBranchNameError;
 import exceptions.NoActiveRepositoryError;
 import exceptions.UncommittedChangesError;
+import exceptions.XmlException;
 
-import java.io.File;
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class UI {
@@ -293,7 +292,7 @@ public class UI {
             } catch (UncommittedChangesError e) {
                 System.out.println("Given Branch has open changes. you need to commit then or force checkout and the " +
                         "changes will remove ");
-                System.out.println("force commit ? Y/N");
+                System.out.println("force commit ? " + Settings.YNquestion);
                 String forceInput = input.next();
                 if (forceInput.equals("Y")) force = true;
                 else{break;}
@@ -308,11 +307,25 @@ public class UI {
     private static void loadFromXml(Scanner input){
         System.out.println("Please provide XML file");
         String response = input.next();
-        String validationMsg = engine.isXmlValid(response);
-        if(validationMsg != null){
-            System.out.println(validationMsg);
+        try{
+            String overrideMsg = engine.isXmlValid(response);
+            if(overrideMsg != null){
+                System.out.println(overrideMsg);
+                String toOverride = input.next();
+                if (toOverride.equals("Y")){
+                    engine.loadRepositoyFromXML();
+                }
+            }
+            else {
+                engine.loadRepositoyFromXML();
+            }
         }
+        catch (XmlException | UncommittedChangesError | InvalidBranchNameError e){
+            System.out.println(e.getMessage());
+        }
+
     }
+
 
     private static void createNewRepository(Scanner input){
         System.out.println("Please provide full path of the new repository");

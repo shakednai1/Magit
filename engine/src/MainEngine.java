@@ -1,14 +1,11 @@
-import exceptions.InvalidBranchNameError;
-import exceptions.NoActiveBranchError;
-import exceptions.NoActiveRepositoryError;
-import exceptions.UncommittedChangesError;
+import exceptions.*;
 
-import javax.xml.bind.UnmarshalException;
 import java.util.*;
 
 public class MainEngine {
 
     private static RepositoryManager repositoryManager;
+    private static XmlLoader xmlLoader;
 
     public MainEngine(){
         repositoryManager = new RepositoryManager();
@@ -107,18 +104,14 @@ public class MainEngine {
         return repositoryManager.getActiveRepository() != null ? repositoryManager.getActiveRepository().getName() : "";
     }
 
-    public String isXmlValid(String xmlPath){
-        try {
-            XmlLoader xmlLoader = new XmlLoader(xmlPath);
-            xmlLoader.checkValidXml();
-            xmlLoader.loadRepo();
-            return null;
-        } catch (XmlException e) {
-            return e.message;
-        }
-        catch (UncommittedChangesError | InvalidBranchNameError e){
-            return e.getMessage();
-        }
+    public String isXmlValid(String xmlPath) throws XmlException {
+        xmlLoader = new XmlLoader(xmlPath);
+        xmlLoader.checkValidXml();
+        return xmlLoader.checkRepoLocation();
+    }
+
+    public void loadRepositoyFromXML() throws UncommittedChangesError, InvalidBranchNameError{
+        xmlLoader.loadRepo();
     }
 
 
