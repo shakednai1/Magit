@@ -79,7 +79,6 @@ class Repository {
 
     boolean  commitActiveBranch(String msg, boolean force){
         // this function is for assert that branch details at `branches` object will stay updated
-        // TODO make objects like branch, commit, folder, (or maybe dedicated loader objects) to serve them as data containers, not always loaded
 
         boolean committed = activeBranch.commit(msg, force);
         if (committed )

@@ -36,6 +36,9 @@ public class Blob extends Item {
         this.lastModified = lastModified;
     }
 
+    String getUser(){ return userLastModified; }
+    String getModifiedTime(){ return lastModified; }
+
     @Override
     public void zipAndCopy(){
         updateState();

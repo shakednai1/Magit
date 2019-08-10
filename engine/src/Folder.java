@@ -137,13 +137,14 @@ public class Folder extends Item {
                     curSubFolders.put(folder.fullPath, folder);
             }
             else if(item.isFile()){
-                Blob file = subFiles.get(item.getPath());
+                Blob file = new Blob(item.getPath(), item.getName());
+                file.updateState();
 
-                if (file == null) {
-                    file = new Blob(item.getPath(), item.getName());
+                Blob prevFile = subFiles.get(file.fullPath);
+                if (prevFile != null){
+                    file.updateUserAndDate(prevFile.getUser(), prevFile.getModifiedTime());
                 }
 
-                file.updateState();
                 curSubFiles.put(file.fullPath, file);
             }
         }
