@@ -61,10 +61,19 @@ public class XmlLoader {
     public void loadRepo() throws UncommittedChangesError, InvalidBranchNameError {
         //create empty repository
         repositoryManager.createNewRepository(repositoryPath, magitRepository.getName(), true);
+
+        Utils.clearCurrentWC();
+
         setFirstCommit();
-        buildCommitPointersMap();
-        openCommitRec(firstCommit, null);
-        repositoryManager.getActiveRepository().checkoutBranch(magitBranches.getHead(), true);
+        if(firstCommit == null){
+            repositoryManager.getActiveRepository().createNewBranch(magitBranches.getHead(), true);
+        }
+        else{
+            buildCommitPointersMap();
+            openCommitRec(firstCommit, null);
+            repositoryManager.getActiveRepository().checkoutBranch(magitBranches.getHead(), true);
+        }
+
     }
 
     private void setFirstCommit() {
@@ -105,31 +114,46 @@ public class XmlLoader {
     }
 
     public Commit openCommit(String commitID, String prevCommit){
-        boolean isPointedBranch = false;
         MagitSingleCommit magitCommit = commitMap.get(commitID);
         MagitSingleFolder magitRootFolder = folderMap.get(magitCommit.getRootFolder().getId());
         Folder rootFolder = createFilesTree(magitRootFolder, Settings.repositoryFullPath);
         Commit commit = new Commit(magitCommit.getMessage(), rootFolder.getCurrentSHA1(), magitCommit.getAuthor(),
                 magitCommit.getDateOfCreation(), prevCommit);
 
-        for(MagitSingleBranch magitBranch : magitBranches.getMagitSingleBranch()){
-            if (magitBranch.getPointedCommit().getId().equals(magitCommit.getId())){
-                isPointedBranch = true;
-                Branch branch = new Branch(magitBranch.getName(), commit, rootFolder);
+
+        List<MagitSingleBranch> pointingBranches = getPointedMagitBranch(magitCommit.getId());
+
+        if (!pointingBranches.isEmpty()){
+            for(MagitSingleBranch pointingBranch: pointingBranches){
+                Branch branch = new Branch(pointingBranch.getName(), commit, rootFolder);
                 repositoryManager.getActiveRepository().addNewBranch(branch);
-                if (magitBranches.getHead().equals(magitBranch.getName())) {
+                if (magitBranches.getHead().equals(pointingBranch.getName())) {
                     repositoryManager.getActiveRepository().setActiveBranch(branch);
                 }
                 branch.commit(commit);
             }
-            if(!isPointedBranch){
-                rootFolder.zipRec();
-                commit.zipCommit();
-            }
         }
+        else{
+            rootFolder.zipRec();
+            commit.zipCommit();
+        }
+
         Utils.clearCurrentWC();
         return commit;
     }
+
+    private List<MagitSingleBranch> getPointedMagitBranch(String id){
+
+        List<MagitSingleBranch> pointingBranches = new LinkedList<>();
+
+        for(MagitSingleBranch magitBranch : magitBranches.getMagitSingleBranch()){
+            if (magitBranch.getPointedCommit().getId().equals(id))
+                pointingBranches.add(magitBranch);
+
+        }
+        return pointingBranches;
+    }
+
 
     private Folder createFilesTree(MagitSingleFolder magitRootFolder, String path){
         List<Item> items = magitRootFolder.getItems().getItem();
@@ -149,13 +173,13 @@ public class XmlLoader {
                     Blob blob = new Blob(path + "/" + magitBlob.getName(), magitBlob.getName(), magitBlob.getContent(),
                             magitBlob.getLastUpdater(), magitBlob.getLastUpdateDate());
                     Utils.createNewFile(path + "/" + magitBlob.getName(), magitBlob.getContent());
-                    subBlobs.put(blob.getCurrentSHA1(), blob);
+                    subBlobs.put(blob.fullPath, blob);
                     break;
                 case "folder":
                     MagitSingleFolder magitFolder = folderMap.get(itemId);
                     String folderPath = path +  "/" + magitFolder.getName();
                     Folder newFolder = createFilesTree(magitFolder, folderPath);
-                    subFolders.put(newFolder.getCurrentSHA1(), newFolder);
+                    subFolders.put(newFolder.fullPath, newFolder);
                     break;
             }
         }
@@ -241,6 +265,8 @@ public class XmlLoader {
 
     private void checkBranchPointers() throws XmlException {
         for(MagitSingleBranch branch: magitBranches.getMagitSingleBranch()){
+            if (branch.getPointedCommit().getId().equals("")) continue;
+
             if(commitMap.get(branch.getPointedCommit().getId()) == null){
                 throw new XmlException("branch " + branch.getName() +
                         " points to non existing commit id : " + branch.getPointedCommit().getId());

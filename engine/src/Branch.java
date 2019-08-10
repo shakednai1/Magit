@@ -1,12 +1,8 @@
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.util.*;
 
 class Branch {
@@ -26,6 +22,7 @@ class Branch {
 
         rootFolder = createRootFolder();
         rootFolder.updateState();
+        writeBranchInfoFile();
     }
 
     Branch(String name, Commit head, Folder rootFolder){
@@ -42,7 +39,7 @@ class Branch {
         this.name = name;
 
         commitData = Commit.loadAll(headCommitSha1);
-        this.head = commitData.get(headCommitSha1);
+        setHead(commitData.get(headCommitSha1));
 
         File  rootFolderPath = new File(Settings.repositoryFullPath);
         rootFolder = new Folder(rootFolderPath,
@@ -76,15 +73,30 @@ class Branch {
         List<String> branchData = Utils.getFileLines(getBranchFilePath(branchName));
         String headCommitSha1 = branchData.get(0);
 
+        if(headCommitSha1.equals("null")){
+            // loading empty repo
+            if (rewriteWC) Utils.clearCurrentWC();
+            return new Branch(branchName);
+        }
+
         return new Branch(branchName, headCommitSha1, rewriteWC);
     }
 
     static Map<String, String> getBranchDisplayDetails(String branchName){
         List<String> branchData = Utils.getFileLines(getBranchFilePath(branchName));
         String headCommitSha1 = branchData.get(0);
-        Commit headCommit = new Commit(headCommitSha1);
+        String headCommitMsg;
+        if(headCommitSha1.equals("null")){
+            headCommitSha1 = "";
+            headCommitMsg = "";
+        }
+        else{
+            Commit headCommit = new Commit(headCommitSha1);
+            headCommitSha1 = headCommit.getCommitSHA1();
+            headCommitMsg = headCommit.getMsg();
+        }
 
-        return getFormattedBranchDetails(branchName,  headCommit.getCommitSHA1(), headCommit.getMsg());
+        return getFormattedBranchDetails(branchName, headCommitSha1, headCommitMsg);
     }
 
     static Map<String, String> getFormattedBranchDetails(String branchName, String headCommitSha1, String headCommitMsg){
@@ -138,7 +150,7 @@ class Branch {
     }
 
     private void writeBranchInfoFile(){
-        String branchFileContent =  head.getCommitSHA1();
+        String branchFileContent =  (head == null)? "null": head.getCommitSHA1();
         Utils.writeFile(getBranchFilePath(name), branchFileContent, false);
     }
 

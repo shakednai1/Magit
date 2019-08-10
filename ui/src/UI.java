@@ -294,7 +294,8 @@ public class UI {
 
     private static void loadFromXml(Scanner input){
         System.out.println("Please provide XML file");
-        String response = input.next();
+        input.nextLine();
+        String response = input.nextLine();
         try{
             String overrideMsg = engine.isXmlValid(response);
             if(overrideMsg != null){
