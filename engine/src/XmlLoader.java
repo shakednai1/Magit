@@ -2,6 +2,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.*;
 
 import exceptions.InvalidBranchNameError;
@@ -22,6 +23,9 @@ public class XmlLoader {
     private Map<String, MagitBlob> blobMap = new HashMap<>();
     private Map<String, MagitSingleFolder> folderMap = new HashMap<>();
     private Map<String, MagitSingleCommit> commitMap = new HashMap<>();
+    // only commits with preceding commits - without first commit
+    private Map<String, List<MagitSingleCommit>> commitPointersMap = new HashMap<>();
+    private MagitSingleCommit firstCommit;
 
     RepositoryManager repositoryManager = MainEngine.getRepositoryManager();
 
@@ -57,14 +61,34 @@ public class XmlLoader {
     public void loadRepo() throws UncommittedChangesError, InvalidBranchNameError {
         //create empty repository
         repositoryManager.createNewRepository(repositoryPath, magitRepository.getName(), true);
-        // search for the first commit and create it
+        setFirstCommit();
+        buildCommitPointersMap();
+        openCommitRec(firstCommit, null);
+        repositoryManager.getActiveRepository().checkoutBranch(magitBranches.getHead(), true);
+    }
+
+    private void setFirstCommit() {
         for (MagitSingleCommit magitSingleCommit : magitCommits.getMagitSingleCommit()) {
-            if (magitSingleCommit.getPrecedingCommits().getPrecedingCommit().isEmpty()) {
-                openCommitRec(magitSingleCommit, null);
+            if (magitSingleCommit.getPrecedingCommits() == null ||
+                    magitSingleCommit.getPrecedingCommits().getPrecedingCommit().isEmpty()) {
+                firstCommit = magitSingleCommit;
                 break;
             }
         }
-        repositoryManager.getActiveRepository().checkoutBranch(magitBranches.getHead(), true);
+    }
+
+    private void buildCommitPointersMap() {
+        for(MagitSingleCommit commit: magitCommits.getMagitSingleCommit()){
+            commitPointersMap.put(commit.getId(), new ArrayList<>());
+        }
+        for(MagitSingleCommit commit: magitCommits.getMagitSingleCommit()){
+            if(commit.getPrecedingCommits() == null) continue;
+            if(commit.getPrecedingCommits().getPrecedingCommit().isEmpty() ) continue;
+            for(PrecedingCommits.PrecedingCommit precedingCommit : commit.getPrecedingCommits().getPrecedingCommit()){
+                    List<MagitSingleCommit> currentChilds = commitPointersMap.get(precedingCommit.getId());
+                    currentChilds.add(commit);
+                }
+        }
     }
 
 
@@ -72,14 +96,11 @@ public class XmlLoader {
         // open my commit and than
         // search for the commits that the prev commit its me and open them
         Commit commitObj = openCommit(commit.getId(), prevCommitSha1);
-        for (MagitSingleCommit magitSingleCommit: magitCommits.getMagitSingleCommit()){
-            if(!magitSingleCommit.getPrecedingCommits().getPrecedingCommit().isEmpty()) {
-                for(PrecedingCommits.PrecedingCommit precedingCommit: magitSingleCommit.getPrecedingCommits().getPrecedingCommit()){
-                    if(commit.getId().equals(precedingCommit.getId())){
-                        openCommitRec(magitSingleCommit, commitObj.getCommitSHA1());
-                    }
-                }
-             }
+        List<MagitSingleCommit> commitChilds = commitPointersMap.get(commit.getId());
+        if(!commitChilds.isEmpty()){
+            for(MagitSingleCommit child: commitChilds){
+                openCommitRec(child, commitObj.getCommitSHA1());
+            }
         }
     }
 
@@ -90,6 +111,7 @@ public class XmlLoader {
         Folder rootFolder = createFilesTree(magitRootFolder, Settings.repositoryFullPath);
         Commit commit = new Commit(magitCommit.getMessage(), rootFolder.getCurrentSHA1(), magitCommit.getAuthor(),
                 magitCommit.getDateOfCreation(), prevCommit);
+
         for(MagitSingleBranch magitBranch : magitBranches.getMagitSingleBranch()){
             if (magitBranch.getPointedCommit().getId().equals(magitCommit.getId())){
                 isPointedBranch = true;
