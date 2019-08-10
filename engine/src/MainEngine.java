@@ -1,5 +1,8 @@
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import exceptions.*;
 
+import java.io.File;
+import java.lang.reflect.Field;
 import java.util.*;
 
 public class MainEngine {
@@ -116,6 +119,10 @@ public class MainEngine {
 
 
     public void createNewRepository(String newRepositoryPath, String name){
+        File directory = new File(newRepositoryPath);
+        if(directory.exists()){
+            throw new IllegalArgumentException(newRepositoryPath + " is already exist");
+        }
         repositoryManager.createNewRepository(newRepositoryPath, name, false);
     }
 
