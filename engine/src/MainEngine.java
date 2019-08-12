@@ -26,7 +26,7 @@ public class MainEngine {
 
     public boolean commit(String msg) throws NoActiveRepositoryError{
         validateActiveRepository();
-        return repositoryManager.getActiveRepository().commitActiveBranch(msg, false);
+        return repositoryManager.getActiveRepository().commitActiveBranch(msg);
     }
 
     public String getUser(){

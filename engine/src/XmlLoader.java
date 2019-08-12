@@ -1,3 +1,4 @@
+import javax.rmi.CORBA.Util;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -130,7 +131,8 @@ public class XmlLoader {
                 if (magitBranches.getHead().equals(pointingBranch.getName())) {
                     repositoryManager.getActiveRepository().setActiveBranch(branch);
                 }
-                branch.commit(commit);
+                rootFolder.zipRec();
+                commit.zipCommit();
             }
         }
         else{

@@ -110,11 +110,16 @@ class Branch {
 
     boolean haveChanges(){
         rootFolder.updateState();
-        return !head.getRootFolderSHA1().equals(rootFolder.currentSHA1);
+        if (head == null){
+            return !rootFolder.isEmptyCurrentState();
+        }
+        else{
+            return !head.getRootFolderSHA1().equals(rootFolder.currentSHA1);
+        }
     }
 
-    boolean commit(String msg, boolean force){
-        if(head == null || haveChanges() || force){
+    boolean commit(String msg){
+        if(haveChanges()){
 
             String commitTime = Commit.commitDateFormat.format(new Date());
             rootFolder.commit(Settings.getUser(), commitTime);
@@ -130,11 +135,6 @@ class Branch {
         }
 
         return false;
-    }
-
-    void commit(Commit commit){
-        rootFolder.zipRec();
-        commit.zipCommit();
     }
 
     private void updateChangedFilesState(){ // TODO better name for function

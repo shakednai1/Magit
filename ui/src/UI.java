@@ -280,7 +280,7 @@ public class UI {
             } catch (UncommittedChangesError e) {
                 System.out.println("Given Branch has open changes. you need to commit then or force checkout and the " +
                         "changes will remove ");
-                System.out.println("force commit ? " + Settings.YNquestion);
+                System.out.println("force checkout ? " + Settings.YNquestion);
                 String forceInput = input.next();
                 if (forceInput.equals("Y")) force = true;
                 else{break;}

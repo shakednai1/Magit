@@ -77,10 +77,10 @@ class Repository {
         }
     }
 
-    boolean  commitActiveBranch(String msg, boolean force){
+    boolean  commitActiveBranch(String msg){
         // this function is for assert that branch details at `branches` object will stay updated
 
-        boolean committed = activeBranch.commit(msg, force);
+        boolean committed = activeBranch.commit(msg);
         if (committed )
             updateActiveBranchDataInHistory();
 

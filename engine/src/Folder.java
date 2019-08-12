@@ -57,8 +57,8 @@ public class Folder extends Item {
         this.userLastModified = lastUser;
     }
 
-    boolean isEmpty(){
-        return (subFiles == null && subFolders == null);
+    boolean isEmptyCurrentState(){
+        return (curSubFiles.isEmpty() && curSubFolders.isEmpty());
     }
 
 
@@ -67,7 +67,6 @@ public class Folder extends Item {
         this.curSubFiles = subFiles;
         this.subFolders = subFolders;
         this.curSubFolders = subFolders;
-
     }
 
     boolean commit(String commitUser, String commitTime){
@@ -133,7 +132,7 @@ public class Folder extends Item {
                     folder = new Folder(item.getPath(), item.getName());
                 }
                 folder.updateState();
-                if(!folder.isEmpty())
+                if(!folder.isEmptyCurrentState())
                     curSubFolders.put(folder.fullPath, folder);
             }
             else if(item.isFile()){
