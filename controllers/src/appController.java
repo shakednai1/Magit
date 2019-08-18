@@ -191,17 +191,18 @@ public class appController {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Select repository location ");
         File dir = directoryChooser.showDialog(MyApp.stage);
-        // need to specify new directory
         TextInputDialog dialog = new TextInputDialog("");
+        dialog.setTitle("Repository folder name");
+        dialog.setHeaderText("Enter repository folder name:");
+        dialog.setContentText("Name:");
+        Optional<String> result = dialog.showAndWait();
+        String newRepoPath = dir.getPath() +"/" + result.get();
         dialog.setTitle("Repository name");
         dialog.setHeaderText("Enter repository name:");
         dialog.setContentText("Name:");
-        Optional<String> result = dialog.showAndWait();
-        String newRepoName = result.get();
-        if (result.isPresent()){
-            engine.changeCurrentUser(newRepoName);
-        }
-        engine.createNewRepository(dir.getPath(), newRepoName);
+        Optional<String> repoName = dialog.showAndWait();
+        String newRepoName = repoName.get();
+        engine.createNewRepository(newRepoPath, newRepoName);
     }
 
     private List<String> getAllBranchesName() throws NoActiveRepositoryError{
