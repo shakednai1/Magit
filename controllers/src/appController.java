@@ -170,7 +170,14 @@ public class appController {
 
     @FXML
     void OnSwitchRepo(ActionEvent event) {
-
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Select repository location ");
+        File dir = directoryChooser.showDialog(MyApp.stage);
+        if(!engine.changeActiveRepository(dir.getPath())){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("path is not contains .magit folder!");
+            alert.showAndWait();
+        }
     }
 
     @FXML
