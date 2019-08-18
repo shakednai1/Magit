@@ -11,15 +11,14 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class appController {
 
     private static MainEngine engine ;
 
-    public appController(){
-        engine = new MainEngine();
-    }
+    public appController(){ engine = new MainEngine(); }
 
     @FXML
     private MenuItem createNewBranch;
@@ -66,6 +65,7 @@ public class appController {
             Optional<String> branchToCheckout = choiceDialog.showAndWait();
             branchNameToCheckout = branchToCheckout.get();
             engine.checkoutBranch(branchNameToCheckout, false);
+            updateCurrentRepoAndBranch();
         }
         catch (InvalidBranchNameError | NoActiveRepositoryError e){
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -77,11 +77,12 @@ public class appController {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Uncommited changes in current branch");
             alert.setHeaderText("Given Branch has open changes. you need to commit then or force checkout and the changes will remove ");
-            alert.setContentText("Are you sure you want to force commit ?");
+            alert.setContentText("Are you sure you want to force checkout ?");
             Optional<ButtonType> result = alert.showAndWait();
             if (result.get() == ButtonType.OK){
                 try {
                     engine.checkoutBranch(branchNameToCheckout, true);
+                    updateCurrentRepoAndBranch();
                 }
                 catch (InvalidBranchNameError | UncommittedChangesError | NoActiveRepositoryError ex){
                 }
@@ -159,9 +160,9 @@ public class appController {
         try{
             engine.isXmlValid(selectedFile.getPath());
             engine.loadRepositoyFromXML();
-            currentRepo.setText("Current Repo: " + engine.getCurrentRepoName());
+            updateCurrentRepoAndBranch();
         }
-        catch (XmlException | UncommittedChangesError | InvalidBranchNameError | NoActiveRepositoryError e){
+        catch (XmlException | UncommittedChangesError | InvalidBranchNameError e){
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText(e.getMessage());
             alert.showAndWait();
@@ -177,6 +178,9 @@ public class appController {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("path is not contains .magit folder!");
             alert.showAndWait();
+        }
+        else{
+            updateCurrentRepoAndBranch();
         }
     }
 
@@ -204,12 +208,103 @@ public class appController {
         dialog.setContentText("Name:");
         Optional<String> result = dialog.showAndWait();
         String newRepoPath = dir.getPath() +"/" + result.get();
-        dialog.setTitle("Repository name");
-        dialog.setHeaderText("Enter repository name:");
-        dialog.setContentText("Name:");
-        Optional<String> repoName = dialog.showAndWait();
+        TextInputDialog dialog2 = new TextInputDialog("");
+        dialog2.setTitle("Repository name");
+        dialog2.setHeaderText("Enter repository name:");
+        dialog2.setContentText("Name:");
+        Optional<String> repoName = dialog2.showAndWait();
         String newRepoName = repoName.get();
         engine.createNewRepository(newRepoPath, newRepoName);
+    }
+
+    @FXML
+    void OnWCStatus(ActionEvent event){
+        try{
+            Map<String, List<String>> changes = engine.getWorkingCopyStatus();
+            List<String> updatedFiles = changes.get("update");
+            List<String> newFiles = changes.get("new");
+            List<String> deletedFiles = changes.get("delete");
+            String files = "";
+            files = files.concat("Update: \n");
+            for(String updatedFile : updatedFiles){
+                files = files.concat(updatedFile + "\n");
+            }
+            files = files.concat("\n");
+            files = files.concat("\n");
+
+            files = files.concat("New: \n");
+            for(String newFile : newFiles){
+                files = files.concat(newFile + "\n");
+            }
+            files = files.concat("\n");
+            files = files.concat("\n");
+
+            files = files.concat("Deleted: \n");
+            for(String deletedFile : deletedFiles){
+                files = files.concat(deletedFile + "\n");
+            }
+            files = files.concat("\n");
+            files = files.concat("\n");
+
+            Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
+            alertInfo.setContentText(files);
+            alertInfo.setHeaderText("Working copy status:");
+            alertInfo.setTitle("WC status");
+            alertInfo.showAndWait();
+        }
+        catch (NoActiveRepositoryError e){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+
+    }
+
+    @FXML
+    void OnCommit(ActionEvent event){
+        TextInputDialog dialog = new TextInputDialog("");
+        dialog.setTitle("Commit");
+        dialog.setHeaderText("Enter commit message:");
+        dialog.setContentText("Message:");
+        Optional<String> commitMsg = dialog.showAndWait();
+        try{
+            if(!engine.commit(commitMsg.get())){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setContentText("There are no changes to commit");
+                alert.showAndWait();
+            }
+        }
+        catch (NoActiveRepositoryError e){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+    @FXML
+    public void OnListAllBranches(){
+        try {
+            List<String> allBranches = getAllBranchesName();
+            Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
+            alertInfo.setTitle("Branches");
+            alertInfo.setHeaderText("All Branches:");
+            String str = "";
+            for(String branch : allBranches){
+                if(engine.getCurrentBranchName().equals(branch)){
+                    str = str.concat("**HEAD** ");
+                }
+                str = str.concat(branch + "\n");
+
+            }
+            alertInfo.setContentText(str);
+            alertInfo.showAndWait();
+        }
+        catch (NoActiveRepositoryError e){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+
     }
 
     private List<String> getAllBranchesName() throws NoActiveRepositoryError{
@@ -225,6 +320,16 @@ public class appController {
             branchesName.add(name);
         }
         return branchesName;
+    }
+
+    private void updateCurrentRepoAndBranch(){
+        try{
+            currentRepo.setText("Current Repo: " + engine.getCurrentRepoName());
+            currentBranch.setText("Current Branch: " + engine.getCurrentBranchName());
+        }
+        catch (NoActiveRepositoryError e){
+
+        }
     }
 
 }

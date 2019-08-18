@@ -126,4 +126,8 @@ public class MainEngine {
         repositoryManager.createNewRepository(newRepositoryPath, name, false);
     }
 
+    public String getCurrentBranchName(){
+        return repositoryManager.getActiveRepository().getActiveBranch().getName();
+    }
+
 }
