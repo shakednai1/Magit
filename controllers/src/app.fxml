@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
@@ -9,7 +10,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="appController">
+<AnchorPane focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="AppController">
     <children>
         <GridPane layoutX="11.0" layoutY="7.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="1000.0">
             <columnConstraints>
@@ -22,9 +23,10 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <MenuButton mnemonicParsing="false" text="Branch" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                <MenuButton mnemonicParsing="false" text="Branch" GridPane.columnIndex="2" GridPane.rowIndex="2">
                     <items>
                         <MenuItem fx:id="createNewBranch" mnemonicParsing="false" onAction="#OnCreateNewBranchPopUp" text="create new" />
                         <MenuItem fx:id="checkoutBranch" mnemonicParsing="false" onAction="#OnCheckoutBranch" text="checkout" />
@@ -32,19 +34,22 @@
                         <MenuItem fx:id="listAllBranches" mnemonicParsing="false" onAction="#OnListAllBranches" text="show all branches" />
                     </items>
                 </MenuButton>
-                <Label fx:id="currentRepo" text="Current Repo:" />
-                <Label fx:id="currentUser" text="Current User: Administrator" GridPane.columnIndex="1" />
-                <Label fx:id="currentBranch" text="Current Branch:" GridPane.columnIndex="2" />
-                <Button fx:id="switchUser" mnemonicParsing="false" onAction="#OnSwitchUserPopUp" text="switch user" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <MenuButton fx:id="repoOptions" mnemonicParsing="false" text="Repository" GridPane.rowIndex="1">
+                <Label fx:id="currentRepo" textFill="#783232" GridPane.columnSpan="2147483647">
+                    <GridPane.margin>
+                        <Insets left="1.0" right="1.0" />
+                    </GridPane.margin></Label>
+                <Label fx:id="currentUser" text="Current User: Administrator" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label fx:id="currentBranch" text="Current Branch:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                <Button fx:id="switchUser" mnemonicParsing="false" onAction="#OnSwitchUserPopUp" text="switch user" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <MenuButton fx:id="repoOptions" mnemonicParsing="false" text="Repository" GridPane.rowIndex="2">
                     <items>
                         <MenuItem fx:id="createNewRepo" mnemonicParsing="false" onAction="#OnCreateNewRepo" text="create new" />
                         <MenuItem fx:id="switchRepo" mnemonicParsing="false" onAction="#OnSwitchRepo" text="switch repo" />
                         <MenuItem fx:id="loadFromXml" mnemonicParsing="false" onAction="#OnLoadFromXml" text="load from XML" />
                     </items>
                 </MenuButton>
-                <Button fx:id="wcStatus" mnemonicParsing="false" onAction="#OnWCStatus" text="show WC statuc" GridPane.columnIndex="3" />
-                <Button fx:id="commitBtn" mnemonicParsing="false" onAction="#OnCommit" prefHeight="25.0" prefWidth="199.0" text="Commit" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                <Button fx:id="wcStatus" mnemonicParsing="false" onAction="#OnWCStatus" text="show WC statuc" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                <Button fx:id="commitBtn" mnemonicParsing="false" onAction="#OnCommit" prefHeight="25.0" prefWidth="199.0" text="Commit" GridPane.columnIndex="3" GridPane.rowIndex="3" />
             </children>
         </GridPane>
     </children>

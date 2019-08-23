@@ -1,14 +1,11 @@
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.InputStream;
 import java.net.URL;
 
 public class MyApp extends Application{
@@ -25,7 +22,11 @@ public class MyApp extends Application{
         FXMLLoader fxmlLoader = new FXMLLoader();
         URL url = getClass().getResource("app.fxml");
         fxmlLoader.setLocation(url);
-        Parent root = fxmlLoader.load(url.openStream());
+        InputStream urlStream = url.openStream();
+        Parent root = fxmlLoader.load(urlStream);
+
+        AppController appController = fxmlLoader.getController();
+        appController.setBindings();
 
         Scene scene = new Scene(root, 1200, 600);
         primaryStage.setScene(scene);

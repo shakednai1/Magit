@@ -2,11 +2,14 @@ import exceptions.InvalidBranchNameError;
 import exceptions.NoActiveRepositoryError;
 import exceptions.UncommittedChangesError;
 import exceptions.XmlException;
+import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import models.RepositoryModel;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,11 +17,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class appController {
+public class AppController {
 
     private static MainEngine engine ;
+    private static RepositoryModel repositoryModel;
 
-    public appController(){ engine = new MainEngine(); }
+    public AppController(){
+        engine = new MainEngine();
+        repositoryModel = new RepositoryModel();
+
+    }
+
+    public void setBindings(){
+        currentRepo.textProperty().bind(Bindings.format("%s > %s",
+                repositoryModel.getRepoNameProperty(),
+                repositoryModel.getRepoPathProperty()));
+
+    }
 
     @FXML
     private MenuItem createNewBranch;
@@ -65,7 +80,7 @@ public class appController {
             Optional<String> branchToCheckout = choiceDialog.showAndWait();
             branchNameToCheckout = branchToCheckout.get();
             engine.checkoutBranch(branchNameToCheckout, false);
-            updateCurrentRepoAndBranch();
+            updateBranch();
         }
         catch (InvalidBranchNameError | NoActiveRepositoryError e){
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -82,7 +97,7 @@ public class appController {
             if (result.get() == ButtonType.OK){
                 try {
                     engine.checkoutBranch(branchNameToCheckout, true);
-                    updateCurrentRepoAndBranch();
+                    updateBranch();
                 }
                 catch (InvalidBranchNameError | UncommittedChangesError | NoActiveRepositoryError ex){
                 }
@@ -134,7 +149,7 @@ public class appController {
            choiceDialog.setContentText("Choose branch to delete");
            choiceDialog.setHeaderText("Delete branch");
            Optional<String> branchToDelete = choiceDialog.showAndWait();
-           engine.deleteBranch(branchToDelete.get());
+               engine.deleteBranch(branchToDelete.get());
         }
         catch (InvalidBranchNameError | NoActiveRepositoryError e){
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -160,7 +175,7 @@ public class appController {
         try{
             engine.isXmlValid(selectedFile.getPath());
             engine.loadRepositoyFromXML();
-            updateCurrentRepoAndBranch();
+            updateCurrentRepo(selectedFile.getPath());
         }
         catch (XmlException | UncommittedChangesError | InvalidBranchNameError e){
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -180,7 +195,7 @@ public class appController {
             alert.showAndWait();
         }
         else{
-            updateCurrentRepoAndBranch();
+            updateCurrentRepo(dir.getPath());
         }
     }
 
@@ -322,14 +337,20 @@ public class appController {
         return branchesName;
     }
 
-    private void updateCurrentRepoAndBranch(){
+    private void updateCurrentRepo(String repoPath){
         try{
-            currentRepo.setText("Current Repo: " + engine.getCurrentRepoName());
-            currentBranch.setText("Current Branch: " + engine.getCurrentBranchName());
+            repositoryModel.setRepo(engine.getCurrentRepoName(), repoPath);
+            updateBranch();
         }
         catch (NoActiveRepositoryError e){
 
         }
     }
+
+    private void updateBranch(){
+        currentBranch.setText("Current Branch: " + engine.getCurrentBranchName());
+    }
+
+    RepositoryModel getRepositoryModel(){ return repositoryModel; }
 
 }
