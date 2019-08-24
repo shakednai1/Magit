@@ -32,6 +32,7 @@
                         <MenuItem fx:id="checkoutBranch" mnemonicParsing="false" onAction="#OnCheckoutBranch" text="checkout" />
                         <MenuItem fx:id="deleteBranch" mnemonicParsing="false" onAction="#OnDeleteBranch" text="delete" />
                         <MenuItem fx:id="listAllBranches" mnemonicParsing="false" onAction="#OnListAllBranches" text="show all branches" />
+                  <MenuItem fx:id="resetBranch" mnemonicParsing="false" onAction="#OnResetBranch" text="reset branch" />
                     </items>
                 </MenuButton>
                 <Label fx:id="currentRepo" textFill="#783232" GridPane.columnSpan="2147483647">

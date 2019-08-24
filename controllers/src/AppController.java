@@ -171,10 +171,13 @@ public class AppController {
         try{
             engine.isXmlValid(selectedFile.getPath());
             engine.loadRepositoyFromXML();
-            updateCurrentRepo(selectedFile.getPath());
+            updateCurrentRepo(engine.getCurrentRepoPath());
         }
         catch (XmlException | UncommittedChangesError | InvalidBranchNameError e){
             showErrorAlert(e);
+        }
+        catch (NoActiveRepositoryError e){
+
         }
     }
 
@@ -334,4 +337,44 @@ public class AppController {
         alert.showAndWait();
     }
 
+    @FXML
+    void OnResetBranch(ActionEvent event) {
+        try{
+            if(engine.getActiveBranch().haveChanges()) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Uncommited changes in current branch");
+                alert.setHeaderText("Given Branch has open changes. you need to commit then or force reset and the changes will remove ");
+                alert.setContentText("Are you sure you want to reset and the changes will not saved ?");
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.get() == ButtonType.OK) {
+                    showResetBranchDialog();
+                }
+            }
+            else {
+                showResetBranchDialog();
+            }
+        }
+        catch (NoActiveRepositoryError e){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+    private void showResetBranchDialog(){
+        TextInputDialog dialog = new TextInputDialog("");
+        dialog.setTitle("Reset Branch");
+        dialog.setHeaderText("Enter commit SHA1:");
+        dialog.setContentText("SHA1:");
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()){
+            engine.resetBranch(result.get());
+            try {
+                engine.getActiveBranch().getRootFolder().updateState();
+            }
+            catch (NoActiveRepositoryError e){
+
+            }
+        }
+    }
 }
