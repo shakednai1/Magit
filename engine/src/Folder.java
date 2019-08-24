@@ -1,7 +1,6 @@
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.*;
 
 public class Folder extends Item {
@@ -61,8 +60,7 @@ public class Folder extends Item {
         return (curSubFiles.isEmpty() && curSubFolders.isEmpty());
     }
 
-
-    public void setSubItems(Map<String, Blob> subFiles, Map<String, Folder> subFolders){
+    void setSubItems(Map<String, Blob> subFiles, Map<String, Folder> subFolders){
         this.subFiles = subFiles;
         this.curSubFiles = subFiles;
         this.subFolders = subFolders;
@@ -101,12 +99,12 @@ public class Folder extends Item {
         return subItemsChanged;
     }
 
-    public void setSHA1(){
+    void setSHA1(){
         String sha1Str = getStringToCalcSHA1();
         currentSHA1 = DigestUtils.sha1Hex(sha1Str) ;
     }
 
-    public void zipRec(){
+    void zipRec(){
         for (Blob blob: subFiles.values()){
             blob.zipAndCopy();
         }

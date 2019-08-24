@@ -1,9 +1,7 @@
-import javax.rmi.CORBA.Util;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.*;
 
 import exceptions.InvalidBranchNameError;
@@ -12,7 +10,7 @@ import exceptions.XmlException;
 import fromXml.*;
 import fromXml.Item;
 
-public class XmlLoader {
+class XmlLoader {
 
     private MagitRepository magitRepository;
     private MagitBlobs magitBlobs;
@@ -32,7 +30,7 @@ public class XmlLoader {
 
 
 
-    public XmlLoader(String XmlPath) throws XmlException {
+    XmlLoader(String XmlPath) throws XmlException {
         File file = new File(XmlPath);
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(MagitRepository.class);
@@ -49,7 +47,7 @@ public class XmlLoader {
     }
 
 
-    public void checkValidXml() throws XmlException {
+    void checkValidXml() throws XmlException {
         checkMagitBlolb();
         checkMagitCommits();
         checkMagitFodler();
@@ -102,7 +100,7 @@ public class XmlLoader {
     }
 
 
-    public void openCommitRec(MagitSingleCommit commit, String prevCommitSha1){
+    void openCommitRec(MagitSingleCommit commit, String prevCommitSha1){
         // open my commit and than
         // search for the commits that the prev commit its me and open them
         Commit commitObj = openCommit(commit.getId(), prevCommitSha1);
@@ -114,7 +112,7 @@ public class XmlLoader {
         }
     }
 
-    public Commit openCommit(String commitID, String prevCommit){
+    Commit openCommit(String commitID, String prevCommit){
         MagitSingleCommit magitCommit = commitMap.get(commitID);
         MagitSingleFolder magitRootFolder = folderMap.get(magitCommit.getRootFolder().getId());
         Folder rootFolder = createFilesTree(magitRootFolder, Settings.repositoryFullPath);
@@ -289,7 +287,7 @@ public class XmlLoader {
         }
     }
 
-    public String checkRepoLocation() throws XmlException {
+    String checkRepoLocation() throws XmlException {
         String repositoryLocation = magitRepository.getLocation();
         File repoLocation = new File(repositoryLocation);
         File magitRepoLocation = new File(repositoryLocation + "\\.magit");

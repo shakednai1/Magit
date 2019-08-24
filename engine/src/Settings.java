@@ -30,9 +30,9 @@ public class Settings {
         repositoryDetailsFilePath = repositoryFullPath + repositoryDetailsFile;
     }
 
-    static String getUser(){return currentUser;}
+    public static String getUser(){return currentUser;}
 
-    static void setUser(String user){
+    public static void setUser(String user){
         currentUser = user;
     }
 }

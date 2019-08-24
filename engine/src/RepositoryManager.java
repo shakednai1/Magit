@@ -4,7 +4,6 @@ class RepositoryManager {
 
     private Repository activeRepository = null;
 
-    // TODO - delete content of .branchs and .objects - do not keep the state, faster dir scanner
 
     Repository getActiveRepository(){
         return activeRepository;

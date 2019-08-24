@@ -2,6 +2,7 @@ import exceptions.InvalidBranchNameError;
 import exceptions.NoActiveRepositoryError;
 import exceptions.UncommittedChangesError;
 import exceptions.XmlException;
+import models.BranchData;
 
 import java.util.*;
 
@@ -77,7 +78,7 @@ public class UI {
         System.out.println("3. Switch repository");
         System.out.println("4. Show current commit file system information");
         System.out.println("5. Working copy status");
-        System.out.println("6. Commit");
+        System.out.println("6. internals.Commit");
         System.out.println("7. List available branch");
         System.out.println("8. Create new branch");
         System.out.println("9. Delete branch");
@@ -191,8 +192,16 @@ public class UI {
 
     private static void printBranches(){
         try {
-            List<String> allBranchesNames = engine.getAllBranches();
-            allBranchesNames.forEach(System.out::println);
+            List<BranchData> allBranches = engine.getAllBranches();
+            String activeBranch = engine.getCurrentBranchName();
+
+            for(BranchData branch: allBranches){
+                String branchDisplay = branch.toString();
+                if (branch.getName().equals(activeBranch))
+                    branchDisplay = "**HEAD**" + branchDisplay;
+
+                System.out.println(branchDisplay);
+            }
         }
         catch (NoActiveRepositoryError e){
             System.out.println(e.getMessage());

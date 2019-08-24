@@ -2,20 +2,20 @@ import exceptions.InvalidBranchNameError;
 import exceptions.NoActiveRepositoryError;
 import exceptions.UncommittedChangesError;
 import exceptions.XmlException;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import models.BranchData;
 import models.RepositoryModel;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class AppController {
 
@@ -73,7 +73,7 @@ public class AppController {
     void OnCheckoutBranch(ActionEvent event) {
         String branchNameToCheckout = null;
         try{
-            List<String> branchesName = getAllBranchesName();
+            List<String> branchesName = getAllBranchNames();
             ChoiceDialog<String> choiceDialog = new ChoiceDialog<String>(branchesName.get(0), branchesName);
             choiceDialog.setContentText("Choose branch to checkout");
             choiceDialog.setHeaderText("Checkout branch");
@@ -82,16 +82,17 @@ public class AppController {
             engine.checkoutBranch(branchNameToCheckout, false);
             updateBranch();
         }
-        catch (InvalidBranchNameError | NoActiveRepositoryError e){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
+        catch (NoActiveRepositoryError e){
+            showErrorAlert(e);
+        }
+        catch (InvalidBranchNameError e){
             // InvalidBranchNameError cannot happen !
         }
+
         catch (UncommittedChangesError e){
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Uncommited changes in current branch");
-            alert.setHeaderText("Given Branch has open changes. you need to commit then or force checkout and the changes will remove ");
+            alert.setHeaderText("Given Branch has open changes. you need to commit them or force checkout and the changes will remove ");
             alert.setContentText("Are you sure you want to force checkout ?");
             Optional<ButtonType> result = alert.showAndWait();
             if (result.get() == ButtonType.OK){
@@ -121,9 +122,7 @@ public class AppController {
                 return true;
             }
             catch (InvalidBranchNameError | UncommittedChangesError | NoActiveRepositoryError e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setContentText(e.getMessage());
-                alert.showAndWait();
+                showErrorAlert(e);
             }
             return false;
         };
@@ -144,24 +143,21 @@ public class AppController {
     @FXML
     void OnDeleteBranch(ActionEvent event) {
         try{
-           List<String> branchesName = getAllBranchesName();
+           List<String> branchesName = getAllBranchNames();
            ChoiceDialog<String> choiceDialog = new ChoiceDialog<String>(branchesName.get(0), branchesName);
            choiceDialog.setContentText("Choose branch to delete");
            choiceDialog.setHeaderText("Delete branch");
            Optional<String> branchToDelete = choiceDialog.showAndWait();
                engine.deleteBranch(branchToDelete.get());
         }
-        catch (InvalidBranchNameError | NoActiveRepositoryError e){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
+        catch (NoActiveRepositoryError e){
+            showErrorAlert(e);
+        }
+        catch(InvalidBranchNameError e){
             // InvalidBranchNameError cannot happen !
         }
         catch (IllegalArgumentException e){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Given branch name is the head branch. Cannot delete head branch! ");
-            alert.showAndWait();
-
+            showErrorAlert(new Exception("Given branch name is the head branch. Cannot delete head branch! "));
         }
     }
 
@@ -178,9 +174,7 @@ public class AppController {
             updateCurrentRepo(selectedFile.getPath());
         }
         catch (XmlException | UncommittedChangesError | InvalidBranchNameError e){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
+            showErrorAlert(e);
         }
     }
 
@@ -267,18 +261,14 @@ public class AppController {
             alertInfo.setTitle("WC status");
             alertInfo.showAndWait();
         }
-        catch (NoActiveRepositoryError e){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
-        }
+        catch (NoActiveRepositoryError e){ showErrorAlert(e); }
 
     }
 
     @FXML
     void OnCommit(ActionEvent event){
         TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("Commit");
+        dialog.setTitle("internals.Commit");
         dialog.setHeaderText("Enter commit message:");
         dialog.setContentText("Message:");
         Optional<String> commitMsg = dialog.showAndWait();
@@ -289,17 +279,13 @@ public class AppController {
                 alert.showAndWait();
             }
         }
-        catch (NoActiveRepositoryError e){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
-        }
+        catch (NoActiveRepositoryError e){ showErrorAlert(e); }
     }
 
     @FXML
     public void OnListAllBranches(){
         try {
-            List<String> allBranches = getAllBranchesName();
+            List<String> allBranches = getAllBranchNames();
             Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
             alertInfo.setTitle("Branches");
             alertInfo.setHeaderText("All Branches:");
@@ -315,26 +301,13 @@ public class AppController {
             alertInfo.showAndWait();
         }
         catch (NoActiveRepositoryError e){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
+            showErrorAlert(e);
         }
 
     }
 
-    private List<String> getAllBranchesName() throws NoActiveRepositoryError{
-        List<String> branches = engine.getAllBranches();
-        List<String> branchesName = new ArrayList<>(branches.size());
-        for(String branch : branches){
-            String[] splited = branch.split(",");
-            String name = splited[0];
-            if (splited[0].contains("HEAD")){
-                String[] splitedHead = splited[0].split("\\* ");
-                name = splitedHead[splitedHead.length - 1];
-            }
-            branchesName.add(name);
-        }
-        return branchesName;
+    private List<BranchData> getAllBranchesDetails() throws NoActiveRepositoryError{
+        return engine.getAllBranches();
     }
 
     private void updateCurrentRepo(String repoPath){
@@ -351,6 +324,14 @@ public class AppController {
         currentBranch.setText("Current Branch: " + engine.getCurrentBranchName());
     }
 
-    RepositoryModel getRepositoryModel(){ return repositoryModel; }
+    private List<String> getAllBranchNames() throws NoActiveRepositoryError{
+        return engine.getAllBranches().stream().map((branch) -> branch.getName()).collect(Collectors.toList());
+    }
+
+    private void showErrorAlert(Exception e){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setContentText(e.getMessage());
+        alert.showAndWait();
+    }
 
 }

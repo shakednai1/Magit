@@ -1,8 +1,7 @@
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import exceptions.*;
+import models.BranchData;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.*;
 
 public class MainEngine {
@@ -64,21 +63,9 @@ public class MainEngine {
         repositoryManager.getActiveRepository().createNewBranch(name, checkout);
     }
 
-    public List<String> getAllBranches() throws NoActiveRepositoryError{
+    public List<BranchData> getAllBranches() throws NoActiveRepositoryError{
         validateActiveRepository();
-
-        List<Map<String, String>> allBranches = repositoryManager.getActiveRepository().getAllBranches();
-        String headBranch = repositoryManager.getActiveRepository().getActiveBranch().getName();
-        List<String> res = new ArrayList<>();
-
-        for(Map<String , String > branch: allBranches){
-            String branchDisplay = branch.get("name") + ", "+ branch.get("headSha1") + ", "+ branch.get("headMsg");
-            if (branch.get("name").equals(headBranch))
-                branchDisplay = "**HEAD** " + branchDisplay;
-            res.add(branchDisplay);
-        }
-
-        return res;
+        return repositoryManager.getActiveRepository().getAllBranches();
     }
 
     public void deleteBranch(String name) throws InvalidBranchNameError, IllegalArgumentException, NoActiveRepositoryError{
@@ -129,5 +116,7 @@ public class MainEngine {
     public String getCurrentBranchName(){
         return repositoryManager.getActiveRepository().getActiveBranch().getName();
     }
+
+    public Map<String, Commit> getAllCommits(){ return repositoryManager.getActiveRepository().getAllCommits();}
 
 }
