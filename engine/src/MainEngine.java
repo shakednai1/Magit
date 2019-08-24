@@ -1,6 +1,7 @@
 import com.sun.javaws.exceptions.InvalidArgumentException;
 import exceptions.*;
 
+import javax.rmi.CORBA.Util;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -128,6 +129,25 @@ public class MainEngine {
 
     public String getCurrentBranchName(){
         return repositoryManager.getActiveRepository().getActiveBranch().getName();
+    }
+
+    public void resetBranch(String commitSha1){
+        Utils.clearCurrentWC();
+        String branchName = getCurrentBranchName();
+        Branch branch = new Branch(branchName, commitSha1, true);
+        repositoryManager.getActiveRepository().setActiveBranch(branch);
+    }
+
+    public Branch getActiveBranch() throws NoActiveRepositoryError{
+        if(repositoryManager.getActiveRepository() == null){
+            throw new NoActiveRepositoryError("No active repository yet");
+        }
+        return repositoryManager.getActiveRepository().getActiveBranch();
+    }
+
+    public String getCurrentRepoPath() throws NoActiveRepositoryError{
+        validateActiveRepository();
+        return repositoryManager.getActiveRepository() != null ? repositoryManager.getActiveRepository().getFullPath() : "";
     }
 
 }

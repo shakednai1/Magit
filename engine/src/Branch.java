@@ -34,7 +34,7 @@ class Branch {
         currentStateOfFiles = rootFolder.getCommittedItemsState();
     }
 
-    private Branch(String name, String headCommitSha1, boolean rewriteFS){
+     Branch(String name, String headCommitSha1, boolean rewriteFS){
         // constractor for loading an existing branch
         this.name = name;
 
@@ -198,5 +198,4 @@ class Branch {
     static boolean deleteBranch(String branchName){
         return Utils.deleteFile(getBranchFilePath(branchName));
     }
-
 }
