@@ -150,4 +150,16 @@ public class MainEngine {
         return repositoryManager.getActiveRepository() != null ? repositoryManager.getActiveRepository().getFullPath() : "";
     }
 
+    public void cloneRepo(String src, String dst, String repoName){
+        repositoryManager.cloneRepository(src, dst, repoName);
+    }
+
+    public void fetchRepo(){
+        if(repositoryManager.getActiveRepository().hasRemoteRepo()){
+            repositoryManager.getActiveRepository().fetch();
+        }
+        else{
+            throw new IllegalArgumentException("current repo has no remote repository");
+        }
+    }
 }

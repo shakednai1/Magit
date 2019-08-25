@@ -11,10 +11,12 @@ class Branch {
     private String name;
     private Folder rootFolder;
 
+    RemoteBranch trackingAfter = null;
+
     private Map<String, Commit> commitData = new HashMap<>();
 
-    private Map<String, String> currentStateOfFiles = new HashMap<>();
-    private Map<String, String> newStateOfFiles = new HashMap<>();
+    public Map<String, String> currentStateOfFiles = new HashMap<>();
+    public Map<String, String> newStateOfFiles = new HashMap<>();
 
     Branch(String name){
         // constractor for master branch
@@ -197,5 +199,13 @@ class Branch {
 
     static boolean deleteBranch(String branchName){
         return Utils.deleteFile(getBranchFilePath(branchName));
+    }
+
+    public boolean isTracking(){
+        return trackingAfter != null;
+    }
+
+    public void addTracking(RemoteBranch remoteBranch){
+        trackingAfter = remoteBranch;
     }
 }

@@ -20,6 +20,7 @@ public class XmlLoader {
     private MagitFolders magitFolders;
     private MagitCommits magitCommits;
     private String repositoryPath;
+    private MagitRepository.MagitRemoteReference remoteReference;
 
     private Map<String, MagitBlob> blobMap = new HashMap<>();
     private Map<String, MagitSingleFolder> folderMap = new HashMap<>();
@@ -27,6 +28,8 @@ public class XmlLoader {
     // only commits with preceding commits - without first commit
     private Map<String, List<MagitSingleCommit>> commitPointersMap = new HashMap<>();
     private MagitSingleCommit firstCommit;
+
+    private Map<String, RemoteBranch> remoteBranchMap = new HashMap<>();
 
     RepositoryManager repositoryManager = MainEngine.getRepositoryManager();
 
@@ -74,7 +77,10 @@ public class XmlLoader {
             openCommitRec(firstCommit, null);
             repositoryManager.getActiveRepository().checkoutBranch(magitBranches.getHead(), true);
         }
-
+        repositoryManager.getActiveRepository().setRemoteRepositoyName(
+                magitRepository.getMagitRemoteReference().getName());
+        repositoryManager.getActiveRepository().setRemoteRepositoyPath(
+                magitRepository.getMagitRemoteReference().getLocation());
     }
 
     private void setFirstCommit() {
@@ -122,14 +128,26 @@ public class XmlLoader {
                 magitCommit.getDateOfCreation(), prevCommit);
 
 
-        List<MagitSingleBranch> pointingBranches = getPointedMagitBranch(magitCommit.getId());
+        List<MagitSingleBranch> pointingBranches = getPointedMagitBranch(magitCommit.getId(), false);
+        List<MagitSingleBranch> pointingRemoteBranches = getPointedMagitBranch(magitCommit.getId(), true);
 
-        if (!pointingBranches.isEmpty()){
-            for(MagitSingleBranch pointingBranch: pointingBranches){
+        if (!pointingRemoteBranches.isEmpty()) {
+            for (MagitSingleBranch pointingRemoteBranch : pointingRemoteBranches) {
+                RemoteBranch remoteBranch = new RemoteBranch(pointingRemoteBranch.getName(), commit.getCommitSHA1());
+                repositoryManager.getActiveRepository().addRemoteBranch(remoteBranch);
+            }
+        }
+
+        if (!pointingBranches.isEmpty()) {
+            for (MagitSingleBranch pointingBranch : pointingBranches) {
                 Branch branch = new Branch(pointingBranch.getName(), commit, rootFolder);
                 repositoryManager.getActiveRepository().addNewBranch(branch);
                 if (magitBranches.getHead().equals(pointingBranch.getName())) {
                     repositoryManager.getActiveRepository().setActiveBranch(branch);
+                }
+                if(pointingBranch.isTracking()){
+                    RemoteBranch remoteBranch = findTrackingBranch(pointingBranch.getTrackingAfter());
+                    branch.addTracking(remoteBranch);
                 }
                 rootFolder.zipRec();
                 commit.zipCommit();
@@ -144,13 +162,28 @@ public class XmlLoader {
         return commit;
     }
 
-    private List<MagitSingleBranch> getPointedMagitBranch(String id){
+    private RemoteBranch findTrackingBranch(String name){
+        for(RemoteBranch remoteBranch: repositoryManager.getActiveRepository().getAllRemoteBranches()){
+            if (remoteBranch.name.equals(name)){
+                return remoteBranch;
+            }
+        }
+        return null;
+    }
+
+    private List<MagitSingleBranch> getPointedMagitBranch(String id, boolean remote){
 
         List<MagitSingleBranch> pointingBranches = new LinkedList<>();
 
         for(MagitSingleBranch magitBranch : magitBranches.getMagitSingleBranch()){
-            if (magitBranch.getPointedCommit().getId().equals(id))
-                pointingBranches.add(magitBranch);
+            if (magitBranch.getPointedCommit().getId().equals(id)){
+                if(remote && magitBranch.isIsRemote()){
+                    pointingBranches.add(magitBranch);
+                }
+                else if(!remote && !magitBranch.isIsRemote()){
+                    pointingBranches.add(magitBranch);
+                }
+            }
 
         }
         return pointingBranches;

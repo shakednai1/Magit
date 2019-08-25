@@ -47,6 +47,8 @@
                         <MenuItem fx:id="createNewRepo" mnemonicParsing="false" onAction="#OnCreateNewRepo" text="create new" />
                         <MenuItem fx:id="switchRepo" mnemonicParsing="false" onAction="#OnSwitchRepo" text="switch repo" />
                         <MenuItem fx:id="loadFromXml" mnemonicParsing="false" onAction="#OnLoadFromXml" text="load from XML" />
+                  <MenuItem fx:id="cloneRepo" mnemonicParsing="false" onAction="#OnCloneRepo" text="clone repo" />
+                  <MenuItem fx:id="fetch" mnemonicParsing="false" onAction="#OnFetch" text="fetch" />
                     </items>
                 </MenuButton>
                 <Button fx:id="wcStatus" mnemonicParsing="false" onAction="#OnWCStatus" text="show WC statuc" GridPane.columnIndex="3" GridPane.rowIndex="1" />

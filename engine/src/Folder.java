@@ -12,7 +12,7 @@ public class Folder extends Item {
     private Map<String, Folder> subFolders = new HashMap<>();
 
     public Map<String, Blob> curSubFiles = new HashMap<>();
-    private Map<String, Folder> curSubFolders = new HashMap<>();
+    public Map<String, Folder> curSubFolders = new HashMap<>();
 
     Folder(String path, String name) {
         fullPath = path;

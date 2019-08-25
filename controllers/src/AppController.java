@@ -2,7 +2,6 @@ import exceptions.InvalidBranchNameError;
 import exceptions.NoActiveRepositoryError;
 import exceptions.UncommittedChangesError;
 import exceptions.XmlException;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -220,18 +219,8 @@ public class AppController {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Select repository location ");
         File dir = directoryChooser.showDialog(MyApp.stage);
-        TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("Repository folder name");
-        dialog.setHeaderText("Enter repository folder name:");
-        dialog.setContentText("Name:");
-        Optional<String> result = dialog.showAndWait();
-        String newRepoPath = dir.getPath() +"/" + result.get();
-        TextInputDialog dialog2 = new TextInputDialog("");
-        dialog2.setTitle("Repository name");
-        dialog2.setHeaderText("Enter repository name:");
-        dialog2.setContentText("Name:");
-        Optional<String> repoName = dialog2.showAndWait();
-        String newRepoName = repoName.get();
+        String newRepoPath = dir.getPath() +"/" + repositoryFolderNameDialog();
+        String newRepoName = repositoryNameDialog();
         engine.createNewRepository(newRepoPath, newRepoName);
     }
 
@@ -396,4 +385,49 @@ public class AppController {
             }
         }
     }
+
+    @FXML
+    void OnCloneRepo(ActionEvent event) {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Select source repository location ");
+        File SrcDir = directoryChooser.showDialog(MyApp.stage);
+        DirectoryChooser directoryChooser2 = new DirectoryChooser();
+        directoryChooser2.setTitle("Select destination repository location ");
+        File DstDir = directoryChooser2.showDialog(MyApp.stage);
+        String repoFolderName = repositoryFolderNameDialog();
+        String repoName = repositoryNameDialog();
+        engine.cloneRepo(SrcDir.getPath(), DstDir.getPath() + repoFolderName, repoName);
+        updateCurrentRepo(DstDir.getPath() + repoFolderName);
+    }
+
+    @FXML
+    void OnFetch(ActionEvent event){
+        try {
+            engine.fetchRepo();
+        }
+        catch (IllegalArgumentException e){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+    String repositoryFolderNameDialog(){
+        TextInputDialog dialog = new TextInputDialog("");
+        dialog.setTitle("Repository folder name");
+        dialog.setHeaderText("Enter repository folder name:");
+        dialog.setContentText("Name:");
+        Optional<String> result = dialog.showAndWait();
+        return result.get();
+    }
+
+    String repositoryNameDialog(){
+        TextInputDialog dialog2 = new TextInputDialog("");
+        dialog2.setTitle("Repository name");
+        dialog2.setHeaderText("Enter repository name:");
+        dialog2.setContentText("Name:");
+        Optional<String> repoName = dialog2.showAndWait();
+        return repoName.get();
+    }
+
 }

@@ -1,17 +1,24 @@
+import com.sun.xml.internal.ws.api.config.management.policy.ManagementAssertion;
 import exceptions.InvalidBranchNameError;
 import exceptions.UncommittedChangesError;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 class Repository {
 
     private String name;
     private String fullPath;
     private Branch activeBranch = null;
+    private String remoteRepositoyPath = null;
+    private String remoteRepositoyName = null;
     private List<Map<String, String>> branches = new LinkedList<>();
+    private List<RemoteBranch> remoteBranches = new LinkedList<>();
 
 
     Repository(String fullPath, String name, boolean empty) {
@@ -189,5 +196,43 @@ class Repository {
         String headMsg = (branch.getHead() == null)? "": branch.getHead().getMsg();
 
         branches.add(Branch.getFormattedBranchDetails(branch.getName(), headSha1, headMsg));
+    }
+
+    public void setRemoteRepositoyPath(String RRpath){
+        remoteRepositoyPath = RRpath;
+    }
+    public void setRemoteRepositoyName(String RRname){
+        remoteRepositoyName = RRname;
+    }
+
+    public void addRemoteBranch(RemoteBranch remoteBranch){
+        remoteBranches.add(remoteBranch);
+    }
+
+    public List<RemoteBranch> getAllRemoteBranches(){
+        return remoteBranches;
+    }
+
+    public boolean hasRemoteRepo(){
+        return remoteRepositoyName != null;
+    }
+
+    public void fetch(){
+        remoteBranches = new LinkedList<>();
+        File sourceBranchesDir = new File(remoteRepositoyPath + "/.magit/branches");
+        for(File branch: sourceBranchesDir.listFiles()){
+            if(!branch.getName().equals("HEAD")){
+                remoteBranches.add(new RemoteBranch(remoteRepositoyName + "/" + branch.getName(),
+                        Utils.getFileLines(branch.getPath()).get(0)));
+            }
+        }
+        File sourceObjectsDir = new File(remoteRepositoyPath + "/.magit/objects");
+        for(File file : sourceObjectsDir.listFiles()){
+            File destFile = new File(Settings.objectsFolderPath + "/" + file.getName());
+            try {
+                FileUtils.copyFile(file, destFile);
+            } catch (IOException e) {
+            }
+        }
     }
 }
