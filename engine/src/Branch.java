@@ -1,3 +1,4 @@
+import models.BranchData;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.File;
@@ -5,7 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-class Branch {
+public class Branch {
 
     private Commit head = null;
     private String name;
@@ -63,9 +64,9 @@ class Branch {
         return new Folder(repoLocation, repoName);
     }
 
-    Commit getHead(){ return head; }
+    public Commit getHead(){ return head; }
 
-    String getName(){ return name; }
+    public String getName(){ return name; }
 
     Folder getRootFolder(){ return rootFolder; }
 
@@ -84,10 +85,11 @@ class Branch {
         return new Branch(branchName, headCommitSha1, rewriteWC);
     }
 
-    static Map<String, String> getBranchDisplayDetails(String branchName){
+    static BranchData getBranchDisplayData(String branchName){
         List<String> branchData = Utils.getFileLines(getBranchFilePath(branchName));
         String headCommitSha1 = branchData.get(0);
         String headCommitMsg;
+
         if(headCommitSha1.equals("null")){
             headCommitSha1 = "";
             headCommitMsg = "";
@@ -98,17 +100,9 @@ class Branch {
             headCommitMsg = headCommit.getMsg();
         }
 
-        return getFormattedBranchDetails(branchName, headCommitSha1, headCommitMsg);
+        return new BranchData(branchName, headCommitSha1, headCommitMsg);
     }
 
-    static Map<String, String> getFormattedBranchDetails(String branchName, String headCommitSha1, String headCommitMsg){
-        Map<String , String > res = new HashMap<>();
-        res.put("name", branchName);
-        res.put("headSha1", headCommitSha1);
-        res.put("headMsg", headCommitMsg);
-
-        return res;
-    }
 
     boolean haveChanges(){
         rootFolder.updateState();
@@ -160,7 +154,7 @@ class Branch {
         return Settings.branchFolderPath + branchName + ".txt";
     }
 
-    List<String> getCommitHistory(){
+    public List<String> getCommitHistory(){
         List<String> res = new LinkedList<>();
         Commit currentCommit = head;
         while (currentCommit != null){
@@ -170,7 +164,7 @@ class Branch {
         return res;
     }
 
-    List<String> getCommittedState(){  return rootFolder.getItemsData(); }
+    public List<String> getCommittedState(){  return rootFolder.getItemsData(); }
 
     Map<String ,List<String>> getWorkingCopy(){
         rootFolder.updateState();

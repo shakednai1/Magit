@@ -1,11 +1,10 @@
 import org.apache.commons.codec.digest.DigestUtils;
 
-import javax.rmi.CORBA.Util;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-class Commit {
+public class Commit {
 
     static DateFormat commitDateFormat = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss:SSS");
 
@@ -42,12 +41,12 @@ class Commit {
         this.msg = String.join( Settings.delimiter, msgParts);
     }
 
-    String getCommitSHA1(){return commitSha1;}
-    String getRootFolderSHA1(){ return rootSha1; }
-    String getPreviousCommitSHA1(){ return previousCommitSHA1; }
-    String getUserLastModified() { return userLastModified; }
-    String getCommitTime() { return commitTime; }
-    String getMsg(){ return msg;}
+    public String getCommitSHA1(){return commitSha1;}
+    public String getRootFolderSHA1(){ return rootSha1; }
+    public String getPreviousCommitSHA1(){ return previousCommitSHA1; }
+    public String getUserLastModified() { return userLastModified; }
+    public String getCommitTime() { return commitTime; }
+    public String getMsg(){ return msg;}
 
 
     public String toString(){

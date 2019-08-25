@@ -1,5 +1,4 @@
 import org.apache.commons.io.FileUtils;
-
 import javax.rmi.CORBA.Util;
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +9,6 @@ class RepositoryManager {
 
     private Repository activeRepository = null;
 
-    // TODO - delete content of .branchs and .objects - do not keep the state, faster dir scanner
 
     Repository getActiveRepository(){
         return activeRepository;

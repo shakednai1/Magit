@@ -2,13 +2,15 @@ import com.sun.xml.internal.ws.api.config.management.policy.ManagementAssertion;
 import exceptions.InvalidBranchNameError;
 import exceptions.UncommittedChangesError;
 import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import models.BranchData;
+import java.io.File;
+import java.util.*;
 
 class Repository {
 
@@ -17,8 +19,8 @@ class Repository {
     private Branch activeBranch = null;
     private String remoteRepositoyPath = null;
     private String remoteRepositoyName = null;
-    private List<Map<String, String>> branches = new LinkedList<>();
     private List<RemoteBranch> remoteBranches = new LinkedList<>();
+    private List<BranchData> branches = new LinkedList<>();
 
 
     Repository(String fullPath, String name, boolean empty) {
@@ -54,10 +56,7 @@ class Repository {
 
     Branch getActiveBranch(){ return activeBranch; }
 
-    List<Map<String , String >> getAllBranches(){
-        return branches;
-
-    }
+    List<BranchData> getAllBranches(){ return branches; }
 
     static Repository load(String repositoryPath){
         // we know that the repo exists and valid
@@ -79,7 +78,7 @@ class Repository {
         for(File item: listOfItems){
             if(!item.getName().equals(Settings.activeBranchFileName)){
                 String[] name= item.getName().split("\\.");
-                branches.add(Branch.getBranchDisplayDetails(name[0]));
+                branches.add(Branch.getBranchDisplayData(name[0]));
             }
         }
     }
@@ -100,10 +99,10 @@ class Repository {
         // should return updated branch details. the only that can change is the active branch commit
 
         for(int i=0; i < branches.size(); i++){
-            Map<String, String> branchDetails = branches.get(i);
-            if(branchDetails.get("name").equals(activeBranch.getName())){
-                branchDetails.put("headSha1", activeBranch.getHead().getCommitSHA1());
-                branchDetails.put("headMsg", activeBranch.getHead().getMsg());
+            BranchData branchDetails = branches.get(i);
+            if(branchDetails.getName().equals(activeBranch.getName())){
+                branchDetails.setHeadSha1(activeBranch.getHead().getCommitSHA1());
+                branchDetails.setHeadMsg(activeBranch.getHead().getMsg());
             }
         }
     }
@@ -113,7 +112,7 @@ class Repository {
     }
 
     void createNewBranch(String branchName, boolean checkout) throws UncommittedChangesError, InvalidBranchNameError{
-        if(branches.stream().anyMatch(branch-> branch.get("name").equals(branchName)) ||
+        if(branches.stream().anyMatch(branch-> branch.getName().equals(branchName)) ||
             branchName.contains(" "))
             throw new InvalidBranchNameError("");
 
@@ -135,7 +134,7 @@ class Repository {
         }
     }
 
-    public void setActiveBranch(Branch branch){
+    void setActiveBranch(Branch branch){
         activeBranch = branch;
         saveRepositoryActiveBranch();
     }
@@ -168,7 +167,7 @@ class Repository {
     private void deleteBranchFromHistory(String branchName){
         int i;
         for(i = 0; i< branches.size(); i++){
-            if(branches.get(i).get("name").equals(branchName))
+            if(branches.get(i).getName().equals(branchName))
                 break;
         }
 
@@ -187,15 +186,24 @@ class Repository {
 
     boolean validBranchName(String branchName) {
         return branches.stream().
-                map(branch -> branch.get("name")).
+                map(branch -> branch.getName()).
                 anyMatch(name -> name.equals(branchName));
     }
 
     public void addNewBranch(Branch branch){
-        String headSha1 = (branch.getHead() == null)? "": branch.getHead().getCommitSHA1();
-        String headMsg = (branch.getHead() == null)? "": branch.getHead().getMsg();
+        branches.add(Branch.getBranchDisplayData(branch.getName()));
+    }
 
-        branches.add(Branch.getFormattedBranchDetails(branch.getName(), headSha1, headMsg));
+    Map<String, Commit> getAllCommits(){
+        Map<String, Commit> allCommitsData = new HashMap<>();
+
+        for(BranchData branch: branches){
+            String topCommitSha1 = branch.getHeadSha1();
+            if (allCommitsData.get(topCommitSha1) == null)
+                allCommitsData.put(topCommitSha1, new Commit(topCommitSha1));
+        }
+
+        return allCommitsData;
     }
 
     public void setRemoteRepositoyPath(String RRpath){

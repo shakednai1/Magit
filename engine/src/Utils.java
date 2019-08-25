@@ -1,6 +1,5 @@
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,7 +9,7 @@ import java.util.zip.ZipOutputStream;
 
 public class Utils {
 
-    public static void zip(String fullZipPath, String fullFilePath){
+    static void zip(String fullZipPath, String fullFilePath){
         try {
             byte[] buffer = new byte[1024];
             FileOutputStream fos = new FileOutputStream(fullZipPath);
@@ -32,7 +31,7 @@ public class Utils {
 
     }
 
-    public static void unzip(String zipFilePath, String destDir, String newFileName) {
+    static void unzip(String zipFilePath, String destDir, String newFileName) {
         File dir = new File(destDir);
         // create output directory if it doesn't exist
         if(!dir.exists()) dir.mkdirs();
@@ -65,7 +64,7 @@ public class Utils {
         }
     }
 
-    public static void createNewFile(String fileName, String content){
+    static void createNewFile(String fileName, String content){
         File file = new File(fileName);
         try {
             file.createNewFile();
@@ -76,11 +75,6 @@ public class Utils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static boolean createFolder(String folderPath){
-        File file = new File(folderPath);
-        return file.mkdir();
     }
 
     static boolean deleteFile(String filePath){
@@ -114,7 +108,7 @@ public class Utils {
         return null;
     }
 
-    public static void clearCurrentWC() {
+    static void clearCurrentWC() {
         File directory = new File(Settings.repositoryFullPath);
         File[] listOfItems = directory.listFiles();
         for(File item: listOfItems){
