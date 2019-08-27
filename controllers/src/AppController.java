@@ -387,7 +387,7 @@ public class AppController {
         try {
             engine.fetchRepo();
         }
-        catch (IllegalArgumentException e){
+        catch (IllegalArgumentException | NoActiveRepositoryError e){
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText(e.getMessage());
             alert.showAndWait();

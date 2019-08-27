@@ -1,3 +1,5 @@
+import exceptions.InvalidBranchNameError;
+import exceptions.UncommittedChangesError;
 import org.apache.commons.io.FileUtils;
 import javax.rmi.CORBA.Util;
 import java.io.File;
@@ -43,9 +45,14 @@ class RepositoryManager {
         return directory.exists();
     }
 
-    public void cloneRepository(String sourcePath, String destPath, String repoName){
-        List<String> lines = Utils.getFileLines(sourcePath + "/.magit/repo");
-        String remoteRepoName = lines.get(0);
+    public void cloneRepository(String sourcePath, String destPath, String repoName, boolean rtbBranch){
+        String branchesPath = destPath + Settings.branchFolder;
+        String remoteBranchesPath = destPath + Settings.remoteBranchFolder;
+
+        // extract remote repo name
+        String remoteRepoName = Utils.getFileLines(sourcePath + Settings.repositoryDetailsFile).get(0);
+
+        // copy remote repo to local repo
         File srcDir = new File(sourcePath);
         File destDir = new File(destPath);
         try {
@@ -53,29 +60,49 @@ class RepositoryManager {
         }
         catch (IOException e){
         }
-        List<RemoteBranch> remoteBranches = new LinkedList<>();
 
-        File branchesDir = new File(destDir + "/.magit/branches");
-        for (File branch : branchesDir.listFiles()){
-            if(!branch.getName().equals("HEAD")){
-                List<String> branchLines = Utils.getFileLines(branch.getPath());
-                remoteBranches.add(new RemoteBranch(remoteRepoName + "/" + branch.getName(), branchLines.get(0)));
-            }
-        }
-
-        for(File file : branchesDir.listFiles()){
+        // copy all branches files to remote branches folder
+        copyBranchesFromRemote(branchesPath, remoteBranchesPath);
+        File branchesDir = new File(branchesPath);
+        for(File file: branchesDir.listFiles()){
             file.delete();
         }
-        createNewRepository(destPath, repoName, false);
-        //switchActiveRepository(destPath);
-        for(RemoteBranch remoteBranch : remoteBranches){
-            activeRepository.addRemoteBranch(remoteBranch);
+        // create new branch pointing to the current commit
+        // if the user wants to create rtb - create rtb to the head branch
+        String branchName = Utils.getFileLines(remoteBranchesPath + "HEAD").get(0);
+        String headRemotePointedCommit = Utils.getFileLines( remoteBranchesPath + branchName + ".txt").get(0);
+        String content = headRemotePointedCommit + Settings.delimiter + branchName;
+
+        if(!rtbBranch){
+            branchName = "master";
+            content = headRemotePointedCommit + ",null";
         }
-        // TODO fix open change while clone
+
+        // create branch file + update head
+        Utils.createNewFile(branchesPath + branchName + ".txt", content);
+        Utils.createNewFile(branchesPath + "HEAD", branchName);
+
+        // update repo file name
+        Utils.writeFile(destDir + Settings.repositoryDetailsFile, repoName, false);
+        Utils.writeFile(destDir + Settings.repositoryRemoteDetailsFile, sourcePath + Settings.delimiter + remoteRepoName, false);
+
+        switchActiveRepository(destPath);
+
+        activeRepository.getActiveBranch().addTracking(branchName);
+        activeRepository.getActiveBranch().writeBranchInfoFile();
         activeRepository.setRemoteRepositoyPath(sourcePath);
         activeRepository.setRemoteRepositoyName(remoteRepoName);
 
     }
 
+    public void copyBranchesFromRemote(String branchesPath, String remoteBranchesPath){
+        File branchesDir = new File(branchesPath);
+        File remoteBranchesDir = new File(remoteBranchesPath);
+        try {
+            FileUtils.copyDirectory(branchesDir,remoteBranchesDir);
+        }
+        catch (IOException e){
+        }
 
+    }
 }
