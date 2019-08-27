@@ -1,8 +1,12 @@
 
+import com.fxgraph.graph.Graph;
+import com.fxgraph.graph.PannableCanvas;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.stage.Stage;
 
 import java.io.InputStream;
@@ -26,10 +30,17 @@ public class MyApp extends Application{
         Parent root = fxmlLoader.load(urlStream);
 
         AppController appController = fxmlLoader.getController();
-        appController.setBindings();
 
-        Scene scene = new Scene(root, 1200, 600);
+        final Scene scene = new Scene(root, 700, 400);
+
+        ScrollPane scrollPane = (ScrollPane) scene.lookup("#scrollpaneContainer");
+        PannableCanvas canvas = appController.getCommitTreeGraph().getCanvas();
+        //canvas.setPrefWidth(100);
+        //canvas.setPrefHeight(100);
+        scrollPane.setContent(canvas);
+
         primaryStage.setScene(scene);
+        primaryStage.setTitle("M.A.Git - Shaked vs. Alona");
         primaryStage.show();
         stage = primaryStage;
     }

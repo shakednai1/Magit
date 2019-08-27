@@ -1,3 +1,7 @@
+
+
+import com.fxgraph.graph.Graph;
+import components.commitTree.CommitTree;
 import exceptions.InvalidBranchNameError;
 import exceptions.NoActiveRepositoryError;
 import exceptions.UncommittedChangesError;
@@ -17,22 +21,27 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
+
 public class AppController {
 
-    private static MainEngine engine ;
-    private static RepositoryModel repositoryModel;
+    private MainEngine engine ;
+    private RepositoryModel repositoryModel;
+    private CommitTree commitTree;
+    private Commit g;
 
     public AppController(){
         engine = new MainEngine();
         repositoryModel = new RepositoryModel();
 
+        commitTree = new CommitTree();
     }
 
-    public void setBindings(){
+    @FXML
+    private void initialize(){
         currentRepo.textProperty().bind(Bindings.format("%s > %s",
                 repositoryModel.getRepoNameProperty(),
                 repositoryModel.getRepoPathProperty()));
-
     }
 
     @FXML
@@ -68,6 +77,8 @@ public class AppController {
     @FXML
     private MenuItem loadFromXml;
 
+
+    Graph getCommitTreeGraph(){ return commitTree.getTree(); }
 
     @FXML
     void OnCheckoutBranch(ActionEvent event) {
@@ -186,13 +197,11 @@ public class AppController {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Select repository location ");
         File dir = directoryChooser.showDialog(MyApp.stage);
-        if(!engine.changeActiveRepository(dir.getPath())){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("path is not contains .magit folder!");
-            alert.showAndWait();
+        if(engine.changeActiveRepository(dir.getPath())){
+            updateCurrentRepo(dir.getPath());
         }
         else{
-            updateCurrentRepo(dir.getPath());
+            showErrorAlert(new Exception("path is not contains .magit folder!"));
         }
     }
 
@@ -307,6 +316,7 @@ public class AppController {
         try{
             repositoryModel.setRepo(engine.getCurrentRepoName(), repoPath);
             updateBranch();
+//            commitTree.setCommitsTree(engine.getAllCommits());
         }
         catch (NoActiveRepositoryError e){
 
