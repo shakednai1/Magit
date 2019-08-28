@@ -14,6 +14,7 @@ public class Commit {
     private String rootSha1;
     private String previousCommitSHA1;
     private String userLastModified;
+    private String mergedCommitSHA1; // The commit that was merged with prevCommit of the head branch
 
     Commit(String msg, String rootFolderSha, String userLastModified, String commitTime, String previousCommitSHA1){
         this.msg = msg;

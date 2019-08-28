@@ -1,5 +1,5 @@
 import org.apache.commons.io.FileUtils;
-import javax.rmi.CORBA.Util;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -72,8 +72,8 @@ class RepositoryManager {
             activeRepository.addRemoteBranch(remoteBranch);
         }
         // TODO fix open change while clone
-        activeRepository.setRemoteRepositoyPath(sourcePath);
-        activeRepository.setRemoteRepositoyName(remoteRepoName);
+        activeRepository.setRemoteRepositoryPath(sourcePath);
+        activeRepository.setRemoteRepositoryName(remoteRepoName);
 
     }
 

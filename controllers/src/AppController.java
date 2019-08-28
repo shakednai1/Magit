@@ -1,3 +1,4 @@
+import commitTree.CommitTree;
 import exceptions.InvalidBranchNameError;
 import exceptions.NoActiveRepositoryError;
 import exceptions.UncommittedChangesError;
@@ -9,30 +10,35 @@ import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import models.BranchData;
+import models.CommitData;
+import models.CommitModel;
 import models.RepositoryModel;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class AppController {
 
-    private static MainEngine engine ;
-    private static RepositoryModel repositoryModel;
+    private MainEngine engine ;
+    private RepositoryModel repositoryModel;
+    private CommitTree commitTree;
+    private List<BranchData> branches = new LinkedList<>();
+
+    // TODO active branch property, relate current Branch label
+
 
     public AppController(){
         engine = new MainEngine();
         repositoryModel = new RepositoryModel();
-
     }
 
-    public void setBindings(){
+    public void initialize(){
         currentRepo.textProperty().bind(Bindings.format("%s > %s",
                 repositoryModel.getRepoNameProperty(),
                 repositoryModel.getRepoPathProperty()));
 
+        commitTree = new CommitTree();
     }
 
     @FXML
@@ -68,6 +74,11 @@ public class AppController {
     @FXML
     private MenuItem loadFromXml;
 
+    @FXML
+    ScrollPane commitTreeScroll;
+
+
+    CommitTree getCommitTree(){ return commitTree; }
 
     @FXML
     void OnCheckoutBranch(ActionEvent event) {
@@ -148,7 +159,7 @@ public class AppController {
            choiceDialog.setContentText("Choose branch to delete");
            choiceDialog.setHeaderText("Delete branch");
            Optional<String> branchToDelete = choiceDialog.showAndWait();
-               engine.deleteBranch(branchToDelete.get());
+           deleteBranch(branchToDelete.get());
         }
         catch (NoActiveRepositoryError e){
             showErrorAlert(e);
@@ -159,6 +170,11 @@ public class AppController {
         catch (IllegalArgumentException e){
             showErrorAlert(new Exception("Given branch name is the head branch. Cannot delete head branch! "));
         }
+    }
+
+    private void deleteBranch(String branchName) throws NoActiveRepositoryError, InvalidBranchNameError, IllegalArgumentException {
+        engine.deleteBranch(branchName);
+        branches.removeIf((b)->(b.getName().equals(branchName)));
     }
 
     @FXML
@@ -307,6 +323,11 @@ public class AppController {
         try{
             repositoryModel.setRepo(engine.getCurrentRepoName(), repoPath);
             updateBranch();
+
+            branches.clear();
+            branches = engine.getAllBranches();
+
+            commitTree.setCommitsTree(getAllCommits());
         }
         catch (NoActiveRepositoryError e){
 
@@ -317,8 +338,21 @@ public class AppController {
         currentBranch.setText("Current Branch: " + engine.getCurrentBranchName());
     }
 
+    private Map<String , CommitModel> getAllCommits(){
+
+        Map<String, CommitModel> commitModelsRes = new HashMap<>();
+
+        for(Map.Entry<String , CommitData> commitEntry: engine.getAllCommitsData().entrySet()){
+            commitModelsRes.put(commitEntry.getKey(), ModelsConvertor.convertCommit(commitEntry.getValue()));
+        }
+
+        // TODO - add pointing branches
+        return commitModelsRes;
+    }
+
+
     private List<String> getAllBranchNames() throws NoActiveRepositoryError{
-        return engine.getAllBranches().stream().map((branch) -> branch.getName()).collect(Collectors.toList());
+        return branches.stream().map(BranchData::getName).collect(Collectors.toList());
     }
 
     private void showErrorAlert(Exception e){

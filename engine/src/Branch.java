@@ -117,7 +117,7 @@ public class Branch {
     boolean commit(String msg){
         if(haveChanges()){
 
-            String commitTime = Commit.commitDateFormat.format(new Date());
+            String commitTime = Settings.commitDateFormat.format(new Date());
             rootFolder.commit(Settings.getUser(), commitTime);
 
             String prevCommitSha1 = (head==null)? null : head.getCommitSHA1();

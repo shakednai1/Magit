@@ -1,6 +1,6 @@
-import com.sun.xml.internal.ws.api.config.management.policy.ManagementAssertion;
 import exceptions.InvalidBranchNameError;
 import exceptions.UncommittedChangesError;
+import models.CommitData;
 import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
@@ -9,18 +9,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import models.BranchData;
-import java.io.File;
+import sun.awt.image.ImageWatched;
+
 import java.util.*;
+import java.util.stream.Collectors;
 
 class Repository {
 
     private String name;
     private String fullPath;
     private Branch activeBranch = null;
-    private String remoteRepositoyPath = null;
-    private String remoteRepositoyName = null;
-    private List<RemoteBranch> remoteBranches = new LinkedList<>();
     private List<BranchData> branches = new LinkedList<>();
+
+    private String remoteRepositoryPath = null;
+    private String remoteRepositoryName = null;
+    private List<RemoteBranch> remoteBranches = new LinkedList<>();
 
 
     Repository(String fullPath, String name, boolean empty) {
@@ -81,6 +84,7 @@ class Repository {
                 branches.add(Branch.getBranchDisplayData(name[0]));
             }
         }
+
     }
 
     boolean  commitActiveBranch(String msg){
@@ -186,7 +190,7 @@ class Repository {
 
     boolean validBranchName(String branchName) {
         return branches.stream().
-                map(branch -> branch.getName()).
+                map(BranchData::getName).
                 anyMatch(name -> name.equals(branchName));
     }
 
@@ -194,23 +198,49 @@ class Repository {
         branches.add(Branch.getBranchDisplayData(branch.getName()));
     }
 
-    Map<String, Commit> getAllCommits(){
-        Map<String, Commit> allCommitsData = new HashMap<>();
+    Map<String, CommitData> getAllCommitsData(){
+        Map<String, CommitData> allCommitsData = new HashMap<>();
 
         for(BranchData branch: branches){
-            String topCommitSha1 = branch.getHeadSha1();
-            if (allCommitsData.get(topCommitSha1) == null)
-                allCommitsData.put(topCommitSha1, new Commit(topCommitSha1));
+            __addBranchCommitsToAllCommits(allCommitsData, branch);
         }
 
         return allCommitsData;
     }
 
-    public void setRemoteRepositoyPath(String RRpath){
-        remoteRepositoyPath = RRpath;
+    private void __addBranchCommitsToAllCommits(Map<String, CommitData> allCommitsData, BranchData branch){
+
+        class CommitConvertor{
+            CommitData convertCommitToData(Commit commit){
+                return new CommitData(commit.getCommitSHA1(), commit.getMsg(),
+                        commit.getUserLastModified(), commit.getCommitTime(), commit.getPreviousCommitSHA1());
+            }
+        }
+
+        CommitConvertor commitConvertor = new CommitConvertor();
+        boolean isMaster = branch.getName().equals("master");
+
+        for(Map.Entry<String, Commit> c: Commit.loadAll(branch.getHeadSha1()).entrySet()){
+            if(allCommitsData.get(c.getKey()) == null){
+                Commit commit = c.getValue();
+                CommitData commitData = commitConvertor.convertCommitToData(commit);
+                allCommitsData.put(c.getKey(), commitData);
+            }
+
+            CommitData val = allCommitsData.get(c.getKey());
+
+            val.addPointingBranch(branch);
+            if(isMaster)
+                val.setInMasterChain();
+        }
     }
-    public void setRemoteRepositoyName(String RRname){
-        remoteRepositoyName = RRname;
+
+
+    public void setRemoteRepositoryPath(String RRpath){
+        remoteRepositoryPath = RRpath;
+    }
+    public void setRemoteRepositoryName(String RRname){
+        remoteRepositoryName = RRname;
     }
 
     public void addRemoteBranch(RemoteBranch remoteBranch){
@@ -222,19 +252,19 @@ class Repository {
     }
 
     public boolean hasRemoteRepo(){
-        return remoteRepositoyName != null;
+        return remoteRepositoryName != null;
     }
 
     public void fetch(){
         remoteBranches = new LinkedList<>();
-        File sourceBranchesDir = new File(remoteRepositoyPath + "/.magit/branches");
+        File sourceBranchesDir = new File(remoteRepositoryPath + "/.magit/branches");
         for(File branch: sourceBranchesDir.listFiles()){
             if(!branch.getName().equals("HEAD")){
-                remoteBranches.add(new RemoteBranch(remoteRepositoyName + "/" + branch.getName(),
+                remoteBranches.add(new RemoteBranch(remoteRepositoryName + "/" + branch.getName(),
                         Utils.getFileLines(branch.getPath()).get(0)));
             }
         }
-        File sourceObjectsDir = new File(remoteRepositoyPath + "/.magit/objects");
+        File sourceObjectsDir = new File(remoteRepositoryPath + "/.magit/objects");
         for(File file : sourceObjectsDir.listFiles()){
             File destFile = new File(Settings.objectsFolderPath + "/" + file.getName());
             try {

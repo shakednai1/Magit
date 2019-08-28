@@ -1,5 +1,7 @@
 import exceptions.*;
 import models.BranchData;
+import models.CommitData;
+
 import javax.rmi.CORBA.Util;
 import java.io.File;
 import java.util.*;
@@ -117,7 +119,7 @@ public class MainEngine {
         return repositoryManager.getActiveRepository().getActiveBranch().getName();
     }
 
-    public Map<String, Commit> getAllCommits(){ return repositoryManager.getActiveRepository().getAllCommits();}
+    public Map<String, CommitData> getAllCommitsData(){ return repositoryManager.getActiveRepository().getAllCommitsData();}
 
     public void resetBranch(String commitSha1){
         Utils.clearCurrentWC();

@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -55,5 +56,6 @@
                 <Button fx:id="commitBtn" mnemonicParsing="false" onAction="#OnCommit" prefHeight="25.0" prefWidth="199.0" text="Commit" GridPane.columnIndex="3" GridPane.rowIndex="3" />
             </children>
         </GridPane>
+        <ScrollPane fx:id="commitTreeScroll" layoutX="61.0" layoutY="133.0" prefHeight="311.0" prefWidth="561.0" style="-fx-border-color: red;" />
     </children>
 </AnchorPane>

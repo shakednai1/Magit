@@ -75,9 +75,9 @@ class XmlLoader {
             openCommitRec(firstCommit, null);
             repositoryManager.getActiveRepository().checkoutBranch(magitBranches.getHead(), true);
         }
-        repositoryManager.getActiveRepository().setRemoteRepositoyName(
+        repositoryManager.getActiveRepository().setRemoteRepositoryName(
                 magitRepository.getMagitRemoteReference().getName());
-        repositoryManager.getActiveRepository().setRemoteRepositoyPath(
+        repositoryManager.getActiveRepository().setRemoteRepositoryPath(
                 magitRepository.getMagitRemoteReference().getLocation());
     }
 

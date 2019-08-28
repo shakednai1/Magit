@@ -1,7 +1,9 @@
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 public class Settings {
 
-    private static String currentUser = "Administrator";
-
+    final public static DateFormat commitDateFormat = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss:SSS");
 
     final private static String magitFolder = "/.magit";
     final private static String objectsFolder = magitFolder + "/objects/";
@@ -21,6 +23,9 @@ public class Settings {
     static String repositoryDetailsFilePath = "";
 
     final static String gitFolder = ".magit";
+
+
+    private static String currentUser = "Administrator";
 
     static void setNewRepository(String repositoryPath ){
         repositoryFullPath = repositoryPath ;
