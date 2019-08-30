@@ -6,8 +6,8 @@
 
     <groupId>magit.alona.shaked</groupId>
     <artifactId>Magit_Ex1</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <version>1.0</version>
+    <packaging>magit</packaging>
 
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>

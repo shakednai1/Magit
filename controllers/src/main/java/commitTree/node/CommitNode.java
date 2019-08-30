@@ -34,7 +34,7 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
         try {
 
             FXMLLoader fxmlLoader = new FXMLLoader();
-            URL url = getClass().getResource("commitNode.fxml");
+            URL url = getClass().getResource("../../commitNode.fxml");
             fxmlLoader.setLocation(url);
             GridPane root = fxmlLoader.load(url.openStream());
 

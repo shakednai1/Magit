@@ -11,6 +11,10 @@ import javafx.stage.Stage;
 import java.io.InputStream;
 import java.net.URL;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public class MyApp extends Application{
 
     public static Stage stage;
@@ -23,7 +27,13 @@ public class MyApp extends Application{
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader();
-        URL url = getClass().getResource("app.fxml");
+        // The path is relative to the MyApp.class and not MyApp.java
+        String executePath = new File("").getAbsolutePath();
+//        String resourcePath = Paths.get(executePath ,"/controllers/src/main/java/app.fxml").toAbsolutePath().toString();
+
+
+        String resourcePath = "app.fxml";
+        URL url = getClass().getResource(resourcePath);
         fxmlLoader.setLocation(url);
         InputStream urlStream = url.openStream();
         Parent root = fxmlLoader.load(urlStream);

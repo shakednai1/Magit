@@ -7,10 +7,10 @@
     <parent>
         <groupId>magit.alona.shaked</groupId>
         <artifactId>Magit_Ex1</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
     </parent>
 
     <artifactId>engine</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
 </project>
