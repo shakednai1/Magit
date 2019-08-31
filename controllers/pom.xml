@@ -12,6 +12,8 @@
 
     <artifactId>controllers</artifactId>
     <version>1.0</version>
+    <packaging>jar</packaging>
+
 
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
@@ -19,7 +21,6 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
-<!--                <targetPath>target/classes</targetPath>-->
             </resource>
         </resources>
 
@@ -30,6 +31,7 @@
             <groupId>magit.alona.shaked</groupId>
             <artifactId>engine</artifactId>
             <version>1.0</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>

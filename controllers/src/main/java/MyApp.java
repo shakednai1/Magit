@@ -11,9 +11,6 @@ import javafx.stage.Stage;
 import java.io.InputStream;
 import java.net.URL;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class MyApp extends Application{
 
@@ -28,12 +25,7 @@ public class MyApp extends Application{
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader();
         // The path is relative to the MyApp.class and not MyApp.java
-        String executePath = new File("").getAbsolutePath();
-//        String resourcePath = Paths.get(executePath ,"/controllers/src/main/java/app.fxml").toAbsolutePath().toString();
-
-
-        String resourcePath = "app.fxml";
-        URL url = getClass().getResource(resourcePath);
+        URL url = getClass().getResource("app.fxml");
         fxmlLoader.setLocation(url);
         InputStream urlStream = url.openStream();
         Parent root = fxmlLoader.load(urlStream);
@@ -42,7 +34,6 @@ public class MyApp extends Application{
 
         Scene scene = new Scene(root, 1200, 600);
 
-//        ScrollPane scrollPane = (ScrollPane) scene.lookup("#scrollpaneContainer");
         PannableCanvas canvas = appController.getCommitTree().getTree().getCanvas();
         //canvas.setPrefWidth(100);
         //canvas.setPrefHeight(100);
