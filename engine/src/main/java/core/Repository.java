@@ -53,12 +53,17 @@ class Repository {
     }
 
     private void loadRemoteRepoDetails(){
-        List<String> isRemote = Utils.getFileLines(Settings.repositoryRemoteDetailsFilePath);
-        if(!isRemote.isEmpty()){
-            String[] remoteDetails = isRemote.get(0).split(Settings.delimiter);
+        if(isRemote()){
+            List<String> remoteData = Utils.getFileLines(Settings.repositoryDetailsFilePath);
+            String[] remoteDetails = remoteData.get(0).split(Settings.delimiter);
             this.remoteRepositoryName = remoteDetails[1];
             this.remoteRepositoryPath = remoteDetails[0];
         }
+    }
+
+    public boolean isRemote(){
+        File remoteFile = new File(Settings.repositoryRemoteDetailsFilePath);
+        return remoteFile.exists();
     }
 
     private void loadRemoteBranches(){

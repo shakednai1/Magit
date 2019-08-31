@@ -1,5 +1,6 @@
 package core;
 
+import com.sun.org.apache.xerces.internal.impl.xpath.XPath;
 import exceptions.NoChangesToCommitError;
 import models.BranchData;
 import org.apache.commons.collections4.CollectionUtils;
@@ -43,9 +44,10 @@ public class Branch {
         currentStateOfFiles = rootFolder.getCommittedItemsState();
     }
 
-     Branch(String name, String headCommitSha1, boolean rewriteFS){
+     Branch(String name, String headCommitSha1, String trackingAfter, boolean rewriteFS){
         // constractor for loading an existing branch
         this.name = name;
+        this.trackingAfter = trackingAfter;
 
         commitData = Commit.loadAll(headCommitSha1);
         setHead(commitData.get(headCommitSha1));
@@ -60,16 +62,15 @@ public class Branch {
     }
 
     Branch(String name, String trackingAfter){
+        String branchData = Utils.getFileLines(Settings.remoteBranchesPath + trackingAfter + ".txt").get(0);
         this.name=  name;
         this.trackingAfter = trackingAfter;
+        this.head = new Commit(branchData.split(Settings.delimiter)[0]);
 
-        File source = new File(Settings.remoteBranchesPath + trackingAfter + ".txt");
-        File dest = new File(Settings.branchFolderPath + name + ".txt");
-        try {
-            FileUtils.copyFile(source, dest);
-        } catch (IOException e) {
-        }
+        writeBranchInfoFile();
     }
+
+    String getTrackingAfter(){ return trackingAfter; }
 
     private void addCommitToHistory(Commit commit){
         commitData.put(commit.getCommitSHA1(), commit);
@@ -101,7 +102,7 @@ public class Branch {
             return new Branch(branchName);
         }
 
-        return new Branch(branchName, headCommitSha1, rewriteWC);
+        return new Branch(branchName, headCommitSha1, trackingAfterRemote, rewriteWC);
     }
 
     static BranchData getBranchDisplayData(String branchName){

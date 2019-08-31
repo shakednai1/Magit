@@ -125,10 +125,12 @@ public class MainEngine {
 
     public void resetBranch(String commitSha1){
         Utils.clearCurrentWC();
-        String branchName = getCurrentBranchName();
-        Branch branch = new Branch(branchName, commitSha1, true);
-        repositoryManager.getActiveRepository().setActiveBranch(branch);
+
         try{
+            String branchName = getCurrentBranchName();
+            String trackingAfter = getActiveBranch().getTrackingAfter();
+            Branch branch = new Branch(branchName, commitSha1, trackingAfter, true);
+            repositoryManager.getActiveRepository().setActiveBranch(branch);
             getActiveBranch().getRootFolder().updateState();
         }
         catch(NoActiveRepositoryError e) {}
