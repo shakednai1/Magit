@@ -21,7 +21,7 @@ public class CommitData {
 
     private boolean isInMasterChain = false;
 
-
+ 
     public CommitData(Commit commit){
         this.sha1 = commit.getCommitSHA1();
         this.message = commit.getMsg();
