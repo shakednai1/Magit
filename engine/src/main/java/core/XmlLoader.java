@@ -77,10 +77,13 @@ class XmlLoader {
             openCommitRec(firstCommit, null);
             repositoryManager.getActiveRepository().checkoutBranch(magitBranches.getHead(), true);
         }
-        repositoryManager.getActiveRepository().setRemoteRepositoryName(
-                magitRepository.getMagitRemoteReference().getName());
-        repositoryManager.getActiveRepository().setRemoteRepositoryPath(
-                magitRepository.getMagitRemoteReference().getLocation());
+
+        if(magitRepository.getMagitRemoteReference()!=null){
+            repositoryManager.getActiveRepository().setRemoteRepositoryName(
+                    magitRepository.getMagitRemoteReference().getName());
+            repositoryManager.getActiveRepository().setRemoteRepositoryPath(
+                    magitRepository.getMagitRemoteReference().getLocation());
+        }
     }
 
     private void setFirstCommit() {
