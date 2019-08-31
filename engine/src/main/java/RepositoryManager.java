@@ -67,6 +67,16 @@ class RepositoryManager {
         for(File file: branchesDir.listFiles()){
             file.delete();
         }
+
+        // update repo file name
+        Utils.writeFile(destDir + Settings.repositoryDetailsFile, repoName, false);
+        Utils.writeFile(destDir + Settings.repositoryRemoteDetailsFile, sourcePath + Settings.delimiter + remoteRepoName, false);
+
+        createNewBranchFilsTrackingAfter(remoteBranchesPath, branchesPath);
+        switchActiveRepository(destPath);
+    }
+
+    public void createNewBranchFilsTrackingAfter(String remoteBranchesPath, String branchesPath){
         // create new branch pointing to the current commit
         String branchName = Utils.getFileLines(remoteBranchesPath + "HEAD").get(0);
         String headRemotePointedCommit = Utils.getFileLines( remoteBranchesPath + branchName + ".txt").get(0);
@@ -75,18 +85,6 @@ class RepositoryManager {
         // create branch file + update head
         Utils.createNewFile(branchesPath + branchName + ".txt", content);
         Utils.createNewFile(branchesPath + "HEAD", branchName);
-
-        // update repo file name
-        Utils.writeFile(destDir + Settings.repositoryDetailsFile, repoName, false);
-        Utils.writeFile(destDir + Settings.repositoryRemoteDetailsFile, sourcePath + Settings.delimiter + remoteRepoName, false);
-
-        switchActiveRepository(destPath);
-
-        activeRepository.getActiveBranch().addTracking(branchName);
-        activeRepository.getActiveBranch().writeBranchInfoFile();
-        activeRepository.setRemoteRepositoryPath(sourcePath);
-        activeRepository.setRemoteRepositoryName(remoteRepoName);
-
     }
 
     public void copyBranchesFromRemote(String branchesPath, String remoteBranchesPath){

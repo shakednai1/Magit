@@ -204,5 +204,6 @@ public class Branch {
 
     public void addTracking(String remoteBranchName){
         trackingAfter = remoteBranchName;
+        writeBranchInfoFile();
     }
 }
