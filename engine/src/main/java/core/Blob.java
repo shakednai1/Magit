@@ -1,3 +1,5 @@
+package core;
+
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;

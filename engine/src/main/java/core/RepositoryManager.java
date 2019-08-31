@@ -1,11 +1,9 @@
-import exceptions.InvalidBranchNameError;
-import exceptions.UncommittedChangesError;
+package core;
+
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 
 class RepositoryManager {
 

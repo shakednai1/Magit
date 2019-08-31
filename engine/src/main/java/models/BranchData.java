@@ -1,5 +1,7 @@
 package models;
 
+import core.Branch;
+
 public class BranchData {
     private String name;
     private String headSha1;
@@ -9,6 +11,12 @@ public class BranchData {
         this.name = name;
         this.headSha1 = headSha1;
         this.headMsg = headMsg;
+    }
+
+    public BranchData(Branch branch) {
+        this.name = branch.getName();
+        this.headSha1 = branch.getHead().getCommitSHA1();
+        this.headMsg = branch.getHead().getMsg();
     }
 
     public String getName() {

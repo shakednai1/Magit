@@ -1,3 +1,5 @@
+package core;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -67,6 +69,10 @@ public class Utils {
     static void createNewFile(String fileName, String content){
         File file = new File(fileName);
         try {
+
+            if (!file.getParentFile().exists())
+                file.getParentFile().mkdirs();
+
             file.createNewFile();
             FileWriter writer = null;
             writer = new FileWriter(file);

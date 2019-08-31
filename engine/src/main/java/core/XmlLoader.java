@@ -1,3 +1,5 @@
+package core;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -148,7 +150,6 @@ class XmlLoader {
                     branch.addTracking(remoteBranch.name);
                 }
                 rootFolder.zipRec();
-                commit.zipCommit();
             }
         }
         else{
@@ -260,17 +261,17 @@ class XmlLoader {
                 String id = item.getId();
                 if(type.equals("blob")) {
                     if (blobMap.get(id) == null) {
-                        throw new XmlException("Folder id " + folder.getId() +
+                        throw new XmlException("core.Folder id " + folder.getId() +
                                 " points to non existing blob item (id : " + id + ")");
                     }
                 }
 
                 else if(type.equals("folder")){
                     if(id.equals(folder.getId())){
-                        throw new XmlException("Folder id " + id + " points to itself");
+                        throw new XmlException("core.Folder id " + id + " points to itself");
                     }
                     if(folderMap.get(id) == null){
-                        throw new XmlException("Folder id " + folder.getId() +
+                        throw new XmlException("core.Folder id " + folder.getId() +
                                 " points to non existing folder item (id : " + id + ")");
                     }
                 }

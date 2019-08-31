@@ -1,5 +1,7 @@
 package models;
 
+import core.Commit;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +29,14 @@ public class CommitData {
         this.committer = committer;
         this.commitTime = commitTime;
         this.previousCommitSha1 = previousCommitSha1.equals("null")? null : previousCommitSha1;
+    }
+
+    public CommitData(Commit commit){
+        this.sha1 = commit.getCommitSHA1();
+        this.message = commit.getMsg();
+        this.committer = commit.getUserLastModified();
+        this.commitTime = commit.getCommitTime();
+        this.previousCommitSha1 = commit.getPreviousCommitSHA1().equals("null") ? null: commit.getPreviousCommitSHA1();
     }
 
     public String getSha1() { return sha1; }

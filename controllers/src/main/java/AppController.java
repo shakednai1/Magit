@@ -1,8 +1,7 @@
 import commitTree.CommitTree;
-import exceptions.InvalidBranchNameError;
-import exceptions.NoActiveRepositoryError;
-import exceptions.UncommittedChangesError;
-import exceptions.XmlException;
+import core.MainEngine;
+import core.Branch;
+import exceptions.*;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -11,7 +10,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import models.BranchData;
 import models.CommitData;
-import models.CommitModel;
 import models.RepositoryModel;
 
 import java.io.File;
@@ -25,7 +23,7 @@ public class AppController {
     private CommitTree commitTree;
     private List<BranchData> branches = new LinkedList<>();
 
-    // TODO active branch property, relate current Branch label
+    // TODO active branch property, relate current core.Branch label
 
 
     public AppController(){
@@ -103,7 +101,7 @@ public class AppController {
         catch (UncommittedChangesError e){
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Uncommited changes in current branch");
-            alert.setHeaderText("Given Branch has open changes. you need to commit them or force checkout and the changes will remove ");
+            alert.setHeaderText("Given core.Branch has open changes. you need to commit them or force checkout and the changes will remove ");
             alert.setContentText("Are you sure you want to force checkout ?");
             Optional<ButtonType> result = alert.showAndWait();
             if (result.get() == ButtonType.OK){
@@ -129,7 +127,8 @@ public class AppController {
 
         Validator validBranch = (value) -> {
             try {
-                engine.createNewBranch(value, false);
+                BranchData branchData = engine.createNewBranch(value, false);
+                branches.add(branchData);
                 return true;
             }
             catch (InvalidBranchNameError | UncommittedChangesError | NoActiveRepositoryError e) {
@@ -203,9 +202,7 @@ public class AppController {
         directoryChooser.setTitle("Select repository location ");
         File dir = directoryChooser.showDialog(MyApp.stage);
         if(!engine.changeActiveRepository(dir.getPath())){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("path is not contains .magit folder!");
-            alert.showAndWait();
+            showErrorAlert(new Exception("path is not contains .magit folder!"));
         }
         else{
             updateCurrentRepo(dir.getPath());
@@ -277,15 +274,17 @@ public class AppController {
     @FXML
     void OnCommit(ActionEvent event){
         TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("internals.Commit");
+        dialog.setTitle("internals.core.Commit");
         dialog.setHeaderText("Enter commit message:");
         dialog.setContentText("Message:");
         Optional<String> commitMsg = dialog.showAndWait();
         try{
-            if(!engine.commit(commitMsg.get())){
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setContentText("There are no changes to commit");
-                alert.showAndWait();
+            try{
+                CommitData commitData = engine.commit(commitMsg.get());
+                commitTree.addCommit(commitData);
+            }
+            catch (NoChangesToCommitError e){
+                showErrorAlert(new Exception("There are no changes to commit"));
             }
         }
         catch (NoActiveRepositoryError e){ showErrorAlert(e); }
@@ -327,7 +326,7 @@ public class AppController {
             branches.clear();
             branches = engine.getAllBranches();
 
-            commitTree.setCommitsTree(getAllCommits());
+            commitTree.setCommitsTree(engine.getAllCommitsData());
         }
         catch (NoActiveRepositoryError e){
 
@@ -335,19 +334,7 @@ public class AppController {
     }
 
     private void updateBranch(){
-        currentBranch.setText("Current Branch: " + engine.getCurrentBranchName());
-    }
-
-    private Map<String , CommitModel> getAllCommits(){
-
-        Map<String, CommitModel> commitModelsRes = new HashMap<>();
-
-        for(Map.Entry<String , CommitData> commitEntry: engine.getAllCommitsData().entrySet()){
-            commitModelsRes.put(commitEntry.getKey(), ModelsConvertor.convertCommit(commitEntry.getValue()));
-        }
-
-        // TODO - add pointing branches
-        return commitModelsRes;
+        currentBranch.setText("Current core.Branch: " + engine.getCurrentBranchName());
     }
 
 
@@ -367,7 +354,7 @@ public class AppController {
             if(engine.getActiveBranch().haveChanges()) {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Uncommited changes in current branch");
-                alert.setHeaderText("Given Branch has open changes. you need to commit then or force reset and the changes will remove ");
+                alert.setHeaderText("Given core.Branch has open changes. you need to commit then or force reset and the changes will remove ");
                 alert.setContentText("Are you sure you want to reset and the changes will not saved ?");
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.get() == ButtonType.OK) {
@@ -387,18 +374,12 @@ public class AppController {
 
     private void showResetBranchDialog(){
         TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("Reset Branch");
+        dialog.setTitle("Reset core.Branch");
         dialog.setHeaderText("Enter commit SHA1:");
         dialog.setContentText("SHA1:");
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()){
             engine.resetBranch(result.get());
-            try {
-                engine.getActiveBranch().getRootFolder().updateState();
-            }
-            catch (NoActiveRepositoryError e){
-
-            }
         }
     }
 
@@ -430,7 +411,7 @@ public class AppController {
 
     String repositoryFolderNameDialog(){
         TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("Repository folder name");
+        dialog.setTitle("core.Repository folder name");
         dialog.setHeaderText("Enter repository folder name:");
         dialog.setContentText("Name:");
         Optional<String> result = dialog.showAndWait();
@@ -439,7 +420,7 @@ public class AppController {
 
     String repositoryNameDialog(){
         TextInputDialog dialog2 = new TextInputDialog("");
-        dialog2.setTitle("Repository name");
+        dialog2.setTitle("core.Repository name");
         dialog2.setHeaderText("Enter repository name:");
         dialog2.setContentText("Name:");
         Optional<String> repoName = dialog2.showAndWait();

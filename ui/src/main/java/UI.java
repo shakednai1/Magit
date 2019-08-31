@@ -1,7 +1,6 @@
-import exceptions.InvalidBranchNameError;
-import exceptions.NoActiveRepositoryError;
-import exceptions.UncommittedChangesError;
-import exceptions.XmlException;
+import core.MainEngine;
+import core.Settings;
+import exceptions.*;
 import models.BranchData;
 
 import java.util.*;
@@ -78,7 +77,7 @@ public class UI {
         System.out.println("3. Switch repository");
         System.out.println("4. Show current commit file system information");
         System.out.println("5. Working copy status");
-        System.out.println("6. internals.Commit");
+        System.out.println("6. internals.core.Commit");
         System.out.println("7. List available branch");
         System.out.println("8. Create new branch");
         System.out.println("9. Delete branch");
@@ -117,7 +116,7 @@ public class UI {
         System.out.println("Please provide repository full path: ");
         String fullPath = input.next();
         if (!engine.changeActiveRepository(fullPath)){
-            System.out.println("Repository path is not found or path is not contains .magit folder!");
+            System.out.println("core.Repository path is not found or path is not contains .magit folder!");
         }
     }
 
@@ -179,7 +178,10 @@ public class UI {
         String msg = input.nextLine();
 
         try{
-            if (!engine.commit(msg)){
+            try{
+                engine.commit(msg);
+            }
+            catch (NoChangesToCommitError e){
                 System.out.println("There are no changes to commit");
                 System.out.println();
             }
@@ -287,7 +289,7 @@ public class UI {
                 System.out.println("Given branch name is not valid. Please provide an existing branch name ");
                 break;
             } catch (UncommittedChangesError e) {
-                System.out.println("Given Branch has open changes. you need to commit then or force checkout and the " +
+                System.out.println("Given core.Branch has open changes. you need to commit then or force checkout and the " +
                         "changes will remove ");
                 System.out.println("force checkout ? " + Settings.YNquestion);
                 String forceInput = input.next();

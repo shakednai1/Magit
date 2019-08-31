@@ -1,4 +1,7 @@
+package core;
+
 import exceptions.InvalidBranchNameError;
+import exceptions.NoChangesToCommitError;
 import exceptions.UncommittedChangesError;
 import models.CommitData;
 import org.apache.commons.io.FileUtils;
@@ -107,16 +110,21 @@ class Repository {
 
     }
 
-    boolean  commitActiveBranch(String msg){
+    CommitData  commitActiveBranch(String msg) throws NoChangesToCommitError {
         // this function is for assert that branch details at `branches` object will stay updated
 
-        boolean committed = activeBranch.commit(msg);
-        if (committed )
-            updateActiveBranchDataInHistory();
+        Commit commit = activeBranch.commit(msg);
+        updateActiveBranchDataInHistory();
 
-        return committed;
+        return __createCommitData(commit);
     }
 
+    private CommitData __createCommitData(Commit commit){
+        CommitData commitData = new CommitData(commit);
+        if (activeBranch.getName().equals("master"))
+            commitData.setInMasterChain();
+        return commitData;
+    }
 
     private void updateActiveBranchDataInHistory(){
         // TODO branches should have the branch object, even if not loaded not loaded
@@ -135,7 +143,7 @@ class Repository {
         return activeBranch.getWorkingCopy();
     }
 
-    void createNewBranch(String branchName, boolean checkout) throws UncommittedChangesError, InvalidBranchNameError{
+    BranchData createNewBranch(String branchName, boolean checkout) throws UncommittedChangesError, InvalidBranchNameError{
         if(branches.stream().anyMatch(branch-> branch.getName().equals(branchName)) ||
             branchName.contains(" "))
             throw new InvalidBranchNameError("");
@@ -156,6 +164,9 @@ class Repository {
 
             setActiveBranch(newBranch);
         }
+
+        return new BranchData(newBranch);
+
     }
 
     void setActiveBranch(Branch branch){
@@ -215,7 +226,7 @@ class Repository {
     }
 
     public void addNewBranch(Branch branch){
-        branches.add(Branch.getBranchDisplayData(branch.getName()));
+        branches.add(new BranchData(branch));
     }
 
     Map<String, CommitData> getAllCommitsData(){
@@ -229,21 +240,12 @@ class Repository {
     }
 
     private void __addBranchCommitsToAllCommits(Map<String, CommitData> allCommitsData, BranchData branch){
-
-        class CommitConvertor{
-            CommitData convertCommitToData(Commit commit){
-                return new CommitData(commit.getCommitSHA1(), commit.getMsg(),
-                        commit.getUserLastModified(), commit.getCommitTime(), commit.getPreviousCommitSHA1());
-            }
-        }
-
-        CommitConvertor commitConvertor = new CommitConvertor();
         boolean isMaster = branch.getName().equals("master");
 
         for(Map.Entry<String, Commit> c: Commit.loadAll(branch.getHeadSha1()).entrySet()){
             if(allCommitsData.get(c.getKey()) == null){
                 Commit commit = c.getValue();
-                CommitData commitData = commitConvertor.convertCommitToData(commit);
+                CommitData commitData = new CommitData(commit);
                 allCommitsData.put(c.getKey(), commitData);
             }
 
@@ -265,7 +267,7 @@ class Repository {
 
     public void addRemoteBranch(RemoteBranch remoteBranch){
         remoteBranches.add(remoteBranch);
-        Utils.createNewFile(Settings.repositoryFullPath + "/.magit/branches/remote/" + remoteBranch.name + ".txt",
+        Utils.createNewFile(Settings.remoteBranchesPath + remoteBranch.name + ".txt",
                 remoteBranch.pointedCommitSha1);
     }
 

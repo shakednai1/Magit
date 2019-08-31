@@ -1,3 +1,5 @@
+package core;
+
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
@@ -5,7 +7,7 @@ import java.util.*;
 
 public class Folder extends Item {
 
-    final private String typeItem = "Folder";
+    final private String typeItem = "core.Folder";
 
     private Map<String, Blob> subFiles = new HashMap<>();
     private Map<String, Folder> subFolders = new HashMap<>();

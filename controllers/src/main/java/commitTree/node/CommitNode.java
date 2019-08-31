@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
+import models.CommitData;
 import models.CommitModel;
 
 import java.io.IOException;
@@ -18,15 +19,15 @@ import java.util.Date;
 
 public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
 
-    private CommitModel commit;
+    private CommitData commit;
 
     private CommitNodeController commitNodeController;
 
-    public CommitNode(CommitModel commit) {
+    public CommitNode(CommitData commit) {
         this.commit = commit;
     }
 
-    public CommitModel getCommit(){ return commit; }
+    public CommitData getCommit(){ return commit; }
 
     @Override
     public Region getGraphic(Graph graph) {

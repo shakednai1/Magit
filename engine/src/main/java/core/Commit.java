@@ -1,3 +1,5 @@
+package core;
+
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.text.DateFormat;
@@ -23,6 +25,8 @@ public class Commit {
         this.commitTime = commitTime;
         this.userLastModified = userLastModified;
         commitSha1 = calcCommitSha1();
+
+        zipCommit();
     }
 
     Commit(String commitSha1){

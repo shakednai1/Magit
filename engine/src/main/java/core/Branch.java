@@ -1,3 +1,6 @@
+package core;
+
+import exceptions.NoChangesToCommitError;
 import models.BranchData;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -105,7 +108,7 @@ public class Branch {
     }
 
 
-    boolean haveChanges(){
+    public boolean haveChanges(){
         rootFolder.updateState();
         if (head == null){
             return !rootFolder.isEmptyCurrentState();
@@ -115,23 +118,21 @@ public class Branch {
         }
     }
 
-    boolean commit(String msg){
-        if(haveChanges()){
+    Commit commit(String msg) throws NoChangesToCommitError{
+        if (!haveChanges())
+            throw new NoChangesToCommitError("");
 
-            String commitTime = Settings.commitDateFormat.format(new Date());
-            rootFolder.commit(Settings.getUser(), commitTime);
+        String commitTime = Settings.commitDateFormat.format(new Date());
+        rootFolder.commit(Settings.getUser(), commitTime);
 
-            String prevCommitSha1 = (head==null)? null : head.getCommitSHA1();
-            Commit com = new Commit(msg, rootFolder.currentSHA1, rootFolder.userLastModified, commitTime,prevCommitSha1);
-            com.zipCommit();
+        String prevCommitSha1 = (head==null)? null : head.getCommitSHA1();
+        Commit com = new Commit(msg, rootFolder.currentSHA1, rootFolder.userLastModified, commitTime,prevCommitSha1);
+        com.zipCommit();
 
-            setHead(com);
-            currentStateOfFiles = rootFolder.getCommittedItemsState();
+        setHead(com);
+        currentStateOfFiles = rootFolder.getCommittedItemsState();
 
-            return true;
-        }
-
-        return false;
+        return com;
     }
 
     private void updateChangedFilesState(){ // TODO better name for function

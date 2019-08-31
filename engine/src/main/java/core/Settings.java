@@ -1,3 +1,5 @@
+package core;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -16,7 +18,7 @@ public class Settings {
     final public static String repositoryRemoteDetailsFile = magitFolder + "/remote_repo";
 
     final static String delimiter = ",";
-    final static String YNquestion = "Y/N";
+    final public static String YNquestion = "Y/N";
 
     static String repositoryFullPath = "";
     static String objectsFolderPath = "";

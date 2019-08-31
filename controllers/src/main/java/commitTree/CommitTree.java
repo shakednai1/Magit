@@ -6,6 +6,7 @@ import com.fxgraph.graph.ICell;
 import com.fxgraph.graph.Model;
 import commitTree.layout.CommitTreeLayout;
 import commitTree.node.CommitNode;
+import models.CommitData;
 import models.CommitModel;
 
 import java.util.Hashtable;
@@ -25,14 +26,13 @@ public class CommitTree {
 
     public Graph getTree() {return tree;}
 
-    public void setCommitsTree(Map<String, CommitModel> repoCommits) {
+    public void setCommitsTree(Map<String, CommitData> repoCommits) {
         final Model model = tree.getModel();
 
         tree.beginUpdate();
 
-        for(Map.Entry<String, CommitModel> commitEntry: repoCommits.entrySet()){
-            CommitNode cell = new CommitNode(commitEntry.getValue());
-            commitCells.put(commitEntry.getKey(), cell);
+        for(Map.Entry<String, CommitData> commitEntry: repoCommits.entrySet()){
+            ICell cell = __addCommitToTree(commitEntry.getValue());
             model.addCell(cell);
         }
 
@@ -50,17 +50,26 @@ public class CommitTree {
 
     }
 
-    private void addMoreCommits(Graph graph) {
-        final Model model = graph.getModel();
-        //graph.beginUpdate();
-        ICell lastCell = model.getAllCells().get(4);
+    private ICell __addCommitToTree(CommitData commitData){
+        CommitNode cell = new CommitNode(commitData);
+        commitCells.put(commitData.getSha1(), cell);
+        return cell;
+    }
 
-        // TODO add new cells
-        // TODO add edge for between new and old cells
+    public void addCommit(CommitData commitData){
+        final Model model = tree.getModel();
 
-        graph.endUpdate();
+        ICell prevCommit = commitCells.get(commitData.getPreviousCommitSha1());
 
-        graph.layout(new CommitTreeLayout());
+        ICell cell = __addCommitToTree(commitData);
+        model.addCell(cell);
+
+        Edge edge = new Edge(cell, prevCommit);
+        model.addEdge(edge);
+
+        tree.endUpdate();
+
+        tree.layout(new CommitTreeLayout());
     }
 
 }

@@ -1,8 +1,9 @@
+package core;
+
 import exceptions.*;
 import models.BranchData;
 import models.CommitData;
 
-import javax.rmi.CORBA.Util;
 import java.io.File;
 import java.util.*;
 
@@ -25,7 +26,7 @@ public class MainEngine {
         return repositoryManager.getActiveRepository().getWorkingCopy();
     }
 
-    public boolean commit(String msg) throws NoActiveRepositoryError{
+    public CommitData commit(String msg) throws NoActiveRepositoryError, NoChangesToCommitError{
         validateActiveRepository();
         return repositoryManager.getActiveRepository().commitActiveBranch(msg);
     }
@@ -58,11 +59,11 @@ public class MainEngine {
         return repositoryManager.getActiveRepository().getActiveBranch().getCommittedState();
     }
 
-    public void createNewBranch(String name, boolean checkout)
+    public BranchData createNewBranch(String name, boolean checkout)
             throws InvalidBranchNameError, UncommittedChangesError, NoActiveRepositoryError{
         validateActiveRepository();
 
-        repositoryManager.getActiveRepository().createNewBranch(name, checkout);
+        return repositoryManager.getActiveRepository().createNewBranch(name, checkout);
     }
 
     public List<BranchData> getAllBranches() throws NoActiveRepositoryError{
@@ -126,6 +127,10 @@ public class MainEngine {
         String branchName = getCurrentBranchName();
         Branch branch = new Branch(branchName, commitSha1, true);
         repositoryManager.getActiveRepository().setActiveBranch(branch);
+        try{
+            getActiveBranch().getRootFolder().updateState();
+        }
+        catch(NoActiveRepositoryError e) {}
     }
 
     public Branch getActiveBranch() throws NoActiveRepositoryError{
