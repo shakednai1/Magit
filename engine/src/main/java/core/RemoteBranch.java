@@ -10,4 +10,8 @@ public class RemoteBranch {
         this.pointedCommitSha1 = pointedCommitSha1;
     }
 
+    public String getName(){
+        return name;
+    }
+
 }

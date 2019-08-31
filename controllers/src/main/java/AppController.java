@@ -88,6 +88,15 @@ public class AppController {
             choiceDialog.setHeaderText("Checkout branch");
             Optional<String> branchToCheckout = choiceDialog.showAndWait();
             branchNameToCheckout = branchToCheckout.get();
+            if(branchNameToCheckout.contains("/")){
+                TextInputDialog dialog = new TextInputDialog("");
+                dialog.setTitle("Create new tracking branch");
+                dialog.setHeaderText("Enter tracking branch name");
+                dialog.setContentText("Name");
+                Optional<String> branchName = dialog.showAndWait();
+                engine.createAndCheckoutToNewTrackingBranch(branchName.get(), branchNameToCheckout.split("/")[1]);
+                branchNameToCheckout = branchName.get();
+            }
             engine.checkoutBranch(branchNameToCheckout, false);
             updateBranch();
         }
@@ -143,7 +152,7 @@ public class AppController {
         btOk.addEventFilter(
                 ActionEvent.ACTION,
                 OKevent -> {
-                    if (!validBranch.isValid(dialog.getContentText())) {
+                    if (!validBranch.isValid(dialog.getEditor().textProperty().getValue())) {
                         OKevent.consume();
                     }
                 }
@@ -339,7 +348,9 @@ public class AppController {
 
 
     private List<String> getAllBranchNames() throws NoActiveRepositoryError{
-        return branches.stream().map(BranchData::getName).collect(Collectors.toList());
+        List<String> branchesNames = engine.getAllBranches().stream().map((branch) -> branch.getName()).collect(Collectors.toList());
+        branchesNames.addAll(engine.getAllRemoteBranchesName());
+        return branchesNames;
     }
 
     private void showErrorAlert(Exception e){
