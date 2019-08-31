@@ -77,10 +77,13 @@ class XmlLoader {
             openCommitRec(firstCommit, null);
             repositoryManager.getActiveRepository().checkoutBranch(magitBranches.getHead(), true);
         }
-        repositoryManager.getActiveRepository().setRemoteRepositoryName(
-                magitRepository.getMagitRemoteReference().getName());
-        repositoryManager.getActiveRepository().setRemoteRepositoryPath(
-                magitRepository.getMagitRemoteReference().getLocation());
+
+        if(magitRepository.getMagitRemoteReference()!=null){
+            repositoryManager.getActiveRepository().setRemoteRepositoryName(
+                    magitRepository.getMagitRemoteReference().getName());
+            repositoryManager.getActiveRepository().setRemoteRepositoryPath(
+                    magitRepository.getMagitRemoteReference().getLocation());
+        }
     }
 
     private void setFirstCommit() {
@@ -133,7 +136,7 @@ class XmlLoader {
 
         if (!pointingRemoteBranches.isEmpty()) {
             for (MagitSingleBranch pointingRemoteBranch : pointingRemoteBranches) {
-                RemoteBranch remoteBranch = new RemoteBranch(pointingRemoteBranch.getName(), commit.getCommitSHA1());
+                RemoteBranch remoteBranch = new RemoteBranch(pointingRemoteBranch.getName().split("/")[1], commit.getCommitSHA1());
                 repositoryManager.getActiveRepository().addRemoteBranch(remoteBranch);
             }
         }
@@ -147,7 +150,7 @@ class XmlLoader {
                 }
                 if(pointingBranch.isTracking()){
                     RemoteBranch remoteBranch = findTrackingBranch(pointingBranch.getTrackingAfter());
-                    branch.addTracking(remoteBranch.name);
+                    branch.addTracking(remoteBranch.getName());
                 }
                 rootFolder.zipRec();
             }
@@ -163,7 +166,7 @@ class XmlLoader {
 
     private RemoteBranch findTrackingBranch(String name){
         for(RemoteBranch remoteBranch: repositoryManager.getActiveRepository().getAllRemoteBranches()){
-            if (remoteBranch.name.equals(name)){
+            if (remoteBranch.getName().equals(name.split("/")[1])){
                 return remoteBranch;
             }
         }
