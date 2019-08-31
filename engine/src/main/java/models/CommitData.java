@@ -22,15 +22,6 @@ public class CommitData {
     private boolean isInMasterChain = false;
 
 
-    public CommitData(String sha1, String message, String committer,
-                      String commitTime, String previousCommitSha1){
-        this.sha1 = sha1;
-        this.message = message;
-        this.committer = committer;
-        this.commitTime = commitTime;
-        this.previousCommitSha1 = previousCommitSha1.equals("null")? null : previousCommitSha1;
-    }
-
     public CommitData(Commit commit){
         this.sha1 = commit.getCommitSHA1();
         this.message = commit.getMsg();
