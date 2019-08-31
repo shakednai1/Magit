@@ -45,7 +45,7 @@ class RepositoryManager {
         return directory.exists();
     }
 
-    public void cloneRepository(String sourcePath, String destPath, String repoName, boolean rtbBranch){
+    public void cloneRepository(String sourcePath, String destPath, String repoName){
         String branchesPath = destPath + Settings.branchFolder;
         String remoteBranchesPath = destPath + Settings.remoteBranchFolder;
 
@@ -68,15 +68,9 @@ class RepositoryManager {
             file.delete();
         }
         // create new branch pointing to the current commit
-        // if the user wants to create rtb - create rtb to the head branch
         String branchName = Utils.getFileLines(remoteBranchesPath + "HEAD").get(0);
         String headRemotePointedCommit = Utils.getFileLines( remoteBranchesPath + branchName + ".txt").get(0);
         String content = headRemotePointedCommit + Settings.delimiter + branchName;
-
-        if(!rtbBranch){
-            branchName = "master";
-            content = headRemotePointedCommit + ",null";
-        }
 
         // create branch file + update head
         Utils.createNewFile(branchesPath + branchName + ".txt", content);

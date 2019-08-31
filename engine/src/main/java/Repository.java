@@ -62,9 +62,11 @@ class Repository {
             remoteBranches = new LinkedList<>();
             File remoteBranchesFolder = new File(Settings.remoteBranchesPath);
             for(File branch : remoteBranchesFolder.listFiles()){
-                String pointedCommit = Utils.getFileLines(branch.getPath()).get(0).split(Settings.delimiter)[0];
-                RemoteBranch remoteBranch = new RemoteBranch(branch.getName(), pointedCommit);
-                remoteBranches.add(remoteBranch);
+                if(!branch.getName().equals("HEAD")){
+                    String pointedCommit = Utils.getFileLines(branch.getPath()).get(0).split(Settings.delimiter)[0];
+                    RemoteBranch remoteBranch = new RemoteBranch(branch.getName().split(".txt")[0], pointedCommit);
+                    remoteBranches.add(remoteBranch);
+                }
             }
         }
     }
@@ -262,6 +264,10 @@ class Repository {
     public void setRemoteRepositoryName(String RRname){
         remoteRepositoryName = RRname;
     }
+    public String getRemoteRepositoryName(){
+        return remoteRepositoryName;
+    }
+
 
     public void addRemoteBranch(RemoteBranch remoteBranch){
         remoteBranches.add(remoteBranch);

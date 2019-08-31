@@ -5,6 +5,7 @@ import models.CommitData;
 import javax.rmi.CORBA.Util;
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MainEngine {
 
@@ -141,7 +142,7 @@ public class MainEngine {
     }
 
     public void cloneRepo(String src, String dst, String repoName){
-        repositoryManager.cloneRepository(src, dst, repoName, true);
+        repositoryManager.cloneRepository(src, dst, repoName);
     }
 
     public void fetchRepo() throws NoActiveRepositoryError{
@@ -152,5 +153,10 @@ public class MainEngine {
         else{
             throw new IllegalArgumentException("current repo has no remote repository");
         }
+    }
+
+    public List<String> getAllRemoteBranchesName(){
+        String remoteRepoName= repositoryManager.getActiveRepository().getRemoteRepositoryName();
+        return repositoryManager.getActiveRepository().getAllRemoteBranches().stream().map((branch) -> remoteRepoName + "/" + branch.getName()).collect(Collectors.toList());
     }
 }

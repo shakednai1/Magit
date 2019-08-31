@@ -144,7 +144,7 @@ public class AppController {
         btOk.addEventFilter(
                 ActionEvent.ACTION,
                 OKevent -> {
-                    if (!validBranch.isValid(dialog.getContentText())) {
+                    if (!validBranch.isValid(dialog.getEditor().textProperty().getValue())) {
                         OKevent.consume();
                     }
                 }
@@ -352,7 +352,9 @@ public class AppController {
 
 
     private List<String> getAllBranchNames() throws NoActiveRepositoryError{
-        return branches.stream().map(BranchData::getName).collect(Collectors.toList());
+        List<String> branchesNames = engine.getAllBranches().stream().map((branch) -> branch.getName()).collect(Collectors.toList());
+        branchesNames.addAll(engine.getAllRemoteBranchesName());
+        return branchesNames;
     }
 
     private void showErrorAlert(Exception e){
