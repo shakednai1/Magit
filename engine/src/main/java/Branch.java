@@ -12,7 +12,7 @@ public class Branch {
     private String name;
     private Folder rootFolder;
 
-    RemoteBranch trackingAfter = null;
+    String trackingAfter = null;
 
     private Map<String, Commit> commitData = new HashMap<>();
 
@@ -74,7 +74,8 @@ public class Branch {
         // TODO deprecate load function and build constractor that knows how to handle only branch name
 
         List<String> branchData = Utils.getFileLines(getBranchFilePath(branchName));
-        String headCommitSha1 = branchData.get(0);
+        String headCommitSha1 = branchData.get(0).split(Settings.delimiter)[0];
+        String trackingAfterRemote = branchData.get(0).split(Settings.delimiter)[1];
 
         if(headCommitSha1.equals("null")){
             // loading empty repo
@@ -87,7 +88,7 @@ public class Branch {
 
     static BranchData getBranchDisplayData(String branchName){
         List<String> branchData = Utils.getFileLines(getBranchFilePath(branchName));
-        String headCommitSha1 = branchData.get(0);
+        String headCommitSha1 = branchData.get(0).split(Settings.delimiter)[0];
         String headCommitMsg;
 
         if(headCommitSha1.equals("null")){
@@ -145,9 +146,11 @@ public class Branch {
         writeBranchInfoFile();
     }
 
-    private void writeBranchInfoFile(){
-        String branchFileContent =  (head == null)? "null": head.getCommitSHA1();
-        Utils.writeFile(getBranchFilePath(name), branchFileContent, false);
+    public void writeBranchInfoFile(){
+        String branchFileContentCommit =  (head == null)? "null": head.getCommitSHA1();
+        String branchFileContentTracking = (trackingAfter == null) ? "null" : trackingAfter;
+        String content = String.join(Settings.delimiter, branchFileContentCommit, branchFileContentTracking);
+        Utils.writeFile(getBranchFilePath(name), content, false);
     }
 
     private static String getBranchFilePath(String branchName){
@@ -199,7 +202,7 @@ public class Branch {
         return trackingAfter != null;
     }
 
-    public void addTracking(RemoteBranch remoteBranch){
-        trackingAfter = remoteBranch;
+    public void addTracking(String remoteBranchName){
+        trackingAfter = remoteBranchName;
     }
 }

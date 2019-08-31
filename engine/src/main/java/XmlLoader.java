@@ -145,7 +145,7 @@ class XmlLoader {
                 }
                 if(pointingBranch.isTracking()){
                     RemoteBranch remoteBranch = findTrackingBranch(pointingBranch.getTrackingAfter());
-                    branch.addTracking(remoteBranch);
+                    branch.addTracking(remoteBranch.name);
                 }
                 rootFolder.zipRec();
                 commit.zipCommit();

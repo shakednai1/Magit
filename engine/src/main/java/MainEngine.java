@@ -141,10 +141,11 @@ public class MainEngine {
     }
 
     public void cloneRepo(String src, String dst, String repoName){
-        repositoryManager.cloneRepository(src, dst, repoName);
+        repositoryManager.cloneRepository(src, dst, repoName, true);
     }
 
-    public void fetchRepo(){
+    public void fetchRepo() throws NoActiveRepositoryError{
+        validateActiveRepository();
         if(repositoryManager.getActiveRepository().hasRemoteRepo()){
             repositoryManager.getActiveRepository().fetch();
         }

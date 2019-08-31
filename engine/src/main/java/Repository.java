@@ -40,10 +40,33 @@ class Repository {
         this.fullPath = fullPath;
         this.name = loadRepositoryName();
 
+        loadRemoteRepoDetails();
         loadBranchesData();
+        loadRemoteBranches();
 
         this.activeBranch = activeBranch;
         saveRepositoryActiveBranch();
+    }
+
+    private void loadRemoteRepoDetails(){
+        List<String> isRemote = Utils.getFileLines(Settings.repositoryRemoteDetailsFilePath);
+        if(!isRemote.isEmpty()){
+            String[] remoteDetails = isRemote.get(0).split(Settings.delimiter);
+            this.remoteRepositoyName = remoteDetails[1];
+            this.remoteRepositoyPath = remoteDetails[0];
+        }
+    }
+
+    private void loadRemoteBranches(){
+        if(remoteRepositoyName != null){
+            remoteBranches = new LinkedList<>();
+            File remoteBranchesFolder = new File(Settings.remoteBranchesPath);
+            for(File branch : remoteBranchesFolder.listFiles()){
+                String pointedCommit = Utils.getFileLines(branch.getPath()).get(0).split(Settings.delimiter)[0];
+                RemoteBranch remoteBranch = new RemoteBranch(branch.getName(), pointedCommit);
+                remoteBranches.add(remoteBranch);
+            }
+        }
     }
 
     private String loadRepositoryName(){
@@ -242,6 +265,8 @@ class Repository {
 
     public void addRemoteBranch(RemoteBranch remoteBranch){
         remoteBranches.add(remoteBranch);
+        Utils.createNewFile(Settings.repositoryFullPath + "/.magit/branches/remote/" + remoteBranch.name + ".txt",
+                remoteBranch.pointedCommitSha1);
     }
 
     public List<RemoteBranch> getAllRemoteBranches(){
@@ -253,15 +278,17 @@ class Repository {
     }
 
     public void fetch(){
-        remoteBranches = new LinkedList<>();
-        File sourceBranchesDir = new File(remoteRepositoryPath + "/.magit/branches");
-        for(File branch: sourceBranchesDir.listFiles()){
-            if(!branch.getName().equals("HEAD")){
-                remoteBranches.add(new RemoteBranch(remoteRepositoryName + "/" + branch.getName(),
-                        Utils.getFileLines(branch.getPath()).get(0)));
-            }
+        File branchesDir = new File(remoteRepositoyPath + Settings.branchFolder);
+        File remoteBranchesDir = new File(Settings.remoteBranchesPath);
+        try {
+            FileUtils.copyDirectory(branchesDir,remoteBranchesDir);
         }
-        File sourceObjectsDir = new File(remoteRepositoryPath + "/.magit/objects");
+        catch (IOException e){
+        }
+
+        loadRemoteBranches();
+
+        File sourceObjectsDir = new File(remoteRepositoyPath + Settings.objectsFolder);
         for(File file : sourceObjectsDir.listFiles()){
             File destFile = new File(Settings.objectsFolderPath + "/" + file.getName());
             try {
