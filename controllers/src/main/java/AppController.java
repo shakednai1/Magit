@@ -136,8 +136,7 @@ public class AppController {
 
         Validator validBranch = (value) -> {
             try {
-                BranchData branchData = engine.createNewBranch(value, false);
-                branches.add(branchData);
+                engine.createNewBranch(value, false);
                 return true;
             }
             catch (InvalidBranchNameError | UncommittedChangesError | NoActiveRepositoryError e) {
@@ -182,7 +181,6 @@ public class AppController {
 
     private void deleteBranch(String branchName) throws NoActiveRepositoryError, InvalidBranchNameError, IllegalArgumentException {
         engine.deleteBranch(branchName);
-        branches.removeIf((b)->(b.getName().equals(branchName)));
     }
 
     @FXML
