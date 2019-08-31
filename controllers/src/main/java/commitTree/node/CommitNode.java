@@ -43,6 +43,7 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
             commitNodeController.setCommitMessage(commit.getMessage());
             commitNodeController.setCommitter(commit.getCommitter());
             commitNodeController.setCommitTimeStamp(commit.getCommitTime());
+            commitNodeController.setPointingBranches(); // TODO -real data
 
             return root;
         } catch (IOException e) {

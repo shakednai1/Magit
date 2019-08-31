@@ -1,10 +1,10 @@
 package models;
 
 import core.Commit;
+import javafx.beans.property.SetProperty;
+import org.apache.commons.collections4.multiset.HashMultiSet;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -17,11 +17,12 @@ public class CommitData {
     private String committer;
     private String commitTime;
     private String previousCommitSha1;
+    // TODO property -  add label from commitNodeController
     private Set<BranchData> pointingBranches = new HashSet<>();
 
     private boolean isInMasterChain = false;
 
- 
+
     public CommitData(Commit commit){
         this.sha1 = commit.getCommitSHA1();
         this.message = commit.getMsg();
@@ -42,8 +43,9 @@ public class CommitData {
 
     public boolean getIsInMasterChain() { return isInMasterChain; }
 
-
     public void addPointingBranch(BranchData branch){ pointingBranches.add(branch); }
+
+    public void removePointingBranch(BranchData branch){ pointingBranches.remove(branch); }
 
     public void setInMasterChain(){ isInMasterChain = true; }
 
