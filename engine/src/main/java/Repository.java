@@ -52,13 +52,13 @@ class Repository {
         List<String> isRemote = Utils.getFileLines(Settings.repositoryRemoteDetailsFilePath);
         if(!isRemote.isEmpty()){
             String[] remoteDetails = isRemote.get(0).split(Settings.delimiter);
-            this.remoteRepositoyName = remoteDetails[1];
-            this.remoteRepositoyPath = remoteDetails[0];
+            this.remoteRepositoryName = remoteDetails[1];
+            this.remoteRepositoryPath = remoteDetails[0];
         }
     }
 
     private void loadRemoteBranches(){
-        if(remoteRepositoyName != null){
+        if(remoteRepositoryName != null){
             remoteBranches = new LinkedList<>();
             File remoteBranchesFolder = new File(Settings.remoteBranchesPath);
             for(File branch : remoteBranchesFolder.listFiles()){
@@ -278,7 +278,7 @@ class Repository {
     }
 
     public void fetch(){
-        File branchesDir = new File(remoteRepositoyPath + Settings.branchFolder);
+        File branchesDir = new File(remoteRepositoryPath + Settings.branchFolder);
         File remoteBranchesDir = new File(Settings.remoteBranchesPath);
         try {
             FileUtils.copyDirectory(branchesDir,remoteBranchesDir);
@@ -288,7 +288,7 @@ class Repository {
 
         loadRemoteBranches();
 
-        File sourceObjectsDir = new File(remoteRepositoyPath + Settings.objectsFolder);
+        File sourceObjectsDir = new File(remoteRepositoryPath + Settings.objectsFolder);
         for(File file : sourceObjectsDir.listFiles()){
             File destFile = new File(Settings.objectsFolderPath + "/" + file.getName());
             try {
