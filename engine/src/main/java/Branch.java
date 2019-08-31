@@ -1,7 +1,10 @@
 import models.BranchData;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 
+import javax.rmi.CORBA.Util;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -51,6 +54,18 @@ public class Branch {
                 rewriteFS);
 
         currentStateOfFiles = rootFolder.getCommittedItemsState();
+    }
+
+    Branch(String name, String trackingAfter){
+        this.name=  name;
+        this.trackingAfter = trackingAfter;
+
+        File source = new File(Settings.remoteBranchesPath + trackingAfter + ".txt");
+        File dest = new File(Settings.branchFolderPath + name + ".txt");
+        try {
+            FileUtils.copyFile(source, dest);
+        } catch (IOException e) {
+        }
     }
 
     private void addCommitToHistory(Commit commit){

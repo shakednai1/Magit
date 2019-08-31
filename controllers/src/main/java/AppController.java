@@ -90,6 +90,15 @@ public class AppController {
             choiceDialog.setHeaderText("Checkout branch");
             Optional<String> branchToCheckout = choiceDialog.showAndWait();
             branchNameToCheckout = branchToCheckout.get();
+            if(branchNameToCheckout.contains("/")){
+                TextInputDialog dialog = new TextInputDialog("");
+                dialog.setTitle("Create new tracking branch");
+                dialog.setHeaderText("Enter tracking branch name");
+                dialog.setContentText("Name");
+                Optional<String> branchName = dialog.showAndWait();
+                engine.createAndCheckoutToNewTrackingBranch(branchName.get(), branchNameToCheckout.split("/")[1]);
+                branchNameToCheckout = branchName.get();
+            }
             engine.checkoutBranch(branchNameToCheckout, false);
             updateBranch();
         }

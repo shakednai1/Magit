@@ -159,4 +159,9 @@ public class MainEngine {
         String remoteRepoName= repositoryManager.getActiveRepository().getRemoteRepositoryName();
         return repositoryManager.getActiveRepository().getAllRemoteBranches().stream().map((branch) -> remoteRepoName + "/" + branch.getName()).collect(Collectors.toList());
     }
+
+    public void createAndCheckoutToNewTrackingBranch(String newBranchName, String trackingAfter) {
+        Branch branch = new Branch(newBranchName, trackingAfter);
+        repositoryManager.getActiveRepository().addNewBranch(branch);
+    }
 }
