@@ -15,7 +15,7 @@ public class BranchData {
 
     public BranchData(Branch branch) {
         this.name = branch.getName();
-        this.headSha1 = branch.getHead().getCommitSHA1();
+        this.headSha1 = branch.getHead().getSha1();
         this.headMsg = branch.getHead().getMsg();
     }
 

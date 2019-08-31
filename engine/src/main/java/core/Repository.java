@@ -1,5 +1,6 @@
 package core;
 
+import com.sun.org.apache.xpath.internal.functions.Function;
 import exceptions.InvalidBranchNameError;
 import exceptions.NoChangesToCommitError;
 import exceptions.UncommittedChangesError;
@@ -11,8 +12,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import models.BranchData;
+import puk.team.course.magit.ancestor.finder.AncestorFinder;
+import puk.team.course.magit.ancestor.finder.CommitRepresentative;
 
-import javax.rmi.CORBA.Util;
 import java.util.*;
 
 class Repository {
@@ -141,7 +143,7 @@ class Repository {
         for(int i=0; i < branches.size(); i++){
             BranchData branchDetails = branches.get(i);
             if(branchDetails.getName().equals(activeBranch.getName())){
-                branchDetails.setHeadSha1(activeBranch.getHead().getCommitSHA1());
+                branchDetails.setHeadSha1(activeBranch.getHead().getSha1());
                 branchDetails.setHeadMsg(activeBranch.getHead().getMsg());
             }
         }
@@ -310,5 +312,22 @@ class Repository {
             } catch (IOException e) {
             }
         }
+    }
+
+    public String findAncestor(BranchData base, BranchData otherBranch){
+        AncestorFinder ancestorFinder = new AncestorFinder( (sha1) -> (new Commit(sha1)));
+        return ancestorFinder.traceAncestor(base.getHeadSha1(),otherBranch.getHeadSha1());
+    }
+
+    public Map<String, FileChanges> getFileChanges(String commitBase, String commit) {
+        Map<String, String> commitBaseFiles = getAllFilesOfCommit(commitBase);
+        Map<String, String> commitFiles = getAllFilesOfCommit(commit);
+        //List<String> deletedFiles = commitBaseFiles.keySet().removeAll(commitFiles.keySet());
+        return null;
+    }
+
+    private Map<String, String> getAllFilesOfCommit(String commitSha1){
+        //recursive open commit and find files fileFullPath : fileSha1
+        return null;
     }
 }

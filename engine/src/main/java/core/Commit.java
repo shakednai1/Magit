@@ -1,12 +1,13 @@
 package core;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import puk.team.course.magit.ancestor.finder.CommitRepresentative;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Commit {
+public class Commit implements CommitRepresentative {
 
     static DateFormat commitDateFormat = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss:SSS");
 
@@ -14,13 +15,14 @@ public class Commit {
     private String commitTime;
     private String commitSha1;
     private String rootSha1;
-    private String previousCommitSHA1;
+    private String firstPreviousCommitSHA1;
+    private String secondPreviousCommitSHA1;
     private String userLastModified;
     private String mergedCommitSHA1; // The commit that was merged with prevCommit of the head branch
 
-    Commit(String msg, String rootFolderSha, String userLastModified, String commitTime, String previousCommitSHA1){
+    Commit(String msg, String rootFolderSha, String userLastModified, String commitTime, String firstPreviousCommitSHA1){
         this.msg = msg;
-        this.previousCommitSHA1 = previousCommitSHA1;
+        this.firstPreviousCommitSHA1 = firstPreviousCommitSHA1 == null ? "" : firstPreviousCommitSHA1;
         this.rootSha1 = rootFolderSha;
         this.commitTime = commitTime;
         this.userLastModified = userLastModified;
@@ -40,15 +42,16 @@ public class Commit {
         this.rootSha1 = commitData[0];
         this.commitTime = commitData[commitData.length - 2];
         this.userLastModified = commitData[commitData.length - 1];
-        this.previousCommitSHA1 = commitData[1];
+        this.firstPreviousCommitSHA1 = commitData[1].equals("null") ? "" : commitData[1];
 
         String[] msgParts = Arrays.copyOfRange(commitData, 2, commitData.length - 2);
         this.msg = String.join( Settings.delimiter, msgParts);
     }
 
-    public String getCommitSHA1(){return commitSha1;}
+    @Override
+    public String getSha1(){return commitSha1;}
     public String getRootFolderSHA1(){ return rootSha1; }
-    public String getPreviousCommitSHA1(){ return previousCommitSHA1; }
+    public String getFirstPreviousCommitSHA1(){ return firstPreviousCommitSHA1; }
     public String getUserLastModified() { return userLastModified; }
     public String getCommitTime() { return commitTime; }
     public String getMsg(){ return msg;}
@@ -66,7 +69,7 @@ public class Commit {
     }
 
     private String getCommitTxt(){
-        String prevCommitStr = (previousCommitSHA1 == null)? "null": previousCommitSHA1;
+        String prevCommitStr = (firstPreviousCommitSHA1 == null || firstPreviousCommitSHA1.equals(""))? "null": firstPreviousCommitSHA1;
 
         return rootSha1 + Settings.delimiter +
                 prevCommitStr + Settings.delimiter +
@@ -90,15 +93,27 @@ public class Commit {
         commitMap.put(currCommitSha1, new Commit(currCommitSha1));
 
         while (true){
-            currCommitSha1 = commitMap.get(currCommitSha1).getPreviousCommitSHA1();
-            if(currCommitSha1.equals("null")){
+            if(!commitMap.get(currCommitSha1).hasPrecedingCommit()){
                 break;
             }
+            currCommitSha1 = commitMap.get(currCommitSha1).getFirstPreviousCommitSHA1();
             commitMap.put(currCommitSha1, new Commit(currCommitSha1));
         }
 
         return commitMap;
     }
 
+    private boolean hasPrecedingCommit(){
+        return !firstPreviousCommitSHA1.equals("");
+    }
 
+    @Override
+    public String getFirstPrecedingSha1() {
+        return firstPreviousCommitSHA1;
+    }
+
+    @Override
+    public String getSecondPrecedingSha1() {
+        return "";
+    }
 }

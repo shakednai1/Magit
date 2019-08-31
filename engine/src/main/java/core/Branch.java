@@ -1,14 +1,10 @@
 package core;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.XPath;
 import exceptions.NoChangesToCommitError;
 import models.BranchData;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 
-import javax.rmi.CORBA.Util;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -73,7 +69,7 @@ public class Branch {
     String getTrackingAfter(){ return trackingAfter; }
 
     private void addCommitToHistory(Commit commit){
-        commitData.put(commit.getCommitSHA1(), commit);
+        commitData.put(commit.getSha1(), commit);
     }
 
     private Folder createRootFolder(){
@@ -116,7 +112,7 @@ public class Branch {
         }
         else{
             Commit headCommit = new Commit(headCommitSha1);
-            headCommitSha1 = headCommit.getCommitSHA1();
+            headCommitSha1 = headCommit.getSha1();
             headCommitMsg = headCommit.getMsg();
         }
 
@@ -141,7 +137,7 @@ public class Branch {
         String commitTime = Settings.commitDateFormat.format(new Date());
         rootFolder.commit(Settings.getUser(), commitTime);
 
-        String prevCommitSha1 = (head==null)? null : head.getCommitSHA1();
+        String prevCommitSha1 = (head==null)? null : head.getSha1();
         Commit com = new Commit(msg, rootFolder.currentSHA1, rootFolder.userLastModified, commitTime,prevCommitSha1);
         com.zipCommit();
 
@@ -164,7 +160,7 @@ public class Branch {
     }
 
     public void writeBranchInfoFile(){
-        String branchFileContentCommit =  (head == null)? "null": head.getCommitSHA1();
+        String branchFileContentCommit =  (head == null)? "null": head.getSha1();
         String branchFileContentTracking = (trackingAfter == null) ? "null" : trackingAfter;
         String content = String.join(Settings.delimiter, branchFileContentCommit, branchFileContentTracking);
         Utils.writeFile(getBranchFilePath(name), content, false);
@@ -179,7 +175,7 @@ public class Branch {
         Commit currentCommit = head;
         while (currentCommit != null){
             res.add(currentCommit.toString());
-            currentCommit = commitData.get(currentCommit.getPreviousCommitSHA1());
+            currentCommit = commitData.get(currentCommit.getFirstPreviousCommitSHA1());
         }
         return res;
     }

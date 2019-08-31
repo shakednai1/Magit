@@ -171,4 +171,13 @@ public class MainEngine {
         Branch branch = new Branch(newBranchName, trackingAfter);
         repositoryManager.getActiveRepository().addNewBranch(branch);
     }
+
+    public String findAncestor(BranchData base, BranchData otherBranch){
+        return repositoryManager.getActiveRepository().findAncestor(base, otherBranch);
+    }
+
+    public Map<String, FileChanges> getFileChanges(String commitBase, String commit){
+        return repositoryManager.getActiveRepository().getFileChanges(commitBase, commit);
+    }
+
 }

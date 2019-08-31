@@ -29,6 +29,16 @@
         </plugins>
     </build>
 
+    <dependencies>
+        <dependency>
+            <groupId>AncestorFinder</groupId>
+            <artifactId>AncestorFinder</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>C:/JavaDependencies/AncestorFinder.jar</systemPath>
+       </dependency>
+    </dependencies>
+
 <!--    <dependencies>-->
 <!--        <dependency>-->
 <!--            <groupId>commons-io</groupId>-->

@@ -118,7 +118,7 @@ class XmlLoader {
         List<MagitSingleCommit> commitChilds = commitPointersMap.get(commit.getId());
         if(!commitChilds.isEmpty()){
             for(MagitSingleCommit child: commitChilds){
-                openCommitRec(child, commitObj.getCommitSHA1());
+                openCommitRec(child, commitObj.getSha1());
             }
         }
     }
@@ -136,7 +136,7 @@ class XmlLoader {
 
         if (!pointingRemoteBranches.isEmpty()) {
             for (MagitSingleBranch pointingRemoteBranch : pointingRemoteBranches) {
-                RemoteBranch remoteBranch = new RemoteBranch(pointingRemoteBranch.getName().split("/")[1], commit.getCommitSHA1());
+                RemoteBranch remoteBranch = new RemoteBranch(pointingRemoteBranch.getName().split("/")[1], commit.getSha1());
                 repositoryManager.getActiveRepository().addRemoteBranch(remoteBranch);
             }
         }

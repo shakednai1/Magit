@@ -11,7 +11,9 @@ import java.nio.file.Paths;
 public class Blob extends Item {
     final private String typeItem = "File";
 
+    Blob(){
 
+    }
     Blob(String path, String name){
         fullPath = path;
         this.name = name;

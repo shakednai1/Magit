@@ -1,8 +1,6 @@
 package models;
 
 import core.Commit;
-import javafx.beans.property.SetProperty;
-import org.apache.commons.collections4.multiset.HashMultiSet;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,11 +22,11 @@ public class CommitData {
 
 
     public CommitData(Commit commit){
-        this.sha1 = commit.getCommitSHA1();
+        this.sha1 = commit.getSha1();
         this.message = commit.getMsg();
         this.committer = commit.getUserLastModified();
         this.commitTime = commit.getCommitTime();
-        this.previousCommitSha1 = commit.getPreviousCommitSHA1().equals("null") ? null: commit.getPreviousCommitSHA1();
+        this.previousCommitSha1 = commit.getFirstPreviousCommitSHA1().equals("null") ? null: commit.getFirstPreviousCommitSHA1();
     }
 
     public String getSha1() { return sha1; }
