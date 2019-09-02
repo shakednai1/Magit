@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.181" xmlns:fx="http://javafx.com/fxml/1" fx:controller="AppController">
+<AnchorPane focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="AppController">
     <children>
         <GridPane layoutX="11.0" layoutY="7.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="1000.0">
             <columnConstraints>
@@ -34,6 +34,7 @@
                         <MenuItem fx:id="deleteBranch" mnemonicParsing="false" onAction="#OnDeleteBranch" text="delete" />
                         <MenuItem fx:id="listAllBranches" mnemonicParsing="false" onAction="#OnListAllBranches" text="show all branches" />
                   <MenuItem fx:id="resetBranch" mnemonicParsing="false" onAction="#OnResetBranch" text="reset branch" />
+                  <MenuItem fx:id="createBranchFromSha1" mnemonicParsing="false" onAction="#OnCreateBranchFromSha1" text="create branch from sha1" />
                     </items>
                 </MenuButton>
                 <Label fx:id="currentRepo" textFill="#783232" GridPane.columnSpan="2147483647">
