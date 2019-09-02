@@ -57,7 +57,7 @@ class Repository {
 
     private void loadRemoteRepoDetails(){
         if(isRemote()){
-            List<String> remoteData = Utils.getFileLines(Settings.repositoryDetailsFilePath);
+            List<String> remoteData = Utils.getFileLines(Settings.repositoryRemoteDetailsFilePath);
             String[] remoteDetails = remoteData.get(0).split(Settings.delimiter);
             this.remoteRepositoryName = remoteDetails[1];
             this.remoteRepositoryPath = remoteDetails[0];
@@ -332,23 +332,12 @@ class Repository {
         return null;
     }
 
-    BranchData createNewBranchFromSha1(String branchName, String sha1){
+    BranchData createNewBranchFromSha1(String branchName, String sha1, String trackingAfter){
         Branch newBranch;
-        String trackingAfter = findTrackingAfterBySha1(sha1);
-        newBranch = new Branch(name, sha1, trackingAfter, false);
+        newBranch = new Branch(branchName, sha1, trackingAfter, false);
         addNewBranch(newBranch);
         return new BranchData(newBranch);
 
-    }
-
-    String findTrackingAfterBySha1(String sha1){
-        File rbDir = new File(Settings.remoteBranchesPath);
-        for (File rb : rbDir.listFiles()){
-            if(Utils.getFileLines(rb.getPath()).get(0).split(Settings.delimiter)[0].equals(sha1)){
-                return rb.getName().split(".txt")[0];
-            }
-        }
-        return null;
     }
 
     public boolean isValidBranchName(String name) throws InvalidBranchNameError {

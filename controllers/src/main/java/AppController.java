@@ -83,6 +83,7 @@ public class AppController {
 
     @FXML
     void OnCheckoutBranch(ActionEvent event) {
+        boolean checkout = true;
         String branchNameToCheckout = null;
         try{
             List<String> branchesName = getAllBranchNames();
@@ -92,16 +93,30 @@ public class AppController {
             Optional<String> branchToCheckout = choiceDialog.showAndWait();
             branchNameToCheckout = branchToCheckout.get();
             if(branchNameToCheckout.contains("/")){
-                TextInputDialog dialog = new TextInputDialog("");
-                dialog.setTitle("Create new tracking branch");
-                dialog.setHeaderText("Enter tracking branch name");
-                dialog.setContentText("Name");
-                Optional<String> branchName = dialog.showAndWait();
-                engine.createAndCheckoutToNewTrackingBranch(branchName.get(), branchNameToCheckout.split("/")[1]);
-                branchNameToCheckout = branchName.get();
+                Alert alert = new Alert(Alert.AlertType.NONE);
+                alert.setHeaderText("Checkout to remote branch");
+                alert.setTitle("Checkout to remote branch");
+                alert.setContentText("Cannot checkout to remote branch\nDo you want to create tracking branch instead and checkout?");
+                ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.APPLY);
+                ButtonType no = new ButtonType("No", ButtonBar.ButtonData.NO);
+                alert.getDialogPane().getButtonTypes().addAll(yes, no);
+                Optional<ButtonType> result = alert.showAndWait();
+                if(result.get() == yes){
+                    String branchName = branchNameToCheckout.split("/")[1];
+                    String sha1 = engine.getSha1FromRemoteBranch(branchName);
+                    engine.createNewBranchFromSha1(branchName, sha1, true);
+                    branchNameToCheckout = branchName;
+                }
+                else{
+                    checkout = false;
+                }
+
             }
-            engine.checkoutBranch(branchNameToCheckout, false);
-            updateBranch();
+            if(checkout){
+                engine.checkoutBranch(branchNameToCheckout, false);
+                updateBranch();
+
+            }
         }
         catch (NoActiveRepositoryError e){
             showErrorAlert(e);
@@ -423,59 +438,43 @@ public class AppController {
 
     @FXML
     void OnCreateBranchFromSha1(ActionEvent event) {
-        // Create the custom dialog.
-        Dialog<Pair<String, String>> dialog = new Dialog<>();
-        dialog.setTitle("New Branch From Sha1");
-        dialog.setHeaderText("New Branch From Sha1");
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        TextInputDialog dialog = new TextInputDialog("");
+        dialog.setTitle("Create new branch from sha1");
+        dialog.setHeaderText("Enter sha1");
+        dialog.setContentText("SHA1");
+        Optional<String> sha1 = dialog.showAndWait();
+        String tracking = engine.findTrackingAfterBySha1(sha1.get());
+        if(tracking!= null) {
+            Alert alert = new Alert(Alert.AlertType.NONE);
+            alert.setHeaderText("Tracking after remote branch");
+            alert.setTitle("Tracking after remote branch");
+            alert.setContentText("This SHA1 pointed by remote branch\ndo you want to create remote branch?");
+            ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.APPLY);
+            ButtonType no = new ButtonType("No", ButtonBar.ButtonData.NO);
+            alert.getDialogPane().getButtonTypes().addAll(yes, no);
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == yes) {
+                engine.createNewBranchFromSha1(tracking, sha1.get(), true);
+            } else if (result.get() == no) {
+                String branchName = showCreateBranchDialog();
+                engine.createNewBranchFromSha1(branchName, sha1.get(), false);
 
-        // Create the username and password labels and fields.
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
-
-        TextField name = new TextField();
-        name.setPromptText("Branch Name");
-        TextField sha1 = new TextField();
-        sha1.setPromptText("Sha1");
-
-        grid.add(new Label("BranchName:"), 0, 0);
-        grid.add(name, 1, 0);
-        grid.add(new Label("Sha1:"), 0, 1);
-        grid.add(sha1, 1, 1);
-
-        dialog.getDialogPane().setContent(grid);
-
-        dialog.getDialogPane().lookupButton(ButtonType.CANCEL).visibleProperty().set(false);
-
-        Validator validBranch = (value) -> {
-            try {
-                engine.isValidBranchName(value);
-                return true;
             }
-            catch (InvalidBranchNameError | NoActiveRepositoryError e) {
-                showErrorAlert(e);
-            }
-            return false;
-        };
+        }
+        else{
+            String branchName = showCreateBranchDialog();
+            engine.createNewBranchFromSha1(branchName, sha1.get(), false);
+        }
 
+    }
 
-        final Button btOk = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
-        btOk.addEventFilter(
-                ActionEvent.ACTION,
-                OKevent -> {
-                    if (!validBranch.isValid(name.getText())){
-                        OKevent.consume();
-                    }
-                    else {
-                        engine.createNewBranchFromSha1(name.getText(), sha1.getText());
-                    }
-                }
-        );
-
-        dialog.showAndWait();
-
+    public String showCreateBranchDialog(){
+        TextInputDialog BranchDialog = new TextInputDialog("");
+        BranchDialog.setTitle("Create new branch from sha1");
+        BranchDialog.setHeaderText("Enter branch name");
+        BranchDialog.setContentText("Name");
+        Optional<String> branchName = BranchDialog.showAndWait();
+        return branchName.get();
     }
 
     String repositoryFolderNameDialog(){

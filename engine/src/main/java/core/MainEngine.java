@@ -180,12 +180,28 @@ public class MainEngine {
         return repositoryManager.getActiveRepository().getFileChanges(commitBase, commit);
     }
 
-    public BranchData createNewBranchFromSha1(String name, String sha1){
-        return repositoryManager.getActiveRepository().createNewBranchFromSha1(name, sha1);
+    public BranchData createNewBranchFromSha1(String name, String sha1, boolean track){
+        String trackingAfter = track ? findTrackingAfterBySha1(sha1): null;
+        return repositoryManager.getActiveRepository().createNewBranchFromSha1(name, sha1, trackingAfter);
     }
 
     public boolean isValidBranchName(String name) throws InvalidBranchNameError, NoActiveRepositoryError {
         validateActiveRepository();
         return repositoryManager.getActiveRepository().isValidBranchName(name);
     }
+
+    public String findTrackingAfterBySha1(String sha1){
+        File rbDir = new File(Settings.remoteBranchesPath);
+        for (File rb : rbDir.listFiles()){
+            if(Utils.getFileLines(rb.getPath()).get(0).split(Settings.delimiter)[0].equals(sha1)){
+                return rb.getName().split(".txt")[0];
+            }
+        }
+        return null;
+    }
+
+    public String getSha1FromRemoteBranch(String remote){
+        return Utils.getFileLines(Settings.remoteBranchesPath + remote + ".txt").get(0).split(Settings.delimiter)[0];
+    }
+
 }

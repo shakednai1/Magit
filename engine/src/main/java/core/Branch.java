@@ -15,7 +15,7 @@ public class Branch {
     private String name;
     private Folder rootFolder;
 
-    String trackingAfter = null;
+    String trackingAfter = "null";
 
     private Map<String, Commit> commitData = new HashMap<>();
 
@@ -66,7 +66,7 @@ public class Branch {
         writeBranchInfoFile();
     }
 
-    String getTrackingAfter(){ return trackingAfter; }
+    public String getTrackingAfter(){ return trackingAfter; }
 
     private void addCommitToHistory(Commit commit){
         commitData.put(commit.getSha1(), commit);
@@ -104,6 +104,7 @@ public class Branch {
     static BranchData getBranchDisplayData(String branchName){
         List<String> branchData = Utils.getFileLines(getBranchFilePath(branchName));
         String headCommitSha1 = branchData.get(0).split(Settings.delimiter)[0];
+        String trackingAfter = branchData.get(0).split(Settings.delimiter)[1];
         String headCommitMsg;
 
         if(headCommitSha1.equals("null")){
@@ -116,7 +117,7 @@ public class Branch {
             headCommitMsg = headCommit.getMsg();
         }
 
-        return new BranchData(branchName, headCommitSha1, headCommitMsg);
+        return new BranchData(branchName, headCommitSha1, headCommitMsg, trackingAfter);
     }
 
 

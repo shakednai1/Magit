@@ -6,17 +6,20 @@ public class BranchData {
     private String name;
     private String headSha1;
     private String headMsg;
+    private String trackingAfter;
 
-    public BranchData(String name, String headSha1, String headMsg) {
+    public BranchData(String name, String headSha1, String headMsg, String trackingAfter) {
         this.name = name;
         this.headSha1 = headSha1;
         this.headMsg = headMsg;
+        this.trackingAfter = trackingAfter;
     }
 
     public BranchData(Branch branch) {
         this.name = branch.getName();
         this.headSha1 = branch.getHead().getSha1();
         this.headMsg = branch.getHead().getMsg();
+        this.trackingAfter = branch.getTrackingAfter();
     }
 
     public String getName() {
@@ -34,6 +37,10 @@ public class BranchData {
     public void setHeadMsg(String headMsg) {
         this.headMsg = headMsg;
     }
+
+    public String getTrackingAfter(){return this.trackingAfter; }
+    public void setTrackingAfter(String trackingAfter){this.trackingAfter = trackingAfter; }
+
 
     @Override
     public String toString() {
