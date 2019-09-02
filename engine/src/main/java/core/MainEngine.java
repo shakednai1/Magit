@@ -180,4 +180,12 @@ public class MainEngine {
         return repositoryManager.getActiveRepository().getFileChanges(commitBase, commit);
     }
 
+    public BranchData createNewBranchFromSha1(String name, String sha1){
+        return repositoryManager.getActiveRepository().createNewBranchFromSha1(name, sha1);
+    }
+
+    public boolean isValidBranchName(String name) throws InvalidBranchNameError, NoActiveRepositoryError {
+        validateActiveRepository();
+        return repositoryManager.getActiveRepository().isValidBranchName(name);
+    }
 }

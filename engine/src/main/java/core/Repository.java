@@ -4,6 +4,7 @@ import com.sun.org.apache.xpath.internal.functions.Function;
 import exceptions.InvalidBranchNameError;
 import exceptions.NoChangesToCommitError;
 import exceptions.UncommittedChangesError;
+import fromXml.RootFolder;
 import models.CommitData;
 import org.apache.commons.io.FileUtils;
 import java.io.File;
@@ -329,5 +330,32 @@ class Repository {
     private Map<String, String> getAllFilesOfCommit(String commitSha1){
         //recursive open commit and find files fileFullPath : fileSha1
         return null;
+    }
+
+    BranchData createNewBranchFromSha1(String branchName, String sha1){
+        Branch newBranch;
+        String trackingAfter = findTrackingAfterBySha1(sha1);
+        newBranch = new Branch(name, sha1, trackingAfter, false);
+        addNewBranch(newBranch);
+        return new BranchData(newBranch);
+
+    }
+
+    String findTrackingAfterBySha1(String sha1){
+        File rbDir = new File(Settings.remoteBranchesPath);
+        for (File rb : rbDir.listFiles()){
+            if(Utils.getFileLines(rb.getPath()).get(0).split(Settings.delimiter)[0].equals(sha1)){
+                return rb.getName().split(".txt")[0];
+            }
+        }
+        return null;
+    }
+
+    public boolean isValidBranchName(String name) throws InvalidBranchNameError {
+        if(branches.stream().anyMatch(branch-> branch.getName().equals(name)) ||
+                name.contains(" ")){
+            throw new InvalidBranchNameError("");
+        }
+        return true;
     }
 }

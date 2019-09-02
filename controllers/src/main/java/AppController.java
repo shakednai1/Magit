@@ -5,9 +5,12 @@ import exceptions.*;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.util.Pair;
 import models.BranchData;
 import models.CommitData;
 import models.RepositoryModel;
@@ -416,6 +419,63 @@ public class AppController {
             alert.setContentText(e.getMessage());
             alert.showAndWait();
         }
+    }
+
+    @FXML
+    void OnCreateBranchFromSha1(ActionEvent event) {
+        // Create the custom dialog.
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("New Branch From Sha1");
+        dialog.setHeaderText("New Branch From Sha1");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // Create the username and password labels and fields.
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField name = new TextField();
+        name.setPromptText("Branch Name");
+        TextField sha1 = new TextField();
+        sha1.setPromptText("Sha1");
+
+        grid.add(new Label("BranchName:"), 0, 0);
+        grid.add(name, 1, 0);
+        grid.add(new Label("Sha1:"), 0, 1);
+        grid.add(sha1, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.getDialogPane().lookupButton(ButtonType.CANCEL).visibleProperty().set(false);
+
+        Validator validBranch = (value) -> {
+            try {
+                engine.isValidBranchName(value);
+                return true;
+            }
+            catch (InvalidBranchNameError | NoActiveRepositoryError e) {
+                showErrorAlert(e);
+            }
+            return false;
+        };
+
+
+        final Button btOk = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+        btOk.addEventFilter(
+                ActionEvent.ACTION,
+                OKevent -> {
+                    if (!validBranch.isValid(name.getText())){
+                        OKevent.consume();
+                    }
+                    else {
+                        engine.createNewBranchFromSha1(name.getText(), sha1.getText());
+                    }
+                }
+        );
+
+        dialog.showAndWait();
+
     }
 
     String repositoryFolderNameDialog(){
