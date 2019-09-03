@@ -1,9 +1,12 @@
+import core.Blob;
+import core.FilesDelta;
 import core.MainEngine;
 import core.Settings;
 import exceptions.*;
 import models.BranchData;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class UI {
 
@@ -135,10 +138,10 @@ public class UI {
 
     private static void printWorkingCopyStatus(){
         try{
-            Map<String, List<String>> changes = engine.getWorkingCopyStatus();
-            List<String> updatedFiles = changes.get("update");
-            List<String> newFiles = changes.get("new");
-            List<String> deletedFiles = changes.get("delete");
+            FilesDelta changes = engine.getWorkingCopyStatus();
+            List<String> updatedFiles = changes.getUpdatedFilesPaths();
+            List<String> newFiles = changes.getNewFilesPaths();
+            List<String> deletedFiles = changes.getDeletedFilesPaths();
 
             System.out.println();
             System.out.println("============================");

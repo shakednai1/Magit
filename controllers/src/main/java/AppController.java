@@ -1,6 +1,6 @@
 import commitTree.CommitTree;
+import core.CommitsDelta;
 import core.MainEngine;
-import core.Branch;
 import exceptions.*;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
@@ -11,6 +11,7 @@ import javafx.stage.FileChooser;
 import models.BranchData;
 import models.CommitData;
 import models.RepositoryModel;
+import workingCopy.WorkingCopyStage;
 
 import java.io.File;
 import java.util.*;
@@ -244,40 +245,10 @@ public class AppController {
     @FXML
     void OnWCStatus(ActionEvent event){
         try{
-            Map<String, List<String>> changes = engine.getWorkingCopyStatus();
-            List<String> updatedFiles = changes.get("update");
-            List<String> newFiles = changes.get("new");
-            List<String> deletedFiles = changes.get("delete");
-            String files = "";
-            files = files.concat("Update: \n");
-            for(String updatedFile : updatedFiles){
-                files = files.concat(updatedFile + "\n");
-            }
-            files = files.concat("\n");
-            files = files.concat("\n");
-
-            files = files.concat("New: \n");
-            for(String newFile : newFiles){
-                files = files.concat(newFile + "\n");
-            }
-            files = files.concat("\n");
-            files = files.concat("\n");
-
-            files = files.concat("Deleted: \n");
-            for(String deletedFile : deletedFiles){
-                files = files.concat(deletedFile + "\n");
-            }
-            files = files.concat("\n");
-            files = files.concat("\n");
-
-            Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
-            alertInfo.setContentText(files);
-            alertInfo.setHeaderText("Working copy status:");
-            alertInfo.setTitle("WC status");
-            alertInfo.showAndWait();
+            // TODO - add icon for deleted, new, updated
+            new WorkingCopyStage().display();
         }
         catch (NoActiveRepositoryError e){ showErrorAlert(e); }
-
     }
 
     @FXML
@@ -297,6 +268,14 @@ public class AppController {
             }
         }
         catch (NoActiveRepositoryError e){ showErrorAlert(e); }
+    }
+
+    @FXML
+    public void OnTemp(){
+        String sha1a = "f1d7620781290535490b8164d753e7a5052a944e";
+        String sha1b = "680ffa2139deeb70f91c2c007c2de0942ddb9818";
+        CommitsDelta diff = new CommitsDelta(sha1b, sha1a);
+        diff.calcFilesMergeState();
     }
 
     @FXML

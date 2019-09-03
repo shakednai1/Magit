@@ -10,17 +10,16 @@ import java.util.stream.Collectors;
 
 public class MainEngine {
 
-    private static RepositoryManager repositoryManager;
+    private static RepositoryManager repositoryManager = new RepositoryManager();
     private static XmlLoader xmlLoader;
 
-    public MainEngine(){
-        repositoryManager = new RepositoryManager();
-    }
+    public MainEngine(){ }
 
     public static RepositoryManager getRepositoryManager(){
         return repositoryManager;
     }
-    public Map<String ,List<String>> getWorkingCopyStatus() throws NoActiveRepositoryError{
+
+    public FilesDelta getWorkingCopyStatus() throws NoActiveRepositoryError{
         if(repositoryManager.getActiveRepository() == null){
             throw new NoActiveRepositoryError("No active repository yet");
         }
@@ -172,12 +171,5 @@ public class MainEngine {
         repositoryManager.getActiveRepository().addNewBranch(branch);
     }
 
-    public String findAncestor(BranchData base, BranchData otherBranch){
-        return repositoryManager.getActiveRepository().findAncestor(base, otherBranch);
-    }
-
-    public Map<String, FileChanges> getFileChanges(String commitBase, String commit){
-        return repositoryManager.getActiveRepository().getFileChanges(commitBase, commit);
-    }
 
 }

@@ -5,22 +5,24 @@ import org.apache.commons.codec.digest.DigestUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 
 public class Blob extends Item {
     final private String typeItem = "File";
+    protected Common.FilesStatus state;
 
-    Blob(){
+    Blob(){}
 
+    Blob(String fullPath){
+        this.fullPath = fullPath;
+        this.name = new File(fullPath).getName();
     }
-    Blob(String path, String name){
-        fullPath = path;
-        this.name = name;
-    }
 
-    Blob(File itemPath, String sha1, String lastUser, String lastModified, boolean rewriteFS){
-        this.fullPath = itemPath.getPath();
+    Blob(File itemPath, ItemSha1 sha1, String lastUser, String lastModified, boolean rewriteFS){
+        this.fullPath = itemPath.getAbsolutePath();
         this.name = itemPath.getName();
         this.currentSHA1 = sha1;
         this.userLastModified = lastUser;
@@ -28,23 +30,18 @@ public class Blob extends Item {
 
         if (rewriteFS)
             Utils.unzip(Settings.objectsFolderPath + this.currentSHA1 + ".zip",
-                    itemPath.getParent(), this.name );
+                    itemPath.getParent(), itemPath.getName());
 
-    }
-
-    Blob(String Path, String name, String content, String lastUser, String lastModified){
-        this.fullPath = Path;
-        this.name = name;
-        this.currentSHA1 = DigestUtils.sha1Hex(content);
-        this.userLastModified = lastUser;
-        this.lastModified = lastModified;
     }
 
     String getUser(){ return userLastModified; }
     String getModifiedTime(){ return lastModified; }
 
+    public Common.FilesStatus getState(){ return state; }
+    void setState(Common.FilesStatus state){ this.state = state; }
+
     @Override
-    public void zipAndCopy(){
+    public void zip(){
         updateState();
         if(!isExistInObjects()){
             Utils.zip(getZipPath(), fullPath);
@@ -54,14 +51,20 @@ public class Blob extends Item {
     @Override
     public void updateState(){
         try {
-            String contents = new String(Files.readAllBytes(Paths.get(fullPath)));
-            currentSHA1 = DigestUtils.sha1Hex(contents);
+            String content = new String(Files.readAllBytes(Paths.get(fullPath)));
+            currentSHA1 = new ItemSha1(content, true);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    public List<String> getContent(){
+        return currentSHA1.getContent();
+    }
+
     String getTypeItem(){ return this.typeItem; }
 
+    @Override
+    public String toString(){ return fullPath; }
 
 }

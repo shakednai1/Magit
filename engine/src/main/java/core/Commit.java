@@ -3,6 +3,7 @@ package core;
 import org.apache.commons.codec.digest.DigestUtils;
 import puk.team.course.magit.ancestor.finder.CommitRepresentative;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -16,9 +17,8 @@ public class Commit implements CommitRepresentative {
     private String commitSha1;
     private String rootSha1;
     private String firstPreviousCommitSHA1;
-    private String secondPreviousCommitSHA1;
+    private String secondPreviousCommitSHA1; // The commit that was merged with prevCommit of the head branch
     private String userLastModified;
-    private String mergedCommitSHA1; // The commit that was merged with prevCommit of the head branch
 
     Commit(String msg, String rootFolderSha, String userLastModified, String commitTime, String firstPreviousCommitSHA1){
         this.msg = msg;
@@ -33,10 +33,8 @@ public class Commit implements CommitRepresentative {
 
     Commit(String commitSha1){
         this.commitSha1 = commitSha1;
-        Utils.unzip(Settings.objectsFolderPath + commitSha1 + ".zip", Settings.objectsFolderPath, commitSha1 + ".txt");
-        List<String> content = Utils.getFileLines(Settings.objectsFolderPath + commitSha1 + ".txt");
-        Utils.deleteFile(Settings.objectsFolderPath + commitSha1 + ".txt");
 
+        List<String> content = Utils.getZippedContent(commitSha1);
         String[] commitData = content.get(0).split(Settings.delimiter);
 
         this.rootSha1 = commitData[0];
@@ -76,7 +74,6 @@ public class Commit implements CommitRepresentative {
                 msg + Settings.delimiter +
                 commitTime + Settings.delimiter +
                 userLastModified + Settings.delimiter;
-
     }
 
     void zipCommit(){
@@ -116,4 +113,20 @@ public class Commit implements CommitRepresentative {
     public String getSecondPrecedingSha1() {
         return "";
     }
+
+    static protected Map<String, Blob> getAllFilesOfCommit(String commitSha1){
+        Folder commitFolder = Commit.getCommitRootFolder(commitSha1);
+        return commitFolder.getCommittedFilesState(false);
+    }
+
+    static Folder getCommitRootFolder(String commitSha1){
+        Commit commit = new Commit(commitSha1);
+
+        return new Folder(new File(Settings.repositoryFullPath),
+                new ItemSha1(commit.getRootFolderSHA1(), false),
+                commit.getUserLastModified(),
+                commit.getCommitTime(),false);
+
+    }
+
 }
