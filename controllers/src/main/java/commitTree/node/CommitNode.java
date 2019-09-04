@@ -4,20 +4,31 @@ import com.fxgraph.cells.AbstractCell;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.IEdge;
 import javafx.beans.binding.DoubleBinding;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
+import models.BranchData;
 import models.CommitData;
-import models.CommitModel;
 
 import java.io.IOException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
+
+
+    class PointingBranchListener implements ListChangeListener {
+
+        public void onChanged(Change change){
+            commitNodeController.pointingBranches.setText(String.join(", ", commit.getPointingBranchNames()));
+        }
+    }
 
     private CommitData commit;
 
@@ -40,10 +51,14 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
             GridPane root = fxmlLoader.load(url.openStream());
 
             commitNodeController = fxmlLoader.getController();
+
+
+            commit.getPointingBranches().addListener(new PointingBranchListener());
+
             commitNodeController.setCommitMessage(commit.getMessage());
             commitNodeController.setCommitter(commit.getCommitter());
             commitNodeController.setCommitTimeStamp(commit.getCommitTime());
-            commitNodeController.setPointingBranches(); // TODO -real data
+            commitNodeController.setPointingBranches(commit.getPointingBranchNames());
 
             return root;
         } catch (IOException e) {

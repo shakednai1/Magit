@@ -11,11 +11,11 @@ import java.util.List;
 
 public class CommitNodeController {
 
-    @FXML private Label commitTimeStampLabel;
-    @FXML private Label messageLabel;
-    @FXML private Label committerLabel;
-    @FXML private Circle CommitCircle;
-    @FXML private Label pointingBranches;
+    @FXML protected Label commitTimeStampLabel;
+    @FXML protected Label messageLabel;
+    @FXML protected Label committerLabel;
+    @FXML protected Circle CommitCircle;
+    @FXML protected Label pointingBranches;
 
     public void setCommitTimeStamp(String timeStamp) {
         commitTimeStampLabel.setText(timeStamp);
@@ -36,8 +36,8 @@ public class CommitNodeController {
         return (int)CommitCircle.getRadius();
     }
 
-    public void setPointingBranches(){
-        pointingBranches.setText("dd & gg");
+    public void setPointingBranches(List<String> branches){
+        pointingBranches.setText(String.join(", ", branches));
     }
 
 }

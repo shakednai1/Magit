@@ -1,14 +1,14 @@
 package models;
 
 import core.Commit;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class CommitData {
-
-    // TODO - duplication of code. DISASTER
 
     private String sha1;
     private String message;
@@ -16,7 +16,7 @@ public class CommitData {
     private String commitTime;
     private String previousCommitSha1;
     // TODO property -  add label from commitNodeController
-    private Set<BranchData> pointingBranches = new HashSet<>();
+    private ObservableList<BranchData> pointingBranches = FXCollections.observableArrayList();
 
     private boolean isInMasterChain = false;
 
@@ -46,5 +46,12 @@ public class CommitData {
     public void removePointingBranch(BranchData branch){ pointingBranches.remove(branch); }
 
     public void setInMasterChain(){ isInMasterChain = true; }
+
+    public ObservableList<BranchData> getPointingBranches(){ return pointingBranches; }
+
+
+    public List<String> getPointingBranchNames(){
+        return pointingBranches.stream().map(BranchData::getName).sorted().collect(Collectors.toList());
+    }
 
 }

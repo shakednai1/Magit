@@ -27,6 +27,8 @@ class Repository {
     private List<RemoteBranch> remoteBranches = new LinkedList<>();
 
 
+
+
     Repository(String fullPath, String name, boolean empty) {
         this.fullPath = fullPath;
         this.name = name;
@@ -242,6 +244,8 @@ class Repository {
 
         for(BranchData branch: branches){
             __addBranchCommitsToAllCommits(allCommitsData, branch);
+            CommitData commitData = allCommitsData.get(branch.getHeadSha1());
+            commitData.addPointingBranch(branch);
         }
 
         return allCommitsData;
@@ -257,12 +261,10 @@ class Repository {
                 allCommitsData.put(c.getKey(), commitData);
             }
 
-            CommitData val = allCommitsData.get(c.getKey());
-
-            val.addPointingBranch(branch);
             if(isMaster)
-                val.setInMasterChain();
+                allCommitsData.get(c.getKey()).setInMasterChain();
         }
+
     }
 
 

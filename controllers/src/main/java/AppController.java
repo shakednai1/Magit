@@ -3,6 +3,8 @@ import core.CommitsDelta;
 import core.MainEngine;
 import exceptions.*;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -22,6 +24,7 @@ public class AppController {
     private MainEngine engine ;
     private RepositoryModel repositoryModel;
     private CommitTree commitTree;
+    private Map<String, CommitData> commits = new HashMap<>(); // TODO make observable & commit tree should listen
     private List<BranchData> branches = new LinkedList<>();
 
     // TODO active branch property, relate current core.Branch label
@@ -73,8 +76,22 @@ public class AppController {
     @FXML
     private MenuItem loadFromXml;
 
-    @FXML
-    ScrollPane commitTreeScroll;
+    @FXML ScrollPane commitTreeScroll;
+
+
+    public class BranchHeadCommitChangedListener implements ChangeListener<String>{
+        private BranchData branchData;
+
+        BranchHeadCommitChangedListener(BranchData branchData){this.branchData = branchData;}
+
+        @Override
+        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+            commits.get(oldValue).removePointingBranch(branchData);
+            commits.get(newValue).addPointingBranch(branchData);
+        }
+
+    }
+
 
 
     CommitTree getCommitTree(){ return commitTree; }
@@ -137,8 +154,7 @@ public class AppController {
 
         Validator validBranch = (value) -> {
             try {
-                BranchData branchData = engine.createNewBranch(value, false);
-                branches.add(branchData);
+                createNewBranch(value);
                 return true;
             }
             catch (InvalidBranchNameError | UncommittedChangesError | NoActiveRepositoryError e) {
@@ -158,6 +174,12 @@ public class AppController {
                     }
                 }
         );
+    }
+
+    private void createNewBranch(String branchName) throws InvalidBranchNameError, UncommittedChangesError, NoActiveRepositoryError{
+        BranchData branchData = engine.createNewBranch(branchName, false);
+        branchData.getHeadSha1Property().addListener(new BranchHeadCommitChangedListener(branchData));
+        branches.add(branchData);
     }
 
     @FXML
@@ -253,8 +275,9 @@ public class AppController {
 
     @FXML
     void OnCommit(ActionEvent event){
+
         TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("internals.core.Commit");
+        dialog.setTitle("Commit");
         dialog.setHeaderText("Enter commit message:");
         dialog.setContentText("Message:");
         Optional<String> commitMsg = dialog.showAndWait();
@@ -314,6 +337,8 @@ public class AppController {
             branches.clear();
             branches = engine.getAllBranches();
 
+            commits.clear();
+            commits = engine.getAllCommitsData();
             commitTree.setCommitsTree(engine.getAllCommitsData());
         }
         catch (NoActiveRepositoryError e){

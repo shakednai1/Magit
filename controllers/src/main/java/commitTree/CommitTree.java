@@ -7,7 +7,6 @@ import com.fxgraph.graph.Model;
 import commitTree.layout.CommitTreeLayout;
 import commitTree.node.CommitNode;
 import models.CommitData;
-import models.CommitModel;
 
 import java.util.Hashtable;
 import java.util.Map;
