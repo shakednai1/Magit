@@ -162,6 +162,7 @@ public class MainEngine {
     }
 
     public List<String> getAllRemoteBranchesName(){
+        showFileSystemOfCommit("f1d7620781290535490b8164d753e7a5052a944e");
         String remoteRepoName= repositoryManager.getActiveRepository().getRemoteRepositoryName();
         return repositoryManager.getActiveRepository().getAllRemoteBranches().stream().map((branch) -> remoteRepoName + "/" + branch.getName()).collect(Collectors.toList());
     }
@@ -179,8 +180,21 @@ public class MainEngine {
         return changes;
     }
 
-    public void showFileSystemOfCommit(String commitSha1){
+    public Map<String, List<String>> getFileSystemOfCommit(String commitSha1){
+        Folder rootFolder = Commit.getCommitRootFolder(commitSha1);
+        Map<String, List<String>> res = new HashMap<>();
+        return getFS(rootFolder, res);
+    }
 
+    private Map<String, List<String>> getFS(Folder folder, Map<String, List<String>> fs){
+        List<String> files = new LinkedList<>();
+        files.addAll(folder.getSubFiles().keySet());
+        fs.put(folder.fullPath, files);
+        for(Folder subFolder: folder.getSubFolders().values()){
+            getFS(subFolder, fs);
+        }
+
+        return fs;
     }
 
 

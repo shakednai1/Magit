@@ -58,7 +58,7 @@ public class CommitNodeController {
         contextMenu.getItems().addAll(item1, item2);
         messageLabel.setContextMenu(contextMenu);
     }
-    
+
     public String getCommitTime(){return commitTimeStampLabel.getText();}
 
 }
