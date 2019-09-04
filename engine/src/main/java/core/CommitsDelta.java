@@ -35,6 +35,9 @@ public class CommitsDelta {
         rootFolderChanges = new FolderChanges(baseFolder, aFolder, bFolder);
     }
 
+    public FolderChanges getRootFolderChanges(){
+        return rootFolderChanges;
+    }
 
     protected void commit(){}
     

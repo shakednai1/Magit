@@ -171,5 +171,17 @@ public class MainEngine {
         repositoryManager.getActiveRepository().addNewBranch(branch);
     }
 
+    public FolderChanges getDiffBetweenCommits(String commitSha1){
+        String prevCommitSha1 = new Commit(commitSha1).getFirstPreviousCommitSHA1();
+        CommitsDelta commitsDelta= new CommitsDelta(commitSha1, prevCommitSha1);
+        commitsDelta.calcFilesMergeState();
+        FolderChanges changes=  commitsDelta.getRootFolderChanges();
+        return changes;
+    }
+
+    public void showFileSystemOfCommit(String commitSha1){
+
+    }
+
 
 }
