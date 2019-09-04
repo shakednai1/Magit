@@ -85,6 +85,8 @@ class XmlLoader {
             repositoryManager.getActiveRepository().setRemoteRepositoryPath(
                     magitRepository.getMagitRemoteReference().getLocation());
         }
+
+        repositoryManager.switchActiveRepository(repositoryPath);
     }
 
     private void setFirstCommit() {

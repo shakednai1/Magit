@@ -1,34 +1,51 @@
 package core;
 
 import exceptions.InvalidBranchNameError;
+import exceptions.NoActiveRepositoryError;
 import exceptions.NoChangesToCommitError;
 import exceptions.UncommittedChangesError;
-import fromXml.RootFolder;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import models.CommitData;
+import models.BranchData;
+
 import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import models.BranchData;
 import puk.team.course.magit.ancestor.finder.AncestorFinder;
 
 import java.util.*;
 
-class Repository {
+public class Repository {
 
     private String name;
     private String fullPath;
     private Branch activeBranch = null;
     private List<BranchData> branches = new LinkedList<>();
+    private Map<String, CommitData> commits = new HashMap<>();
 
     private String remoteRepositoryPath = null;
     private String remoteRepositoryName = null;
     private List<RemoteBranch> remoteBranches = new LinkedList<>();
 
+    class BranchHeadCommitListener implements ChangeListener<String> {
 
+        final private BranchData branchData;
 
+        BranchHeadCommitListener(BranchData branch){ branchData = branch;}
+
+        @Override
+        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+            CommitData oldCommit = commits.get(oldValue);
+            if(oldCommit != null)
+                oldCommit.removePointingBranch(branchData);
+            commits.get(newValue).addPointingBranch(branchData);
+        }
+    }
 
     Repository(String fullPath, String name, boolean empty) {
         this.fullPath = fullPath;
@@ -48,8 +65,10 @@ class Repository {
         this.name = loadRepositoryName();
 
         loadRemoteRepoDetails();
-        loadBranchesData();
         loadRemoteBranches();
+
+        loadBranchesData();
+        loadAllCommitsData();
 
         this.activeBranch = activeBranch;
         saveRepositoryActiveBranch();
@@ -115,8 +134,36 @@ class Repository {
         for(File item: listOfItems){
             if(!item.getName().equals(Settings.activeBranchFileName)){
                 String[] name= item.getName().split("\\.");
-                branches.add(Branch.getBranchDisplayData(name[0]));
+                BranchData branchData = Branch.getBranchDisplayData(name[0], this);
+                branchData.getHeadSha1Property().addListener(new BranchHeadCommitListener(branchData));
+                branches.add(branchData);
             }
+        }
+
+    }
+    Map<String, CommitData> getAllCommitsData(){ return new HashMap<>(commits); }
+
+
+    private void loadAllCommitsData(){
+        commits.clear();
+        for(BranchData branch: branches){
+            __addBranchCommitsToAllCommits(branch);
+            commits.get(branch.getHeadSha1()).addPointingBranch(branch);
+        }
+    }
+
+    private void __addBranchCommitsToAllCommits(BranchData branch){
+        boolean isMaster = branch.getName().equals("master");
+
+        for(Map.Entry<String, Commit> c: Commit.loadAll(branch.getHeadSha1()).entrySet()){
+            if(commits.get(c.getKey()) == null){
+                Commit commit = c.getValue();
+                CommitData commitData = new CommitData(commit);
+                commits.put(c.getKey(), commitData);
+            }
+
+            if(isMaster)
+                commits.get(c.getKey()).setInMasterChain();
         }
 
     }
@@ -125,9 +172,12 @@ class Repository {
         // this function is for assert that branch details at `branches` object will stay updated
 
         Commit commit = activeBranch.commit(msg);
+        CommitData commitData = __createCommitData(commit);
+        commits.put(commitData.getSha1(), commitData);
+
         updateActiveBranchDataInHistory();
 
-        return __createCommitData(commit);
+        return commitData;
     }
 
     private CommitData __createCommitData(Commit commit){
@@ -138,8 +188,6 @@ class Repository {
     }
 
     private void updateActiveBranchDataInHistory(){
-        // TODO branches should have the branch object, even if not loaded not loaded
-        // should return updated branch details. the only that can change is the active branch commit
 
         for(int i=0; i < branches.size(); i++){
             BranchData branchDetails = branches.get(i);
@@ -149,6 +197,22 @@ class Repository {
             }
         }
     }
+
+    public void resetActiveBranch(String commitSha1) throws NoActiveRepositoryError {
+        String branchName = activeBranch.getName();
+        String trackingAfter = activeBranch.getTrackingAfter();
+
+        Branch branch = new Branch(branchName, commitSha1, trackingAfter, true);
+        setActiveBranch(branch);
+
+        activeBranch.getRootFolder().updateState();
+
+        updateActiveBranchDataInHistory();
+
+    }
+
+
+
 
     FilesDelta getWorkingCopy(){
         return activeBranch.getWorkingCopy();
@@ -167,7 +231,7 @@ class Repository {
             newBranch = new Branch(branchName, activeBranch.getHead(),
                     activeBranch.getRootFolder());
         }
-        addNewBranch(newBranch);
+        BranchData branchData = addNewBranch(newBranch);
 
         if (checkout){
             if (activeBranch != null && haveOpenChanges())
@@ -176,7 +240,7 @@ class Repository {
             setActiveBranch(newBranch);
         }
 
-        return new BranchData(newBranch);
+        return branchData;
 
     }
 
@@ -217,6 +281,8 @@ class Repository {
                 break;
         }
 
+        BranchData branchData = branches.get(i);
+        commits.get(branchData.getHeadSha1()).removePointingBranch(branchData);
         branches.remove(i);
     }
 
@@ -236,38 +302,17 @@ class Repository {
                 anyMatch(name -> name.equals(branchName));
     }
 
-    public void addNewBranch(Branch branch){
-        branches.add(new BranchData(branch));
+    public BranchData addNewBranch(Branch branch){
+        BranchData branchData = new BranchData(branch);
+        branchData.getHeadSha1Property().addListener(new BranchHeadCommitListener(branchData));
+
+        if(commits.get(branchData.getHeadSha1()) != null)
+            commits.get(branchData.getHeadSha1()).addPointingBranch(branchData);
+
+        branches.add(branchData);
+
+        return branchData;
     }
-
-    Map<String, CommitData> getAllCommitsData(){
-        Map<String, CommitData> allCommitsData = new HashMap<>();
-
-        for(BranchData branch: branches){
-            __addBranchCommitsToAllCommits(allCommitsData, branch);
-            CommitData commitData = allCommitsData.get(branch.getHeadSha1());
-            commitData.addPointingBranch(branch);
-        }
-
-        return allCommitsData;
-    }
-
-    private void __addBranchCommitsToAllCommits(Map<String, CommitData> allCommitsData, BranchData branch){
-        boolean isMaster = branch.getName().equals("master");
-
-        for(Map.Entry<String, Commit> c: Commit.loadAll(branch.getHeadSha1()).entrySet()){
-            if(allCommitsData.get(c.getKey()) == null){
-                Commit commit = c.getValue();
-                CommitData commitData = new CommitData(commit);
-                allCommitsData.put(c.getKey(), commitData);
-            }
-
-            if(isMaster)
-                allCommitsData.get(c.getKey()).setInMasterChain();
-        }
-
-    }
-
 
     public void setRemoteRepositoryPath(String RRpath){
         remoteRepositoryPath = RRpath;
@@ -328,10 +373,8 @@ class Repository {
     }
 
     BranchData createNewBranchFromSha1(String branchName, String sha1, String trackingAfter){
-        Branch newBranch;
-        newBranch = new Branch(branchName, sha1, trackingAfter, false);
-        addNewBranch(newBranch);
-        return new BranchData(newBranch);
+        Branch newBranch = new Branch(branchName, sha1, trackingAfter, false);
+        return addNewBranch(newBranch);
 
     }
 

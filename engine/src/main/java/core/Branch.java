@@ -103,7 +103,7 @@ public class Branch {
         return new Branch(branchName, headCommitSha1, trackingAfterRemote, rewriteWC);
     }
 
-    static BranchData getBranchDisplayData(String branchName){
+    static BranchData getBranchDisplayData(String branchName, Repository repository){
         List<String> branchData = Utils.getFileLines(getBranchFilePath(branchName));
         String headCommitSha1 = branchData.get(0).split(Settings.delimiter)[0];
         String trackingAfter = branchData.get(0).split(Settings.delimiter)[1];

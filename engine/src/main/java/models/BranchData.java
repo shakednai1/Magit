@@ -1,14 +1,15 @@
 package models;
 
 import core.Branch;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 public class BranchData {
     private String name;
-    private Property<String> headSha1 = new SimpleStringProperty();
+    private StringProperty headSha1 = new SimpleStringProperty();
     private String headMsg;
     private String trackingAfter;
+
 
     public BranchData(String name, String headSha1, String headMsg, String trackingAfter) {
         this.name = name;
@@ -32,7 +33,7 @@ public class BranchData {
         return headSha1.getValue();
     }
 
-    public Property<String> getHeadSha1Property() {
+    public StringProperty getHeadSha1Property() {
         return headSha1;
     }
 
@@ -50,6 +51,6 @@ public class BranchData {
 
     @Override
     public String toString() {
-        return name + ", "+ headSha1 + ", "+ headMsg;
+        return name + ", "+ headSha1.toString() + ", "+ headMsg;
     }
 }

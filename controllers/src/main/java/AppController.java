@@ -3,6 +3,7 @@ import commitTree.node.CommitNode;
 import commitTree.node.CommitNodeController;
 import core.Commit;
 import core.CommitsDelta;
+import core.FolderChanges;
 import core.MainEngine;
 import exceptions.*;
 import javafx.beans.binding.Bindings;
@@ -320,6 +321,7 @@ public class AppController {
         String sha1b = "680ffa2139deeb70f91c2c007c2de0942ddb9818";
         CommitsDelta diff = new CommitsDelta(sha1b, sha1a);
         diff.calcFilesMergeState();
+
     }
 
     @FXML
