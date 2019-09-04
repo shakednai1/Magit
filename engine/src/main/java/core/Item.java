@@ -61,4 +61,8 @@ abstract public class Item implements Zipable {
         Item other = (Item) object;
         return currentSHA1.equals(other.currentSHA1) && fullPath.equals(other.fullPath);
     }
+
+    public String getName(){
+        return name;
+    }
 }

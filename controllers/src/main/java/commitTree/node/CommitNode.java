@@ -63,6 +63,7 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
             commitNodeController.setPointingBranches(commit.getPointingBranchNames());
 
             commitNodeController.setContextMenu();
+            commitNodeController.setCommitSha1(commit.getSha1());
 
             return root;
         } catch (IOException e) {

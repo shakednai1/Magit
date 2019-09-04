@@ -22,7 +22,7 @@ public class WorkingCopyStage {
     public void display() throws NoActiveRepositoryError {
 
         Stage stage = new Stage();
-        stage.setTitle("UnCommited Changes");
+        stage.setTitle("Working Copy Status");
 
         try{
             FXMLLoader fxmlLoader = new FXMLLoader();

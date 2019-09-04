@@ -179,10 +179,8 @@ public class MainEngine {
         return changes;
     }
 
-    public Map<String, List<String>> getFileSystemOfCommit(String commitSha1){
-        Folder rootFolder = Commit.getCommitRootFolder(commitSha1);
-        Map<String, List<String>> res = new HashMap<>();
-        return getFS(rootFolder, res);
+    public Folder getFileSystemOfCommit(String commitSha1){
+        return Commit.getCommitRootFolder(commitSha1);
     }
 
     public BranchData createNewBranchFromSha1(String name, String sha1, boolean track){
@@ -207,17 +205,6 @@ public class MainEngine {
 
     public String getSha1FromRemoteBranch(String remote){
         return Utils.getFileLines(Settings.remoteBranchesPath + remote + ".txt").get(0).split(Settings.delimiter)[0];
-    }
-
-    private Map<String, List<String>> getFS(Folder folder, Map<String, List<String>> fs){
-        List<String> files = new LinkedList<>();
-        files.addAll(folder.getSubFiles().keySet());
-        fs.put(folder.fullPath, files);
-        for(Folder subFolder: folder.getSubFolders().values()){
-            getFS(subFolder, fs);
-        }
-
-        return fs;
     }
 
 }

@@ -7,7 +7,7 @@ import java.io.IOException;
 
 class RepositoryManager {
 
-    private Repository activeRepository = null;
+    private static Repository activeRepository = null;
 
 
     Repository getActiveRepository(){

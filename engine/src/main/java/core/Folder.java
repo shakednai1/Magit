@@ -237,9 +237,9 @@ public class Folder extends Item {
         return itemsState;
     }
 
-    Map<String , Folder> getSubFolders(){ return new HashMap<>(subFolders); }
+    public Map<String , Folder> getSubFolders(){ return new HashMap<>(subFolders); }
 
-    Map<String , Blob> getSubFiles(){ return new HashMap<>(subFiles); }
+    public Map<String , Blob> getSubFiles(){ return new HashMap<>(subFiles); }
 
 
     String getTypeItem(){ return this.typeItem; }
