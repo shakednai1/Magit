@@ -1,4 +1,7 @@
 import commitTree.CommitTree;
+import commitTree.node.CommitNode;
+import commitTree.node.CommitNodeController;
+import core.Commit;
 import core.CommitsDelta;
 import core.MainEngine;
 import exceptions.*;
@@ -8,6 +11,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import models.BranchData;

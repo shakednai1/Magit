@@ -162,6 +162,7 @@ public class MainEngine {
     }
 
     public List<String> getAllRemoteBranchesName(){
+        showFileSystemOfCommit("f1d7620781290535490b8164d753e7a5052a944e");
         String remoteRepoName= repositoryManager.getActiveRepository().getRemoteRepositoryName();
         return repositoryManager.getActiveRepository().getAllRemoteBranches().stream().map((branch) -> remoteRepoName + "/" + branch.getName()).collect(Collectors.toList());
     }
@@ -169,6 +170,31 @@ public class MainEngine {
     public void createAndCheckoutToNewTrackingBranch(String newBranchName, String trackingAfter) {
         Branch branch = new Branch(newBranchName, trackingAfter);
         repositoryManager.getActiveRepository().addNewBranch(branch);
+    }
+
+    public FolderChanges getDiffBetweenCommits(String commitSha1){
+        String prevCommitSha1 = new Commit(commitSha1).getFirstPreviousCommitSHA1();
+        CommitsDelta commitsDelta= new CommitsDelta(commitSha1, prevCommitSha1);
+        commitsDelta.calcFilesMergeState();
+        FolderChanges changes=  commitsDelta.getRootFolderChanges();
+        return changes;
+    }
+
+    public Map<String, List<String>> getFileSystemOfCommit(String commitSha1){
+        Folder rootFolder = Commit.getCommitRootFolder(commitSha1);
+        Map<String, List<String>> res = new HashMap<>();
+        return getFS(rootFolder, res);
+    }
+
+    private Map<String, List<String>> getFS(Folder folder, Map<String, List<String>> fs){
+        List<String> files = new LinkedList<>();
+        files.addAll(folder.getSubFiles().keySet());
+        fs.put(folder.fullPath, files);
+        for(Folder subFolder: folder.getSubFolders().values()){
+            getFS(subFolder, fs);
+        }
+
+        return fs;
     }
 
 

@@ -4,6 +4,8 @@ import com.fxgraph.cells.AbstractCell;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.IEdge;
 import javafx.beans.binding.DoubleBinding;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
@@ -59,6 +61,8 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
             commitNodeController.setCommitter(commit.getCommitter());
             commitNodeController.setCommitTimeStamp(commit.getCommitTime());
             commitNodeController.setPointingBranches(commit.getPointingBranchNames());
+
+            commitNodeController.setContextMenu();
 
             return root;
         } catch (IOException e) {
