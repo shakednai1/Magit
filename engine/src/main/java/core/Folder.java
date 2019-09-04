@@ -1,7 +1,5 @@
 package core;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import java.io.File;
 import java.util.*;
 
@@ -12,48 +10,47 @@ public class Folder extends Item {
     private Map<String, Blob> subFiles = new HashMap<>();
     private Map<String, Folder> subFolders = new HashMap<>();
 
-    public Map<String, Blob> curSubFiles = new HashMap<>();
-    public Map<String, Folder> curSubFolders = new HashMap<>();
+    private Map<String, Blob> curSubFiles = new HashMap<>();
+    private Map<String, Folder> curSubFolders = new HashMap<>();
 
-    Folder(String path, String name) {
-        fullPath = path;
-        this.name = name;
+
+    Folder(){}
+
+    Folder(File folderPath) {
+        fullPath = folderPath.getAbsolutePath();
+        name = folderPath.getName();
     }
 
-    Folder(File folderPath, String folderSha1, String lastUser, String lastModified , boolean rewriteFS){
-         this.name = folderPath.getName();
-         this.fullPath = folderPath.getPath();
-         this.userLastModified = lastUser;
+    Folder(File folderPath, ItemSha1 folderSha1, String lastUser, String lastModified , boolean rewriteFS){
+         this.fullPath = folderPath.getAbsolutePath();
+        this.name = folderPath.getName();
+        this.userLastModified = lastUser;
          this.lastModified = lastModified;
          this.currentSHA1 = folderSha1;
 
-        Utils.unzip(Settings.objectsFolderPath + folderSha1 + ".zip", Settings.objectsFolderPath , folderSha1 + ".txt");
-        List<String > content = Utils.getFileLines(Settings.objectsFolderPath + folderSha1 + ".txt");
-        Utils.deleteFile(Settings.objectsFolderPath + folderSha1 + ".txt");
-
-        for (String itemData: content){
+        for (String itemData: this.currentSHA1.getContent()){
             String[] item = itemData.split(Settings.delimiter);
 
             String itemName = item[0];
-            String itemFullPath = this.fullPath + "\\" + itemName;
+            String itemFullPath = new File(this.fullPath , itemName).getPath();
             String itemSha1 = item[1];
             String itemType = item[2];
             String itemLastUser = item[3];
             String itemLastModified = item[4];
 
             if (itemType.equals("File")){
-                subFiles.put(itemFullPath, new Blob(new File(itemFullPath), itemSha1, itemLastUser, itemLastModified, rewriteFS));
+                subFiles.put(itemFullPath, new Blob(new File(itemFullPath), new ItemSha1(itemSha1, false), itemLastUser, itemLastModified, rewriteFS));
             }
             else{
-                subFolders.put(itemFullPath, new Folder(new File(this.fullPath +"\\"+ itemName),
-                        itemSha1, itemLastUser, itemLastModified, rewriteFS));
+                subFolders.put(itemFullPath, new Folder(new File(itemFullPath),
+                        new ItemSha1(itemSha1, false), itemLastUser, itemLastModified, rewriteFS));
             }
         }
     }
 
-    Folder(String path, String name,  String lastUser, String lastModified) {
-        fullPath = path;
-        this.name = name;
+    Folder(File fullPath,  String lastUser, String lastModified) {
+        this.fullPath = fullPath.getAbsolutePath();
+        this.name = fullPath.getName();
         this.lastModified = lastModified;
         this.userLastModified = lastUser;
     }
@@ -85,7 +82,7 @@ public class Folder extends Item {
                 file.updateUserAndDate(commitUser, commitTime);
                 subItemsChanged = true;
             }
-            file.zipAndCopy();
+            file.zip();
         }
         subFiles = curSubFiles;
 
@@ -96,25 +93,22 @@ public class Folder extends Item {
         curSubFiles = new HashMap<>();
         curSubFolders = new HashMap<>();
 
-        zipAndCopy();
+        zip();
 
         return subItemsChanged;
     }
 
     void setSHA1(){
         String sha1Str = getStringToCalcSHA1();
-        currentSHA1 = DigestUtils.sha1Hex(sha1Str) ;
+        currentSHA1 = new ItemSha1(sha1Str, true);
     }
 
     void zipRec(){
-        for (Blob blob: subFiles.values()){
-            blob.zipAndCopy();
-        }
+        for(Folder folder: subFolders.values()) folder.zipRec();
 
-        for(Folder folder: subFolders.values()){
-            folder.zipRec();
-        }
-        zipAndCopy();
+        for (Blob blob: subFiles.values()) blob.zip();
+
+        zip();
     }
 
     @Override
@@ -129,14 +123,14 @@ public class Folder extends Item {
                 Folder folder = subFolders.get(item.getPath());
 
                 if (folder == null) {
-                    folder = new Folder(item.getPath(), item.getName());
+                    folder = new Folder(item);
                 }
                 folder.updateState();
                 if(!folder.isEmptyCurrentState())
                     curSubFolders.put(folder.fullPath, folder);
             }
             else if(item.isFile()){
-                Blob file = new Blob(item.getPath(), item.getName());
+                Blob file = new Blob(item.getPath());
                 file.updateState();
 
                 Blob prevFile = subFiles.get(file.fullPath);
@@ -189,7 +183,7 @@ public class Folder extends Item {
 
     // create txt file with folder data - and zip the file. delete the txt file
     @Override
-    public void zipAndCopy(){
+    public void zip(){
         if (!isExistInObjects()){
             Utils.createNewFile(getTxtFilePath(), getFolderDataString());
             Utils.zip(getZipPath(), getTxtFilePath());
@@ -199,7 +193,7 @@ public class Folder extends Item {
 
     private String getTxtFilePath(){
         // returns the txt file path (we create this file -> zip it -> delete)
-        return Settings.objectsFolderPath + currentSHA1 + ".txt";
+        return Settings.objectsFolderPath + getSha1() + ".txt";
     }
 
     List<String> getItemsData() {
@@ -217,30 +211,36 @@ public class Folder extends Item {
         return itemsData;
     }
 
-    Map<String, String > getCommittedItemsState(){
-        return getItemsState(true);
+    Map<String, Blob > getCommittedFilesState(boolean direct){
+        return getFilesState(true, direct);
     }
 
-    Map<String, String > getCurrentItemsState(){
-        return getItemsState(false);
+    Map<String, Blob > getCurrentFilesState(boolean direct){
+        return getFilesState(false, direct);
     }
 
-    private Map<String, String > getItemsState(boolean committed){
-        Map<String, String > itemsState = new HashMap<>();
+    private Map<String, Blob > getFilesState(boolean committed, boolean direct){
+        Map<String, Blob > itemsState = new HashMap<>();
 
         Map<String, Blob> files = (committed)? subFiles : curSubFiles;
-        Map<String, Folder> folders = (committed)? subFolders: curSubFolders;
 
-        for (Blob file : files.values()){
-            itemsState.put(file.fullPath, file.currentSHA1);
-        }
+        for (Blob file : files.values()){ itemsState.put(file.fullPath, file); }
 
-        for (Folder folder: folders.values()){
-            itemsState.putAll(folder.getItemsState(committed));
+        if(!direct){
+            Map<String, Folder> folders = (committed)? subFolders: curSubFolders;
+
+            for (Folder folder: folders.values()){
+                itemsState.putAll(folder.getFilesState(committed, false));
+            }
         }
 
         return itemsState;
     }
+
+    Map<String , Folder> getSubFolders(){ return new HashMap<>(subFolders); }
+
+    Map<String , Blob> getSubFiles(){ return new HashMap<>(subFiles); }
+
 
     String getTypeItem(){ return this.typeItem; }
 

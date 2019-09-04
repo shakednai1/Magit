@@ -1,23 +1,30 @@
 package core;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Comparator;
 
 
-abstract public class Item {
+abstract public class Item implements Zipable {
 //TODO change class params to private and add appropriate methods
 
-    String name;
-    String currentSHA1;
+    ItemSha1 currentSHA1;
     String userLastModified;
     String lastModified;
     String fullPath;
+    String name;
 
 
     abstract String getTypeItem();
     abstract public void updateState();
-    abstract public void zipAndCopy();
+
+    @Override
+    public String getSha1(){
+        return currentSHA1.sha1;
+    }
+
 
     boolean isExistInObjects() { // TODO get the specific file we look for
         File directory = new File(Settings.objectsFolderPath);
@@ -39,12 +46,19 @@ abstract public class Item {
     String getDataString(){
         return fullPath + Settings.delimiter +
                 getTypeItem() + Settings.delimiter +
-                currentSHA1 + Settings.delimiter +
+                currentSHA1.sha1 + Settings.delimiter +
                 userLastModified + Settings.delimiter +
                 lastModified;
     }
 
-    public String getCurrentSHA1(){
-        return currentSHA1;
+    public String getFullPath() { return fullPath; }
+
+    @Override
+    public boolean equals(Object object){
+        if (object == null) return false;
+        if (object.getClass() != this.getClass()) return false;
+
+        Item other = (Item) object;
+        return currentSHA1.equals(other.currentSHA1) && fullPath.equals(other.fullPath);
     }
 }

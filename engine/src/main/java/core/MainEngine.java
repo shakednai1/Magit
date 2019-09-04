@@ -10,17 +10,16 @@ import java.util.stream.Collectors;
 
 public class MainEngine {
 
-    private static RepositoryManager repositoryManager;
+    private static RepositoryManager repositoryManager = new RepositoryManager();
     private static XmlLoader xmlLoader;
 
-    public MainEngine(){
-        repositoryManager = new RepositoryManager();
-    }
+    public MainEngine(){ }
 
     public static RepositoryManager getRepositoryManager(){
         return repositoryManager;
     }
-    public Map<String ,List<String>> getWorkingCopyStatus() throws NoActiveRepositoryError{
+
+    public FilesDelta getWorkingCopyStatus() throws NoActiveRepositoryError{
         if(repositoryManager.getActiveRepository() == null){
             throw new NoActiveRepositoryError("No active repository yet");
         }
@@ -172,12 +171,18 @@ public class MainEngine {
         repositoryManager.getActiveRepository().addNewBranch(branch);
     }
 
-    public String findAncestor(BranchData base, BranchData otherBranch){
-        return repositoryManager.getActiveRepository().findAncestor(base, otherBranch);
+    public FolderChanges getDiffBetweenCommits(String commitSha1){
+        String prevCommitSha1 = new Commit(commitSha1).getFirstPreviousCommitSHA1();
+        CommitsDelta commitsDelta= new CommitsDelta(commitSha1, prevCommitSha1);
+        commitsDelta.calcFilesMergeState();
+        FolderChanges changes=  commitsDelta.getRootFolderChanges();
+        return changes;
     }
 
-    public Map<String, FileChanges> getFileChanges(String commitBase, String commit){
-        return repositoryManager.getActiveRepository().getFileChanges(commitBase, commit);
+    public Map<String, List<String>> getFileSystemOfCommit(String commitSha1){
+        Folder rootFolder = Commit.getCommitRootFolder(commitSha1);
+        Map<String, List<String>> res = new HashMap<>();
+        return getFS(rootFolder, res);
     }
 
     public BranchData createNewBranchFromSha1(String name, String sha1, boolean track){
@@ -202,6 +207,17 @@ public class MainEngine {
 
     public String getSha1FromRemoteBranch(String remote){
         return Utils.getFileLines(Settings.remoteBranchesPath + remote + ".txt").get(0).split(Settings.delimiter)[0];
+    }
+
+    private Map<String, List<String>> getFS(Folder folder, Map<String, List<String>> fs){
+        List<String> files = new LinkedList<>();
+        files.addAll(folder.getSubFiles().keySet());
+        fs.put(folder.fullPath, files);
+        for(Folder subFolder: folder.getSubFolders().values()){
+            getFS(subFolder, fs);
+        }
+
+        return fs;
     }
 
 }

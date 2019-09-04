@@ -3,11 +3,13 @@ package core;
 import exceptions.NoChangesToCommitError;
 import models.BranchData;
 import org.apache.commons.collections4.CollectionUtils;
+import sun.text.normalizer.CharacterIteratorWrapper;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Branch {
 
@@ -19,8 +21,8 @@ public class Branch {
 
     private Map<String, Commit> commitData = new HashMap<>();
 
-    public Map<String, String> currentStateOfFiles = new HashMap<>();
-    public Map<String, String> newStateOfFiles = new HashMap<>();
+    public Map<String, Blob> currentStateOfFiles = new HashMap<>();
+    public Map<String, Blob> newStateOfFiles = new HashMap<>();
 
     Branch(String name){
         // constractor for master branch
@@ -37,7 +39,7 @@ public class Branch {
         this.rootFolder = rootFolder;
 
         setHead(head);
-        currentStateOfFiles = rootFolder.getCommittedItemsState();
+        currentStateOfFiles = rootFolder.getCommittedFilesState(false);
     }
 
      Branch(String name, String headCommitSha1, String trackingAfter, boolean rewriteFS){
@@ -50,11 +52,12 @@ public class Branch {
 
         File  rootFolderPath = new File(Settings.repositoryFullPath);
         rootFolder = new Folder(rootFolderPath,
-                this.head.getRootFolderSHA1(), head.getUserLastModified(),
+                new ItemSha1(this.head.getRootFolderSHA1(), false),
+                head.getUserLastModified(),
                 head.getCommitTime(),
                 rewriteFS);
 
-        currentStateOfFiles = rootFolder.getCommittedItemsState();
+        currentStateOfFiles = rootFolder.getCommittedFilesState(false);
     }
 
     Branch(String name, String trackingAfter){
@@ -74,9 +77,8 @@ public class Branch {
 
     private Folder createRootFolder(){
         String repoLocation = Settings.repositoryFullPath;
-        Path path = Paths.get(repoLocation);
-        String repoName = path.getFileName().toString();
-        return new Folder(repoLocation, repoName);
+        File path = new File(repoLocation);
+        return new Folder(path);
     }
 
     public Commit getHead(){ return head; }
@@ -127,7 +129,7 @@ public class Branch {
             return !rootFolder.isEmptyCurrentState();
         }
         else{
-            return !head.getRootFolderSHA1().equals(rootFolder.currentSHA1);
+            return !head.getRootFolderSHA1().equals(rootFolder.getSha1());
         }
     }
 
@@ -139,18 +141,18 @@ public class Branch {
         rootFolder.commit(Settings.getUser(), commitTime);
 
         String prevCommitSha1 = (head==null)? null : head.getSha1();
-        Commit com = new Commit(msg, rootFolder.currentSHA1, rootFolder.userLastModified, commitTime,prevCommitSha1);
+        Commit com = new Commit(msg, rootFolder.getSha1(), rootFolder.userLastModified, commitTime,prevCommitSha1);
         com.zipCommit();
 
         setHead(com);
-        currentStateOfFiles = rootFolder.getCommittedItemsState();
+        currentStateOfFiles = rootFolder.getCommittedFilesState(false);
 
         return com;
     }
 
     private void updateChangedFilesState(){ // TODO better name for function
         newStateOfFiles.clear();
-        newStateOfFiles = rootFolder.getCurrentItemsState();
+        newStateOfFiles = rootFolder.getCurrentFilesState(false);
     }
 
     private void setHead(Commit newHead) {
@@ -183,28 +185,30 @@ public class Branch {
 
     public List<String> getCommittedState(){  return rootFolder.getItemsData(); }
 
-    Map<String ,List<String>> getWorkingCopy(){
+    FilesDelta getWorkingCopy(){
         rootFolder.updateState();
         updateChangedFilesState();
         return getFilesChanges();
     }
 
-    private Map<String, List<String>> getFilesChanges() {
-        List<String> newFiles = new ArrayList<>(CollectionUtils.subtract(newStateOfFiles.keySet(), currentStateOfFiles.keySet()));
-        List<String> deletedFiles = new ArrayList<>(CollectionUtils.subtract(currentStateOfFiles.keySet(), newStateOfFiles.keySet()));
-        List<String> updatedFiles = new ArrayList<>();
+    private FilesDelta getFilesChanges() {
+        List<String> newFilesPaths = new ArrayList<>(CollectionUtils.subtract(newStateOfFiles.keySet(), currentStateOfFiles.keySet()));
+        List<String> deletedFilesPaths = new ArrayList<>(CollectionUtils.subtract(currentStateOfFiles.keySet(), newStateOfFiles.keySet()));
+        List<String> updatedFilesPaths = new ArrayList<>();
 
         //check for updated files
         List<String> common = new ArrayList<>(CollectionUtils.retainAll(currentStateOfFiles.keySet(), newStateOfFiles.keySet()));
         for(String key : common){
             if (!currentStateOfFiles.get(key).equals(newStateOfFiles.get(key))){
-                updatedFiles.add(key);
+                updatedFilesPaths.add(key);
             }
         }
-        Map<String, List<String>> changes = new HashMap<>();
-        changes.put("update", updatedFiles);
-        changes.put("new", newFiles);
-        changes.put("delete", deletedFiles);
+
+        FilesDelta changes = new FilesDelta();
+        changes.setUpdatedFiles(updatedFilesPaths.stream().map(newStateOfFiles::get).collect(Collectors.toList()));
+        changes.setNewFiles(newFilesPaths.stream().map(newStateOfFiles::get).collect(Collectors.toList()));
+        changes.setDeletedFiles(deletedFilesPaths.stream().map(currentStateOfFiles::get).collect(Collectors.toList()));
+
         return changes;
     }
 

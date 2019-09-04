@@ -66,6 +66,13 @@ public class Utils {
         }
     }
 
+    static List<String> getZippedContent(String sha1){
+        Utils.unzip(Settings.objectsFolderPath + sha1 + ".zip", Settings.objectsFolderPath , sha1 + ".txt");
+        List<String > content = Utils.getFileLines(Settings.objectsFolderPath + sha1+ ".txt");
+        Utils.deleteFile(Settings.objectsFolderPath + sha1 + ".txt");
+        return content;
+    }
+
     static void createNewFile(String fileName, String content){
         File file = new File(fileName);
         try {

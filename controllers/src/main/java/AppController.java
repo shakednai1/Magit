@@ -1,19 +1,26 @@
 import commitTree.CommitTree;
+import commitTree.node.CommitNode;
+import commitTree.node.CommitNodeController;
+import core.Commit;
+import core.CommitsDelta;
 import core.MainEngine;
-import core.Branch;
 import exceptions.*;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Pair;
 import models.BranchData;
 import models.CommitData;
 import models.RepositoryModel;
+import workingCopy.WorkingCopyStage;
 
 import java.io.File;
 import java.util.*;
@@ -24,6 +31,7 @@ public class AppController {
     private MainEngine engine ;
     private RepositoryModel repositoryModel;
     private CommitTree commitTree;
+    private Map<String, CommitData> commits = new HashMap<>(); // TODO make observable & commit tree should listen
     private List<BranchData> branches = new LinkedList<>();
 
     // TODO active branch property, relate current core.Branch label
@@ -75,8 +83,22 @@ public class AppController {
     @FXML
     private MenuItem loadFromXml;
 
-    @FXML
-    ScrollPane commitTreeScroll;
+    @FXML ScrollPane commitTreeScroll;
+
+
+    public class BranchHeadCommitChangedListener implements ChangeListener<String>{
+        private BranchData branchData;
+
+        BranchHeadCommitChangedListener(BranchData branchData){this.branchData = branchData;}
+
+        @Override
+        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+            commits.get(oldValue).removePointingBranch(branchData);
+            commits.get(newValue).addPointingBranch(branchData);
+        }
+
+    }
+
 
 
     CommitTree getCommitTree(){ return commitTree; }
@@ -154,7 +176,7 @@ public class AppController {
 
         Validator validBranch = (value) -> {
             try {
-                engine.createNewBranch(value, false);
+                createNewBranch(value);
                 return true;
             }
             catch (InvalidBranchNameError | UncommittedChangesError | NoActiveRepositoryError e) {
@@ -174,6 +196,12 @@ public class AppController {
                     }
                 }
         );
+    }
+
+    private void createNewBranch(String branchName) throws InvalidBranchNameError, UncommittedChangesError, NoActiveRepositoryError{
+        BranchData branchData = engine.createNewBranch(branchName, false);
+        branchData.getHeadSha1Property().addListener(new BranchHeadCommitChangedListener(branchData));
+        branches.add(branchData);
     }
 
     @FXML
@@ -260,46 +288,17 @@ public class AppController {
     @FXML
     void OnWCStatus(ActionEvent event){
         try{
-            Map<String, List<String>> changes = engine.getWorkingCopyStatus();
-            List<String> updatedFiles = changes.get("update");
-            List<String> newFiles = changes.get("new");
-            List<String> deletedFiles = changes.get("delete");
-            String files = "";
-            files = files.concat("Update: \n");
-            for(String updatedFile : updatedFiles){
-                files = files.concat(updatedFile + "\n");
-            }
-            files = files.concat("\n");
-            files = files.concat("\n");
-
-            files = files.concat("New: \n");
-            for(String newFile : newFiles){
-                files = files.concat(newFile + "\n");
-            }
-            files = files.concat("\n");
-            files = files.concat("\n");
-
-            files = files.concat("Deleted: \n");
-            for(String deletedFile : deletedFiles){
-                files = files.concat(deletedFile + "\n");
-            }
-            files = files.concat("\n");
-            files = files.concat("\n");
-
-            Alert alertInfo = new Alert(Alert.AlertType.INFORMATION);
-            alertInfo.setContentText(files);
-            alertInfo.setHeaderText("Working copy status:");
-            alertInfo.setTitle("WC status");
-            alertInfo.showAndWait();
+            // TODO - add icon for deleted, new, updated
+            new WorkingCopyStage().display();
         }
         catch (NoActiveRepositoryError e){ showErrorAlert(e); }
-
     }
 
     @FXML
     void OnCommit(ActionEvent event){
+
         TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("internals.core.Commit");
+        dialog.setTitle("Commit");
         dialog.setHeaderText("Enter commit message:");
         dialog.setContentText("Message:");
         Optional<String> commitMsg = dialog.showAndWait();
@@ -313,6 +312,14 @@ public class AppController {
             }
         }
         catch (NoActiveRepositoryError e){ showErrorAlert(e); }
+    }
+
+    @FXML
+    public void OnTemp(){
+        String sha1a = "f1d7620781290535490b8164d753e7a5052a944e";
+        String sha1b = "680ffa2139deeb70f91c2c007c2de0942ddb9818";
+        CommitsDelta diff = new CommitsDelta(sha1b, sha1a);
+        diff.calcFilesMergeState();
     }
 
     @FXML
@@ -351,6 +358,8 @@ public class AppController {
             branches.clear();
             branches = engine.getAllBranches();
 
+            commits.clear();
+            commits = engine.getAllCommitsData();
             commitTree.setCommitsTree(engine.getAllCommitsData());
         }
         catch (NoActiveRepositoryError e){

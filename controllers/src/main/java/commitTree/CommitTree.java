@@ -6,8 +6,8 @@ import com.fxgraph.graph.ICell;
 import com.fxgraph.graph.Model;
 import commitTree.layout.CommitTreeLayout;
 import commitTree.node.CommitNode;
+import commitTree.node.CommitNodeController;
 import models.CommitData;
-import models.CommitModel;
 
 import java.util.Hashtable;
 import java.util.Map;
@@ -71,5 +71,15 @@ public class CommitTree {
 
         tree.layout(new CommitTreeLayout());
     }
+
+    public String getCommitSha1FromCommitNode(CommitNodeController commit){
+        for(Map.Entry<String, CommitNode> entry: commitCells.entrySet()){
+            if(entry.getValue().getCommit().getCommitTime().equals(commit.getCommitTime())){
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
 
 }

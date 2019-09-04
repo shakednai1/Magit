@@ -27,7 +27,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <MenuButton mnemonicParsing="false" text="core.Branch" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                <MenuButton mnemonicParsing="false" text="Branch" GridPane.columnIndex="2" GridPane.rowIndex="2">
                     <items>
                         <MenuItem fx:id="createNewBranch" mnemonicParsing="false" onAction="#OnCreateNewBranchPopUp" text="create new" />
                         <MenuItem fx:id="checkoutBranch" mnemonicParsing="false" onAction="#OnCheckoutBranch" text="checkout" />
@@ -42,9 +42,9 @@
                         <Insets left="1.0" right="1.0" />
                     </GridPane.margin></Label>
                 <Label fx:id="currentUser" text="Current User: Administrator" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <Label fx:id="currentBranch" text="Current core.Branch:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                <Label fx:id="currentBranch" text="Current Branch:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                 <Button fx:id="switchUser" mnemonicParsing="false" onAction="#OnSwitchUserPopUp" text="switch user" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <MenuButton fx:id="repoOptions" mnemonicParsing="false" text="core.Repository" GridPane.rowIndex="2">
+                <MenuButton fx:id="repoOptions" mnemonicParsing="false" text="Repository" GridPane.rowIndex="2">
                     <items>
                         <MenuItem fx:id="createNewRepo" mnemonicParsing="false" onAction="#OnCreateNewRepo" text="create new" />
                         <MenuItem fx:id="switchRepo" mnemonicParsing="false" onAction="#OnSwitchRepo" text="switch repo" />
@@ -54,7 +54,9 @@
                     </items>
                 </MenuButton>
                 <Button fx:id="wcStatus" mnemonicParsing="false" onAction="#OnWCStatus" text="show WC statuc" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                <Button fx:id="commitBtn" mnemonicParsing="false" onAction="#OnCommit" prefHeight="25.0" prefWidth="199.0" text="core.Commit" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                <Button fx:id="commitBtn" mnemonicParsing="false" onAction="#OnCommit" prefHeight="25.0" prefWidth="199.0" text="Commit" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                <Button fx:id="testBtn" mnemonicParsing="false" onAction="#OnTemp" prefHeight="25.0" prefWidth="199.0" text="Test Me" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+
             </children>
         </GridPane>
         <ScrollPane fx:id="commitTreeScroll" layoutX="61.0" layoutY="133.0" prefHeight="311.0" prefWidth="561.0" style="-fx-border-color: red;" />

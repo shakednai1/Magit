@@ -4,6 +4,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 
 import exceptions.InvalidBranchNameError;
@@ -127,7 +128,7 @@ class XmlLoader {
         MagitSingleCommit magitCommit = commitMap.get(commitID);
         MagitSingleFolder magitRootFolder = folderMap.get(magitCommit.getRootFolder().getId());
         Folder rootFolder = createFilesTree(magitRootFolder, Settings.repositoryFullPath);
-        Commit commit = new Commit(magitCommit.getMessage(), rootFolder.getCurrentSHA1(), magitCommit.getAuthor(),
+        Commit commit = new Commit(magitCommit.getMessage(), rootFolder.getSha1(), magitCommit.getAuthor(),
                 magitCommit.getDateOfCreation(), prevCommit);
 
 
@@ -197,7 +198,7 @@ class XmlLoader {
         Map<String, Blob> subBlobs = new HashMap<>();
         Map<String, Folder> subFolders = new HashMap<>();
 
-        Folder rootFolder = new Folder(path, magitRootFolder.getName(), magitRootFolder.getLastUpdater(),
+        Folder rootFolder = new Folder(new File(path), magitRootFolder.getLastUpdater(),
                 magitRootFolder.getLastUpdateDate());
         File directory = new File(path);
         directory.mkdir();
@@ -207,8 +208,10 @@ class XmlLoader {
             switch (item.getType()){
                 case "blob":
                     MagitBlob magitBlob = blobMap.get(itemId);
-                    Blob blob = new Blob(path + "/" + magitBlob.getName(), magitBlob.getName(), magitBlob.getContent(),
-                            magitBlob.getLastUpdater(), magitBlob.getLastUpdateDate());
+
+                    Blob blob = new Blob(new File(path, magitBlob.getName()), new ItemSha1(magitBlob.getContent(), true),
+                            magitBlob.getLastUpdater(), magitBlob.getLastUpdateDate(), false);
+
                     Utils.createNewFile(path + "/" + magitBlob.getName(), magitBlob.getContent());
                     subBlobs.put(blob.fullPath, blob);
                     break;
