@@ -290,7 +290,7 @@ public class AppController {
     void OnWCStatus(ActionEvent event){
         try{
             // TODO - add icon for deleted, new, updated
-            new WorkingCopyStage().display();
+            new WorkingCopyStage().displayWCstatus();
         }
         catch (NoActiveRepositoryError e){ showErrorAlert(e); }
     }

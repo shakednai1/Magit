@@ -19,7 +19,7 @@ public class WorkingCopyStage {
 
     WorkingCopyController controller;
 
-    public void display() throws NoActiveRepositoryError {
+    public void displayWCstatus() throws NoActiveRepositoryError {
 
         Stage stage = new Stage();
         stage.setTitle("Working Copy Status");
@@ -45,4 +45,31 @@ public class WorkingCopyStage {
             e.printStackTrace();
         }
     }
+
+    public void displayCommitDiff(String sha1, String prevSha1) throws NoActiveRepositoryError {
+        Stage stage = new Stage();
+        stage.setTitle("Working Copy Status");
+
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            URL url = getClass().getResource("../wc.fxml");
+            fxmlLoader.setLocation(url);
+            AnchorPane root = fxmlLoader.load(url.openStream());
+            root.autosize();
+            Scene scene = new Scene(root, 300, 400);
+
+            controller = fxmlLoader.getController();
+            controller.filesListView.autosize();
+            controller.setFilesDeltaCommit(sha1, prevSha1);
+
+            stage.setScene(scene);
+            stage.show();
+
+        }
+        catch (IOException e){
+            System.out.println("Error at loading Working Copy : " );
+            e.printStackTrace();
+        }
+    }
+
 }

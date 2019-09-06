@@ -10,8 +10,8 @@ public class FolderChanges extends Folder {
     Folder aElement;
     Folder bElement;
 
-    private List<FileChanges> subFiles = new ArrayList<>();
-    private List<FolderChanges> subFolders= new ArrayList<>();
+    private List<FileChanges> subChangesFiles = new ArrayList<>();
+    private List<FolderChanges> subChangesFolders= new ArrayList<>();
 
     private boolean hasConflicts;
 
@@ -45,7 +45,7 @@ public class FolderChanges extends Folder {
 
         for (Map.Entry<String, Blob> file : baseSubFiles.entrySet()) {
             String filePath = file.getKey();
-            subFiles.add(new FileChanges(file.getValue(), aSubFiles.get(filePath), bSubFiles.get(filePath)));
+            subChangesFiles.add(new FileChanges(file.getValue(), aSubFiles.get(filePath), bSubFiles.get(filePath)));
 
             aSubFiles.remove(filePath);
             bSubFiles.remove(filePath);
@@ -54,7 +54,7 @@ public class FolderChanges extends Folder {
 
         for (Map.Entry<String, Blob> file : aSubFiles.entrySet()) {
             String filePath = file.getKey();
-            subFiles.add(new FileChanges(null, file.getValue(), bSubFiles.get(filePath)));
+            subChangesFiles.add(new FileChanges(null, file.getValue(), bSubFiles.get(filePath)));
 
             bSubFiles.remove(filePath);
         }
@@ -62,7 +62,7 @@ public class FolderChanges extends Folder {
 
         for (Map.Entry<String, Blob> file : bSubFiles.entrySet()) {
             String filePath = file.getKey();
-            subFiles.add(new FileChanges(null, null, file.getValue()));
+            subChangesFiles.add(new FileChanges(null, null, file.getValue()));
 
             bSubFiles.remove(filePath);
         }
@@ -75,7 +75,7 @@ public class FolderChanges extends Folder {
 
         for (Map.Entry<String, Folder> folder : baseSubFolders.entrySet()) {
             String filePath = folder.getKey();
-            subFolders.add(new FolderChanges(folder.getValue(), aSubFolders.get(filePath), bSubFolders.get(filePath)));
+            subChangesFolders.add(new FolderChanges(folder.getValue(), aSubFolders.get(filePath), bSubFolders.get(filePath)));
 
             aSubFolders.remove(filePath);
             bSubFolders.remove(filePath);
@@ -84,27 +84,34 @@ public class FolderChanges extends Folder {
 
         for (Map.Entry<String, Folder> file : aSubFolders.entrySet()) {
             String filePath = file.getKey();
-            subFolders.add(new FolderChanges(null, file.getValue(), bSubFolders.get(filePath)));
+            subChangesFolders.add(new FolderChanges(null, file.getValue(), bSubFolders.get(filePath)));
 
             bSubFolders.remove(filePath);
         }
         aSubFolders.clear();
 
         for (Map.Entry<String, Folder> file : bSubFolders.entrySet()) {
-            subFolders.add(new FolderChanges(null, null, file.getValue()));
+            subChangesFolders.add(new FolderChanges(null, null, file.getValue()));
         }
         bSubFolders.clear();
 
     }
 
     private void setHasConflicts(){
-        hasConflicts = subFiles.stream().anyMatch(fileChanges -> fileChanges.getStatus() == Common.FilesStatus.CONFLICTED);
+        hasConflicts = subChangesFiles.stream().anyMatch(fileChanges -> fileChanges.getStatus() == Common.FilesStatus.CONFLICTED);
 
         if(!hasConflicts)
-            hasConflicts = subFolders.stream().anyMatch(FolderChanges::getHasConflicts);
+            hasConflicts = subChangesFolders.stream().anyMatch(FolderChanges::getHasConflicts);
     }
 
     private boolean getHasConflicts(){return hasConflicts;}
 
+    public List<FileChanges> getSubChangesFiles(){
+        return subChangesFiles;
+    }
+
+    public List<FolderChanges> getSubChangesFolders(){
+        return subChangesFolders;
+    }
 
 }

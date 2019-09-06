@@ -1,9 +1,6 @@
 package workingCopy;
 
-import core.Blob;
-import core.Common;
-import core.FilesDelta;
-import core.MainEngine;
+import core.*;
 import exceptions.NoActiveRepositoryError;
 import exceptions.NoChangesToCommitError;
 import fromXml.MagitSingleBranch;
@@ -15,7 +12,9 @@ import javafx.scene.control.ListView;
 import javafx.util.Callback;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class WorkingCopyController {
 
@@ -41,6 +40,39 @@ public class WorkingCopyController {
         items.addAll(filesDelta.getUpdatedFiles());
 
         filesListView.setItems(items);
+    }
+
+    public void setFilesDeltaCommit(String commitSha1, String prevCommit){
+        FolderChanges folderChanges = engine.getDiffBetweenCommits(commitSha1, prevCommit);
+        List<Blob> deletedFiles = new LinkedList<>();
+        List<Blob> updatedFiles = new LinkedList<>();
+        List<Blob> newFiles = new LinkedList<>();
+        getFilesState(deletedFiles, updatedFiles, newFiles, folderChanges);
+
+        ObservableList<Blob> items= FXCollections.observableArrayList(newFiles);
+        items.addAll(deletedFiles);
+        items.addAll(updatedFiles);
+
+        filesListView.setItems(items);
+
+    }
+
+    public void getFilesState(List<Blob> deletedFiles, List<Blob> updatedFiles, List<Blob> newFiles, FolderChanges folder){
+        for(FileChanges file : folder.getSubChangesFiles()){
+            Common.FilesStatus status = file.getState();
+            if(status == Common.FilesStatus.NEW) {
+                newFiles.add(file);
+            }
+            else if(status == Common.FilesStatus.UPDATED) {
+                updatedFiles.add(file);
+            }
+            else if(status == Common.FilesStatus.DELETED) {
+                deletedFiles.add(file);
+            }
+        }
+        for(FolderChanges subFolder: folder.getSubChangesFolders()){
+            getFilesState(deletedFiles, updatedFiles, newFiles, subFolder);
+        }
     }
 
 

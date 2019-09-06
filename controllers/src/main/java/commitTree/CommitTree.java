@@ -38,7 +38,7 @@ public class CommitTree {
 
         for(CommitNode commitCell: commitCells.values()){
             String prevCommitSha1 = commitCell.getCommit().getPreviousCommitSha1();
-            if(!prevCommitSha1.equals("")){
+            if(prevCommitSha1 != null && !prevCommitSha1.isEmpty()){
                 Edge edge = new Edge(commitCell, commitCells.get(prevCommitSha1));
                 model.addEdge(edge);
             }
@@ -58,28 +58,25 @@ public class CommitTree {
 
     public void addCommit(CommitData commitData){
         final Model model = tree.getModel();
-
+        ICell secondPrevCommit = null;
         ICell prevCommit = commitCells.get(commitData.getPreviousCommitSha1());
+        if(commitData.getSecondPreviousCommitSha1() != null){
+            secondPrevCommit = commitCells.get(commitData.getSecondPreviousCommitSha1());
+        }
 
         ICell cell = __addCommitToTree(commitData);
         model.addCell(cell);
 
         Edge edge = new Edge(cell, prevCommit);
         model.addEdge(edge);
+        if(secondPrevCommit != null) {
+            Edge edge2 = new Edge(cell, secondPrevCommit);
+            model.addEdge(edge2);
+        }
 
         tree.endUpdate();
 
         tree.layout(new CommitTreeLayout());
     }
-
-    public String getCommitSha1FromCommitNode(CommitNodeController commit){
-        for(Map.Entry<String, CommitNode> entry: commitCells.entrySet()){
-            if(entry.getValue().getCommit().getCommitTime().equals(commit.getCommitTime())){
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
-
 
 }

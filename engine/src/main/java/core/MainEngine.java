@@ -167,12 +167,10 @@ public class MainEngine {
         repositoryManager.getActiveRepository().addNewBranch(branch);
     }
 
-    public FolderChanges getDiffBetweenCommits(String commitSha1){
-        String prevCommitSha1 = new Commit(commitSha1).getFirstPreviousCommitSHA1();
-        CommitsDelta commitsDelta= new CommitsDelta(commitSha1, prevCommitSha1);
+    public FolderChanges getDiffBetweenCommits(String commitSha1, String prevCommit){
+        CommitsDelta commitsDelta= new CommitsDelta(commitSha1, prevCommit);
         commitsDelta.calcFilesMergeState();
-        FolderChanges changes=  commitsDelta.getRootFolderChanges();
-        return changes;
+        return commitsDelta.getRootFolderChanges();
     }
 
     public Folder getFileSystemOfCommit(String commitSha1){
@@ -203,4 +201,7 @@ public class MainEngine {
         return Utils.getFileLines(Settings.remoteBranchesPath + remote + ".txt").get(0).split(Settings.delimiter)[0];
     }
 
+    public List<String> getFileLines(String fileSha1){
+        return Utils.getZippedContent(fileSha1);
+    }
 }

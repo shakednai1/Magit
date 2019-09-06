@@ -22,7 +22,7 @@ public class CommitsDelta {
     
     private Commit findAncestor(){
         AncestorFinder ancestorFinder = new AncestorFinder( (sha1) -> (new Commit(sha1)));
-        String ancestorSha1 = ancestorFinder.traceAncestor(commitA.getSha1(),commitA.getSha1());
+        String ancestorSha1 = ancestorFinder.traceAncestor(commitA.getSha1(),commitB.getSha1());
         return new Commit(ancestorSha1);
     }
 

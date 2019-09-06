@@ -16,8 +16,8 @@ public class Commit implements CommitRepresentative {
     private String commitTime;
     private String commitSha1;
     private String rootSha1;
-    private String firstPreviousCommitSHA1;
-    private String secondPreviousCommitSHA1; // The commit that was merged with prevCommit of the head branch
+    private String firstPreviousCommitSHA1 = "";
+    private String secondPreviousCommitSHA1 = ""; // The commit that was merged with prevCommit of the head branch
     private String userLastModified;
 
     Commit(String msg, String rootFolderSha, String userLastModified, String commitTime, String firstPreviousCommitSHA1){
@@ -111,7 +111,7 @@ public class Commit implements CommitRepresentative {
 
     @Override
     public String getSecondPrecedingSha1() {
-        return "";
+        return secondPreviousCommitSHA1;
     }
 
     static protected Map<String, Blob> getAllFilesOfCommit(String commitSha1){
@@ -129,4 +129,7 @@ public class Commit implements CommitRepresentative {
 
     }
 
+    public void setSecondPrecedingSha1(String sha1) {
+        this.secondPreviousCommitSHA1 = sha1;
+    }
 }

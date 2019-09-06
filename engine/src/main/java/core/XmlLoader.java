@@ -12,6 +12,8 @@ import exceptions.UncommittedChangesError;
 import exceptions.XmlException;
 import fromXml.*;
 import fromXml.Item;
+import models.BranchData;
+import models.CommitData;
 
 class XmlLoader {
 
@@ -29,6 +31,7 @@ class XmlLoader {
     // only commits with preceding commits - without first commit
     private Map<String, List<MagitSingleCommit>> commitPointersMap = new HashMap<>();
     private MagitSingleCommit firstCommit;
+    private Map<String, Commit> openedCommits = new HashMap<>();
 
     private Map<String, RemoteBranch> remoteBranchMap = new HashMap<>();
 
@@ -118,10 +121,16 @@ class XmlLoader {
         // open my commit and than
         // search for the commits that the prev commit its me and open them
         Commit commitObj = openCommit(commit.getId(), prevCommitSha1);
+        openedCommits.put(commit.getId(), commitObj);
         List<MagitSingleCommit> commitChilds = commitPointersMap.get(commit.getId());
         if(!commitChilds.isEmpty()){
             for(MagitSingleCommit child: commitChilds){
-                openCommitRec(child, commitObj.getSha1());
+                if(openedCommits.keySet().contains(child.getId())){
+                    openedCommits.get(child.getId()).setSecondPrecedingSha1(commitObj.getSha1());
+                }
+                else{
+                    openCommitRec(child, commitObj.getSha1());
+                }
             }
         }
     }
@@ -132,7 +141,6 @@ class XmlLoader {
         Folder rootFolder = createFilesTree(magitRootFolder, Settings.repositoryFullPath);
         Commit commit = new Commit(magitCommit.getMessage(), rootFolder.getSha1(), magitCommit.getAuthor(),
                 magitCommit.getDateOfCreation(), prevCommit);
-
 
         List<MagitSingleBranch> pointingBranches = getPointedMagitBranch(magitCommit.getId(), false);
         List<MagitSingleBranch> pointingRemoteBranches = getPointedMagitBranch(magitCommit.getId(), true);
