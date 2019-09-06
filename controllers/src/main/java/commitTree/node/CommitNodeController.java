@@ -71,8 +71,6 @@ public class CommitNodeController {
         pointingBranches.setText(String.join(", ", branches));
     }
 
-    // TODO double click to show file content
-    // TODO use WC status to display diff between commits
     public void setContextMenu(){
         ContextMenu contextMenu = new ContextMenu();
         MenuItem item1 = new MenuItem("Get diff from previous commit");
