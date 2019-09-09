@@ -11,19 +11,21 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.util.Pair;
+import javafx.stage.Stage;
 import models.BranchData;
 import models.CommitData;
 import models.RepositoryModel;
 import workingCopy.WorkingCopyStage;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -104,6 +106,21 @@ public class AppController {
 
     CommitTree getCommitTree(){ return commitTree; }
 
+    private Stage openStage(String resourceRelatedPath) throws IOException{
+        Stage stage = new Stage();
+
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        URL url = getClass().getResource(resourceRelatedPath);
+        fxmlLoader.setLocation(url);
+        AnchorPane root = fxmlLoader.load(url.openStream());
+        Scene scene = new Scene(root);
+
+        stage.setScene(scene);
+        stage.show();
+
+        return stage;
+    }
+
     @FXML
     void OnCheckoutBranch(ActionEvent event) {
         boolean checkout = true;
@@ -168,41 +185,50 @@ public class AppController {
 
     @FXML
     void OnCreateNewBranchPopUp(ActionEvent event) {
-        TextInputDialog dialog = new TextInputDialog("");
-        dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(false);
-        dialog.setTitle("Create new branch");
-        dialog.setHeaderText("Enter branch name");
-        dialog.setContentText("Name");
-        dialog.getDialogPane().lookupButton(ButtonType.CANCEL).visibleProperty().set(false);
 
-        Validator validBranch = (value) -> {
-            try {
-                createNewBranch(value);
-                return true;
-            }
-            catch (InvalidBranchNameError | UncommittedChangesError | NoActiveRepositoryError e) {
-                showErrorAlert(e);
-            }
-            return false;
-        };
+        try{
+            Stage nbStage = openStage("newBranchPopUp.fxml");
+            nbStage.setTitle("Create New Branch");
 
-        dialog.show();
+            AnchorPane root = (AnchorPane) nbStage.getScene().getRoot();
 
-        final Button btOk = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
-        btOk.addEventFilter(
-                ActionEvent.ACTION,
-                OKevent -> {
-                    if (!validBranch.isValid(dialog.getEditor().textProperty().getValue())) {
-                        OKevent.consume();
+            final Button btCancel =  (Button) root.lookup("#cancelNewBranch");
+            btCancel.addEventFilter(ActionEvent.ACTION, _event -> {nbStage.close();});
+
+            final Button btOk =  (Button) root.lookup("#okNewBranch");
+            btOk.addEventFilter(
+                    ActionEvent.ACTION,
+                    OKevent -> {
+
+                        String branchName = ((TextField) root.lookup("#branchNameField")).textProperty().getValue();
+                        boolean checkout = ((CheckBox) root.lookup("#checkoutCheckbox")).isSelected();
+
+                        try {
+                            createNewBranch(branchName, checkout);
+                        }
+                        catch (InvalidBranchNameError | UncommittedChangesError | NoActiveRepositoryError e) {
+                            showErrorAlert(e);
+                        }
+                        finally {
+                            OKevent.consume();
+                            nbStage.close();
+                        }
                     }
-                }
-        );
+                    );
+        }
+        catch (IOException e){
+            System.out.println("Error at creating new branch: " );
+            e.printStackTrace();
+        }
     }
 
-    private void createNewBranch(String branchName) throws InvalidBranchNameError, UncommittedChangesError, NoActiveRepositoryError{
-        BranchData branchData = engine.createNewBranch(branchName, false);
+    private void createNewBranch(String branchName, boolean checkout) throws InvalidBranchNameError, UncommittedChangesError, NoActiveRepositoryError{
+        BranchData branchData = engine.createNewBranch(branchName, checkout);
         branchData.getHeadSha1Property().addListener(new BranchHeadCommitChangedListener(branchData));
-        branches.add(branchData);
+
+        // TODO - make active branch as property
+        if(checkout)
+            updateBranch();
     }
 
     @FXML
@@ -370,7 +396,7 @@ public class AppController {
     }
 
     private void updateBranch(){
-        currentBranch.setText("Current core.Branch: " + engine.getCurrentBranchName());
+        currentBranch.setText("Current Branch: " + engine.getCurrentBranchName());
     }
 
 
