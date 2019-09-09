@@ -204,4 +204,16 @@ public class MainEngine {
     public List<String> getFileLines(String fileSha1){
         return Utils.getZippedContent(fileSha1);
     }
+
+    public List<FileChanges> merge(String branchName) {
+        String commitSha1 = "";
+        List<BranchData> branchesData = repositoryManager.getActiveRepository().getAllBranches();
+        for(BranchData branchData: branchesData){
+            if(branchData.getName().equals(branchName)){
+                commitSha1 = branchData.getHeadSha1();
+            }
+        }
+        Merge merge = new Merge(repositoryManager.getActiveRepository().getActiveBranch().getHead().getSha1(), commitSha1);
+        return merge.getConflicts().isEmpty() ? null : merge.getConflicts();
+    }
 }

@@ -1,10 +1,7 @@
 import commitTree.CommitTree;
 import commitTree.node.CommitNode;
 import commitTree.node.CommitNodeController;
-import core.Commit;
-import core.CommitsDelta;
-import core.FolderChanges;
-import core.MainEngine;
+import core.*;
 import exceptions.*;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -501,6 +498,26 @@ public class AppController {
         else{
             String branchName = showCreateBranchDialog();
             engine.createNewBranchFromSha1(branchName, sha1.get(), false);
+        }
+
+    }
+
+    @FXML
+    void OnMerge(ActionEvent event) {
+        List<String> branchesName = null;
+        try {
+            branchesName = getAllBranchNames();
+            branchesName.remove(engine.getCurrentBranchName());
+            ChoiceDialog<String> choiceDialog = new ChoiceDialog<String>(branchesName.get(0), branchesName);
+            choiceDialog.setContentText("Choose branch to Merge with the head branch");
+            choiceDialog.setHeaderText("Merge branch");
+            Optional<String> branchToMerge = choiceDialog.showAndWait();
+            List<FileChanges> conflicts = engine.merge(branchToMerge.get());
+            if(conflicts != null){
+                // TODO show conflicts
+            }
+        } catch (NoActiveRepositoryError e) {
+            showErrorAlert(e);
         }
 
     }

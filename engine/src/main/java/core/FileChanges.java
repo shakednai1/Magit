@@ -5,6 +5,8 @@ public class FileChanges extends Blob{
     private Blob baseElement;
     private Blob aElement;
     private Blob bElement;
+    private Common.FilesStatus aVSbaseStatus;
+    private Common.FilesStatus bVSbaseStatus;
 
     private Blob resElement;
 
@@ -21,14 +23,22 @@ public class FileChanges extends Blob{
 
 
         // one of the vers has no changes
-        Common.FilesStatus aVSbaseStatus = getStatusBetweenVersions(this.baseElement, this.aElement);
-        Common.FilesStatus bVSbaseStatus = getStatusBetweenVersions(this.baseElement, this.bElement);
+        aVSbaseStatus = getStatusBetweenVersions(this.baseElement, this.aElement);
+        bVSbaseStatus = getStatusBetweenVersions(this.baseElement, this.bElement);
 
         if (setStateOneOfBlobsNoChange(aVSbaseStatus, bVSbaseStatus)) return;
 
         if(setStateIfBothVerEqual(aVSbaseStatus)) return;
 
         setConflicted();
+    }
+
+    public Common.FilesStatus getAVSbaseStatus(){
+        return aVSbaseStatus;
+    }
+
+    public Common.FilesStatus getBVSbaseStatus(){
+        return bVSbaseStatus;
     }
 
     void setResAndStatus(Blob resElement, Common.FilesStatus state){
