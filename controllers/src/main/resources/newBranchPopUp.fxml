@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.text.Text?>
+
+
+<?import javafx.scene.layout.AnchorPane?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="147.0" prefWidth="341.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+     <children>
+        <CheckBox id="checkoutCheckbox" layoutX="48.0" layoutY="74.0" mnemonicParsing="false" selected="true" text="Checkout to new branch" />
+        <ButtonBar layoutX="80.0" layoutY="105.0" prefHeight="42.0" prefWidth="181.0">
+          <buttons>
+            <Button id="okNewBranch" mnemonicParsing="false" text="OK"/>
+              <Button id="cancelNewBranch"  cancelButton="true" mnemonicParsing="false" text="Cancel" />
+          </buttons>
+        </ButtonBar>
+        <TextField id="branchNameField" layoutX="47.0" layoutY="40.0" prefHeight="25.0" prefWidth="258.0" />
+        <Text layoutX="48.0" layoutY="36.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter new branch name:" />
+     </children>
+</AnchorPane>
