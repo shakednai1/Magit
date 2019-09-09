@@ -32,7 +32,7 @@ public class FolderChanges extends Folder {
         // at this point, no sha1 need to be calc. only at commit
     }
 
-    private void setFullPath(){ // TODO it is the same as FilesChanges - merge them somehow
+    private void setFullPath(){ // TODO it is the same as FilesChanges - Merge them somehow
         this.fullPath = (this.baseElement != null)? this.baseElement.fullPath :
                 (this.aElement != null)? this.aElement.fullPath:
                         this.bElement.fullPath;
@@ -104,7 +104,7 @@ public class FolderChanges extends Folder {
             hasConflicts = subChangesFolders.stream().anyMatch(FolderChanges::getHasConflicts);
     }
 
-    private boolean getHasConflicts(){return hasConflicts;}
+    public boolean getHasConflicts(){return hasConflicts;}
 
     public List<FileChanges> getSubChangesFiles(){
         return subChangesFiles;

@@ -35,6 +35,7 @@
                         <MenuItem fx:id="listAllBranches" mnemonicParsing="false" onAction="#OnListAllBranches" text="show all branches" />
                   <MenuItem fx:id="resetBranch" mnemonicParsing="false" onAction="#OnResetBranch" text="reset branch" />
                   <MenuItem fx:id="createBranchFromSha1" mnemonicParsing="false" onAction="#OnCreateBranchFromSha1" text="create branch from sha1" />
+                  <MenuItem fx:id="mergeBranch" mnemonicParsing="false" onAction="#OnMerge" text="merge" />
                     </items>
                 </MenuButton>
                 <Label fx:id="currentRepo" textFill="#783232" GridPane.columnSpan="2147483647">
