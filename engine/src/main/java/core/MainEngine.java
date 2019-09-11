@@ -12,6 +12,7 @@ public class MainEngine {
 
     private static RepositoryManager repositoryManager = new RepositoryManager();
     private static XmlLoader xmlLoader;
+    private static BranchData currentBranchMerge;
 
     public MainEngine(){ }
 
@@ -116,7 +117,7 @@ public class MainEngine {
         repositoryManager.createNewRepository(newRepositoryPath, name, false);
     }
 
-    public String getCurrentBranchName(){
+    public static String getCurrentBranchName(){
         return repositoryManager.getActiveRepository().getActiveBranch().getName();
     }
 
@@ -205,15 +206,23 @@ public class MainEngine {
         return Utils.getZippedContent(fileSha1);
     }
 
-    public List<FileChanges> merge(String branchName) {
+    public Merge merge(String branchName) {
         String commitSha1 = "";
         List<BranchData> branchesData = repositoryManager.getActiveRepository().getAllBranches();
         for(BranchData branchData: branchesData){
             if(branchData.getName().equals(branchName)){
                 commitSha1 = branchData.getHeadSha1();
+                this.currentBranchMerge = branchData;
+                break;
             }
         }
         Merge merge = new Merge(repositoryManager.getActiveRepository().getActiveBranch().getHead().getSha1(), commitSha1);
-        return merge.getConflicts().isEmpty() ? null : merge.getConflicts();
+        return merge;
     }
+
+    public static String getBranchMergeName(){
+        return currentBranchMerge.getName();
+    }
+
+
 }

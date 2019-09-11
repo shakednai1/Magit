@@ -33,7 +33,6 @@ public class CommitTreeLayout implements Layout {
         void setFirstCommit(CommitData commit){ firstCommit = commit; }
     }
 
-
     @Override
     public void execute(Graph graph) {
         final List<ICell> cells = graph.getModel().getAllCells();

@@ -39,11 +39,11 @@ public class Folder extends Item {
             String itemLastModified = item[4];
 
             if (itemType.equals("File")){
-                subFiles.put(itemFullPath, new Blob(new File(itemFullPath), new ItemSha1(itemSha1, false), itemLastUser, itemLastModified, rewriteFS));
+                subFiles.put(itemFullPath, new Blob(new File(itemFullPath), new ItemSha1(itemSha1, false, false), itemLastUser, itemLastModified, rewriteFS));
             }
             else{
                 subFolders.put(itemFullPath, new Folder(new File(itemFullPath),
-                        new ItemSha1(itemSha1, false), itemLastUser, itemLastModified, rewriteFS));
+                        new ItemSha1(itemSha1, false, false), itemLastUser, itemLastModified, rewriteFS));
             }
         }
     }
@@ -100,7 +100,7 @@ public class Folder extends Item {
 
     void setSHA1(){
         String sha1Str = getStringToCalcSHA1();
-        currentSHA1 = new ItemSha1(sha1Str, true);
+        currentSHA1 = new ItemSha1(sha1Str, true, false);
     }
 
     void zipRec(){

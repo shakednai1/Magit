@@ -10,7 +10,7 @@ import java.util.*;
 
 public class Commit implements CommitRepresentative {
 
-    static DateFormat commitDateFormat = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss:SSS");
+    static DateFormat commitDateFormat = Settings.commitDateFormat;
 
     private String msg;
     private String commitTime;
@@ -41,8 +41,9 @@ public class Commit implements CommitRepresentative {
         this.commitTime = commitData[commitData.length - 2];
         this.userLastModified = commitData[commitData.length - 1];
         this.firstPreviousCommitSHA1 = commitData[1].equals("null") ? "" : commitData[1];
+        this.firstPreviousCommitSHA1 = commitData[2].equals("null") ? "" : commitData[1];
 
-        String[] msgParts = Arrays.copyOfRange(commitData, 2, commitData.length - 2);
+        String[] msgParts = Arrays.copyOfRange(commitData, 3, commitData.length - 2);
         this.msg = String.join( Settings.delimiter, msgParts);
     }
 
@@ -68,9 +69,11 @@ public class Commit implements CommitRepresentative {
 
     private String getCommitTxt(){
         String prevCommitStr = (firstPreviousCommitSHA1 == null || firstPreviousCommitSHA1.equals(""))? "null": firstPreviousCommitSHA1;
+        String secondCommitStr = (secondPreviousCommitSHA1 == null || secondPreviousCommitSHA1.equals(""))? "null": secondPreviousCommitSHA1;
 
         return rootSha1 + Settings.delimiter +
                 prevCommitStr + Settings.delimiter +
+                secondCommitStr + Settings.delimiter +
                 msg + Settings.delimiter +
                 commitTime + Settings.delimiter +
                 userLastModified + Settings.delimiter;
@@ -123,7 +126,7 @@ public class Commit implements CommitRepresentative {
         Commit commit = new Commit(commitSha1);
 
         return new Folder(new File(Settings.repositoryFullPath),
-                new ItemSha1(commit.getRootFolderSHA1(), false),
+                new ItemSha1(commit.getRootFolderSHA1(), false, false),
                 commit.getUserLastModified(),
                 commit.getCommitTime(),false);
 
@@ -131,5 +134,6 @@ public class Commit implements CommitRepresentative {
 
     public void setSecondPrecedingSha1(String sha1) {
         this.secondPreviousCommitSHA1 = sha1;
+        commitSha1 = calcCommitSha1();
     }
 }

@@ -4,7 +4,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import exceptions.InvalidBranchNameError;
@@ -14,9 +16,11 @@ import fromXml.*;
 import fromXml.Item;
 import models.BranchData;
 import models.CommitData;
+import org.apache.commons.io.FileUtils;
 
 class XmlLoader {
 
+    private String XMLPath;
     private MagitRepository magitRepository;
     private MagitBlobs magitBlobs;
     private MagitBranches magitBranches;
@@ -40,6 +44,7 @@ class XmlLoader {
 
 
     XmlLoader(String XmlPath) throws XmlException {
+        this.XMLPath = XmlPath;
         File file = new File(XmlPath);
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(MagitRepository.class);
@@ -50,8 +55,10 @@ class XmlLoader {
             magitFolders = magitRepository.getMagitFolders();
             magitBlobs = magitRepository.getMagitBlobs();
             repositoryPath = magitRepository.getLocation();
+            FileUtils.deleteDirectory(new File(repositoryPath));
         } catch (JAXBException e) {
             throw new XmlException("Given file has no XML extension OR XML file not exist");
+        } catch (IOException e) {
         }
     }
 
@@ -219,7 +226,7 @@ class XmlLoader {
                 case "blob":
                     MagitBlob magitBlob = blobMap.get(itemId);
 
-                    Blob blob = new Blob(new File(path, magitBlob.getName()), new ItemSha1(magitBlob.getContent(), true),
+                    Blob blob = new Blob(new File(path, magitBlob.getName()), new ItemSha1(magitBlob.getContent(), true, false),
                             magitBlob.getLastUpdater(), magitBlob.getLastUpdateDate(), false);
 
                     Utils.createNewFile(path + "/" + magitBlob.getName(), magitBlob.getContent());

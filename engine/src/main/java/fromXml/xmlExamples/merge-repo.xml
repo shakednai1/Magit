@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MagitRepository name="repo-for-merge">
+    <location>c:\repo2</location>
+    <MagitBlobs>
+        <MagitBlob id="1">
+            <name>a.txt</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:03:23:053</last-update-date>
+            <content>this ia a.txt content</content>
+        </MagitBlob>
+        <MagitBlob id="2">
+            <name>c.cpp</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:03:23:053</last-update-date>
+            <content>this is a cpp file... yac !</content>
+        </MagitBlob>
+        <MagitBlob id="3">
+            <name>foo.java</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:03:23:053</last-update-date>
+            <content>public class Test {&#xD;
+	public static void main(String[] args) {&#xD;
+		System.out.println("Hello world");&#xD;
+	}&#xD;
+}</content>
+        </MagitBlob>
+        <MagitBlob id="4">
+            <name>d.props</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:12:30:798</last-update-date>
+            <content>this is just a sample file</content>
+        </MagitBlob>
+        <MagitBlob id="5">
+            <name>e.txt</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>03.08.2019-10:57:36:289</last-update-date>
+            <content>another file</content>
+        </MagitBlob>
+        <MagitBlob id="6">
+            <name>a.txt</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:04:59:609</last-update-date>
+            <content>this ia a.txt content&#xD;
+this is change on a dedicated branch</content>
+        </MagitBlob>
+        <MagitBlob id="7">
+            <name>foo.java</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:17:04:475</last-update-date>
+            <content>public class Test {&#xD;
+	public static void main(String[] args) {&#xD;
+		System.out.println("Hello moyshe UfNiK");&#xD;
+	}&#xD;
+}</content>
+        </MagitBlob>
+        <MagitBlob id="8">
+            <name>a.txt</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:17:04:475</last-update-date>
+            <content>this ia a.txt content&#xD;
+a change on a.txt</content>
+        </MagitBlob>
+        <MagitBlob id="9">
+            <name>foo.java</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>03.08.2019-10:58:35:807</last-update-date>
+            <content>public class Test {&#xD;
+	public static void main(String[] args) {&#xD;
+		System.out.println("Hello world bla bla");&#xD;
+	}&#xD;
+}</content>
+        </MagitBlob>
+        <MagitBlob id="10">
+            <name>foo.java</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:07:35:880</last-update-date>
+            <content>public class Test {&#xD;
+	public static void main(String[] args) {&#xD;
+		System.out.println("Hello tao tao");&#xD;
+	}&#xD;
+}</content>
+        </MagitBlob>
+    </MagitBlobs>
+    <MagitFolders>
+        <MagitSingleFolder is-root="true" id="6">
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:15:50:217</last-update-date>
+            <items>
+                <item type="blob" id="1"/>
+                <item type="folder" id="1"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="false" id="1">
+            <name>fol2</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:03:23:053</last-update-date>
+            <items>
+                <item type="blob" id="2"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="true" id="9">
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:03:23:053</last-update-date>
+            <items>
+                <item type="folder" id="5"/>
+                <item type="blob" id="1"/>
+                <item type="folder" id="1"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="false" id="5">
+            <name>fol1</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:03:23:053</last-update-date>
+            <items>
+                <item type="blob" id="3"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="true" id="19">
+            <last-updater>Administrator</last-updater>
+            <last-update-date>03.08.2019-10:57:36:289</last-update-date>
+            <items>
+                <item type="folder" id="5"/>
+                <item type="folder" id="4"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="false" id="4">
+            <name>fol2</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>03.08.2019-10:57:36:289</last-update-date>
+            <items>
+                <item type="blob" id="2"/>
+                <item type="folder" id="16"/>
+                <item type="blob" id="5"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="false" id="16">
+            <name>fol3</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:12:30:798</last-update-date>
+            <items>
+                <item type="blob" id="4"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="true" id="11">
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:12:30:798</last-update-date>
+            <items>
+                <item type="folder" id="5"/>
+                <item type="blob" id="1"/>
+                <item type="folder" id="14"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="false" id="14">
+            <name>fol2</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:12:30:798</last-update-date>
+            <items>
+                <item type="blob" id="2"/>
+                <item type="folder" id="16"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="true" id="13">
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:04:59:609</last-update-date>
+            <items>
+                <item type="folder" id="5"/>
+                <item type="folder" id="1"/>
+                <item type="blob" id="6"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="true" id="15">
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:17:04:475</last-update-date>
+            <items>
+                <item type="folder" id="1"/>
+                <item type="folder" id="18"/>
+                <item type="blob" id="8"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="false" id="18">
+            <name>fol1</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:17:04:475</last-update-date>
+            <items>
+                <item type="blob" id="7"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="true" id="7">
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:14:22:996</last-update-date>
+            <items>
+                <item type="folder" id="5"/>
+                <item type="blob" id="1"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="true" id="12">
+            <last-updater>Administrator</last-updater>
+            <last-update-date>03.08.2019-10:59:50:130</last-update-date>
+            <items>
+                <item type="folder" id="8"/>
+                <item type="folder" id="2"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="false" id="8">
+            <name>fol2</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>03.08.2019-10:59:50:130</last-update-date>
+            <items>
+                <item type="blob" id="5"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="false" id="2">
+            <name>fol1</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>03.08.2019-10:58:35:807</last-update-date>
+            <items>
+                <item type="blob" id="9"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="true" id="10">
+            <last-updater>Administrator</last-updater>
+            <last-update-date>03.08.2019-10:58:35:807</last-update-date>
+            <items>
+                <item type="folder" id="2"/>
+                <item type="folder" id="4"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="true" id="3">
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:07:35:880</last-update-date>
+            <items>
+                <item type="blob" id="1"/>
+                <item type="folder" id="17"/>
+                <item type="folder" id="1"/>
+            </items>
+        </MagitSingleFolder>
+        <MagitSingleFolder is-root="false" id="17">
+            <name>fol1</name>
+            <last-updater>Administrator</last-updater>
+            <last-update-date>26.07.2019-00:07:35:880</last-update-date>
+            <items>
+                <item type="blob" id="10"/>
+            </items>
+        </MagitSingleFolder>
+    </MagitFolders>
+    <MagitCommits>
+        <MagitSingleCommit id="10">
+            <root-folder id="6"/>
+            <message>deletes foo.java to have conflict vs master</message>
+            <author>Administrator</author>
+            <date-of-creation>26.07.2019-00:15:50:217</date-of-creation>
+            <preceding-commits>
+                <preceding-commit id="9"/>
+            </preceding-commits>
+        </MagitSingleCommit>
+        <MagitSingleCommit id="9">
+            <root-folder id="9"/>
+            <message>initial commit</message>
+            <author>Administrator</author>
+            <date-of-creation>26.07.2019-00:03:23:53</date-of-creation>
+            <preceding-commits/>
+        </MagitSingleCommit>
+        <MagitSingleCommit id="6">
+            <root-folder id="19"/>
+            <message>delete a.txt add e.txt</message>
+            <author>Administrator</author>
+            <date-of-creation>3.08.2019-10:57:36:289</date-of-creation>
+            <preceding-commits>
+                <preceding-commit id="4"/>
+            </preceding-commits>
+        </MagitSingleCommit>
+        <MagitSingleCommit id="4">
+            <root-folder id="11"/>
+            <message>only creating new file d.props</message>
+            <author>Administrator</author>
+            <date-of-creation>26.07.2019-00:12:30:798</date-of-creation>
+            <preceding-commits>
+                <preceding-commit id="9"/>
+            </preceding-commits>
+        </MagitSingleCommit>
+        <MagitSingleCommit id="7">
+            <root-folder id="13"/>
+            <message>updated only a.txt file</message>
+            <author>Administrator</author>
+            <date-of-creation>26.07.2019-0:04:59:609</date-of-creation>
+            <preceding-commits>
+                <preceding-commit id="9"/>
+            </preceding-commits>
+        </MagitSingleCommit>
+        <MagitSingleCommit id="1">
+            <root-folder id="15"/>
+            <message>updated both foo.java and a.txt (to create conflicts)</message>
+            <author>Administrator</author>
+            <date-of-creation>26.07.2019-00:17:04:475</date-of-creation>
+            <preceding-commits>
+                <preceding-commit id="9"/>
+            </preceding-commits>
+        </MagitSingleCommit>
+        <MagitSingleCommit id="3">
+            <root-folder id="7"/>
+            <message>delete c.cpp file</message>
+            <author>Administrator</author>
+            <date-of-creation>26.07.2019-00:14:22:996</date-of-creation>
+            <preceding-commits>
+                <preceding-commit id="9"/>
+            </preceding-commits>
+        </MagitSingleCommit>
+        <MagitSingleCommit id="5">
+            <root-folder id="12"/>
+            <message>deleted c &amp; d</message>
+            <author>Administrator</author>
+            <date-of-creation>3.08.2019-10:59:50:130</date-of-creation>
+            <preceding-commits>
+                <preceding-commit id="8"/>
+            </preceding-commits>
+        </MagitSingleCommit>
+        <MagitSingleCommit id="8">
+            <root-folder id="10"/>
+            <message>updated file foo.java</message>
+            <author>Administrator</author>
+            <date-of-creation>3.08.2019-10:58:35:807</date-of-creation>
+            <preceding-commits>
+                <preceding-commit id="6"/>
+            </preceding-commits>
+        </MagitSingleCommit>
+        <MagitSingleCommit id="2">
+            <root-folder id="3"/>
+            <message>changed only foo.java file</message>
+            <author>Administrator</author>
+            <date-of-creation>26.07.2019-00:07:35:880</date-of-creation>
+            <preceding-commits>
+                <preceding-commit id="9"/>
+            </preceding-commits>
+        </MagitSingleCommit>
+    </MagitCommits>
+    <MagitBranches>
+        <head>base</head>
+        <MagitSingleBranch is-remote="false" tracking="false">
+            <name>delete-with-conflict</name>
+            <pointed-commit id="10"/>
+            <tracking-after></tracking-after>
+        </MagitSingleBranch>
+        <MagitSingleBranch is-remote="false" tracking="false">
+            <name>contained</name>
+            <pointed-commit id="6"/>
+            <tracking-after></tracking-after>
+        </MagitSingleBranch>
+        <MagitSingleBranch is-remote="false" tracking="false">
+            <name>cross-updates</name>
+            <pointed-commit id="7"/>
+            <tracking-after></tracking-after>
+        </MagitSingleBranch>
+        <MagitSingleBranch is-remote="false" tracking="false">
+            <name>updated-with-conflict</name>
+            <pointed-commit id="1"/>
+            <tracking-after></tracking-after>
+        </MagitSingleBranch>
+        <MagitSingleBranch is-remote="false" tracking="false">
+            <name>new-file-created</name>
+            <pointed-commit id="4"/>
+            <tracking-after></tracking-after>
+        </MagitSingleBranch>
+        <MagitSingleBranch is-remote="false" tracking="false">
+            <name>deleted-file</name>
+            <pointed-commit id="3"/>
+            <tracking-after></tracking-after>
+        </MagitSingleBranch>
+        <MagitSingleBranch is-remote="false" tracking="false">
+            <name>concealed</name>
+            <pointed-commit id="5"/>
+            <tracking-after></tracking-after>
+        </MagitSingleBranch>
+        <MagitSingleBranch is-remote="false" tracking="false">
+            <name>master</name>
+            <pointed-commit id="2"/>
+            <tracking-after></tracking-after>
+        </MagitSingleBranch>
+        <MagitSingleBranch is-remote="false" tracking="false">
+            <name>base</name>
+            <pointed-commit id="9"/>
+            <tracking-after></tracking-after>
+        </MagitSingleBranch>
+    </MagitBranches>
+    <MagitRemoteReference/>
+</MagitRepository>

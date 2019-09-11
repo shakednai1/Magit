@@ -52,7 +52,7 @@ public class Branch {
 
         File  rootFolderPath = new File(Settings.repositoryFullPath);
         rootFolder = new Folder(rootFolderPath,
-                new ItemSha1(this.head.getRootFolderSHA1(), false),
+                new ItemSha1(this.head.getRootFolderSHA1(), false, false),
                 head.getUserLastModified(),
                 head.getCommitTime(),
                 rewriteFS);
@@ -149,6 +149,7 @@ public class Branch {
 
         return com;
     }
+
 
     private void updateChangedFilesState(){ // TODO better name for function
         newStateOfFiles.clear();

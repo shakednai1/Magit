@@ -28,6 +28,7 @@ public class CommitTree {
 
     public void setCommitsTree(Map<String, CommitData> repoCommits) {
         final Model model = tree.getModel();
+        model.clear(); //     TODO MOVE FROM HERE
 
         tree.beginUpdate();
 
@@ -58,6 +59,9 @@ public class CommitTree {
 
     public void addCommit(CommitData commitData){
         final Model model = tree.getModel();
+        model.clear(); //     TODO MOVE FROM HERE
+
+
         ICell secondPrevCommit = null;
         ICell prevCommit = commitCells.get(commitData.getPreviousCommitSha1());
         if(commitData.getSecondPreviousCommitSha1() != null){

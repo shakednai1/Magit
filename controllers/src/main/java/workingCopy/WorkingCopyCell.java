@@ -25,6 +25,5 @@ public class WorkingCopyCell extends ListCell<Blob> {
         setTextFill(state == Common.FilesStatus.NEW ? Color.GREEN :
                 state == Common.FilesStatus.DELETED ? Color.RED :
                         state == Common.FilesStatus.UPDATED ? Color.CADETBLUE : Color.WHITE);
-
 }
 }

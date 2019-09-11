@@ -21,7 +21,6 @@ public class FileChanges extends Blob{
         // two ver has the same sha1
         if(setStateIfDeletedInBothVer()) return;
 
-
         // one of the vers has no changes
         aVSbaseStatus = getStatusBetweenVersions(this.baseElement, this.aElement);
         bVSbaseStatus = getStatusBetweenVersions(this.baseElement, this.bElement);
@@ -40,6 +39,18 @@ public class FileChanges extends Blob{
     public Common.FilesStatus getBVSbaseStatus(){
         return bVSbaseStatus;
     }
+
+    public Blob getaElement(){
+        return aElement;
+    }
+    public Blob getbElement(){
+        return bElement;
+    }
+    public Blob getBaseElement(){
+        return baseElement;
+    }
+
+
 
     void setResAndStatus(Blob resElement, Common.FilesStatus state){
         this.resElement = resElement;
@@ -102,4 +113,8 @@ public class FileChanges extends Blob{
     @Override
     public void zip(){ resElement.zip(); }
 
+    public void setContent(String text) {
+        currentSHA1 = new ItemSha1(text, true, true);
+        state = Common.FilesStatus.RESOLVED;
+    }
 }

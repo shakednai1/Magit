@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 
 public class Settings {
 
-    final public static DateFormat commitDateFormat = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss:SSS");
+    final public static DateFormat commitDateFormat = new SimpleDateFormat("dd.MM.yyyy-HH:mm:ss:SSS");
 
     final public static String magitFolder = "/.magit";
     final public static String objectsFolder = magitFolder + "/objects/";

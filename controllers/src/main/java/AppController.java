@@ -1,32 +1,34 @@
 import commitTree.CommitTree;
-import commitTree.node.CommitNode;
-import commitTree.node.CommitNodeController;
 import core.*;
 import exceptions.*;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
+import merge.ConflictFileCell;
 import models.BranchData;
 import models.CommitData;
 import models.RepositoryModel;
+import utils.BaseController;
+import workingCopy.WorkingCopyCell;
 import workingCopy.WorkingCopyStage;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class AppController {
+public class AppController extends BaseController {
 
     private MainEngine engine ;
     private RepositoryModel repositoryModel;
@@ -102,21 +104,6 @@ public class AppController {
 
 
     CommitTree getCommitTree(){ return commitTree; }
-
-    private Stage openStage(String resourceRelatedPath) throws IOException{
-        Stage stage = new Stage();
-
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        URL url = getClass().getResource(resourceRelatedPath);
-        fxmlLoader.setLocation(url);
-        AnchorPane root = fxmlLoader.load(url.openStream());
-        Scene scene = new Scene(root);
-
-        stage.setScene(scene);
-        stage.show();
-
-        return stage;
-    }
 
     @FXML
     void OnCheckoutBranch(ActionEvent event) {
@@ -512,13 +499,38 @@ public class AppController {
             choiceDialog.setContentText("Choose branch to Merge with the head branch");
             choiceDialog.setHeaderText("Merge branch");
             Optional<String> branchToMerge = choiceDialog.showAndWait();
-            List<FileChanges> conflicts = engine.merge(branchToMerge.get());
-            if(conflicts != null){
-                // TODO show conflicts
+            Merge merge = engine.merge(branchToMerge.get());
+            if(merge.getConflicts().size() != 0){
+
+                try{
+                    ListView listView = new ListView();
+
+                    listView.setCellFactory(new Callback<ListView<FileChanges>, ListCell<FileChanges>>() {
+                        @Override
+                        public ListCell<FileChanges> call(ListView param) {
+                            return new ConflictFileCell();
+                        }
+                    });
+
+                    ObservableList<FileChanges> items= FXCollections.observableList(merge.getConflicts());
+                    listView.setItems(items);
+                    AnchorPane anchorPane = new AnchorPane();
+                    anchorPane.getChildren().add(listView);
+                    Stage stage = new Stage();
+                    stage.setScene(new Scene(anchorPane));
+                    stage.show();
+                }
+                catch (NoSuchElementException e){}
+                // TODO close when list empty
             }
-        } catch (NoActiveRepositoryError e) {
-            showErrorAlert(e);
+
+            merge.setConflictFiles();
+            if(merge.getConflicts().size() != 0){ return; }
+
+            CommitData commitData = merge.commit();
         }
+        catch (NoActiveRepositoryError e) {
+            showErrorAlert(e); }
 
     }
 

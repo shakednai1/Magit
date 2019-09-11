@@ -52,7 +52,7 @@ public class Blob extends Item {
     public void updateState(){
         try {
             String content = new String(Files.readAllBytes(Paths.get(fullPath)));
-            currentSHA1 = new ItemSha1(content, true);
+            currentSHA1 = new ItemSha1(content, true, false);
         } catch (IOException e) {
             e.printStackTrace();
         }

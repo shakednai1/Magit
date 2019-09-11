@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="455.0" prefWidth="735.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="merge.MergeController">
+   <center>
+      <Pane prefHeight="303.0" prefWidth="200.0" style="-fx-border-color: gray;" BorderPane.alignment="CENTER">
+         <children>
+            <HBox prefHeight="283.0" prefWidth="735.0">
+               <children>
+                  <TextArea fx:id="oursContent" editable="false" />
+                  <TextArea fx:id="baseContent" editable="false" />
+                  <TextArea fx:id="theirsContent" editable="false" />
+               </children>
+            </HBox>
+         </children>
+      </Pane>
+   </center>
+   <bottom>
+      <Pane prefHeight="136.0" prefWidth="681.0" style="-fx-border-color: gray;" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="submitConflictBtn" layoutX="671.0" layoutY="14.0" mnemonicParsing="false" onAction="#OnResolveConflict" prefHeight="25.0" prefWidth="50.0" text="OK" />
+            <Button fx:id="cancelBtn" cancelButton="true" layoutX="670.0" layoutY="67.0" mnemonicParsing="false" onAction="#OnCancelBtn" text="Cancel" />
+            <ScrollPane layoutX="21.0" layoutY="14.0" prefHeight="105.0" prefWidth="634.0">
+               <content>
+                  <TextArea fx:id="resultContent" />
+               </content>
+            </ScrollPane>
+         </children>
+      </Pane>
+   </bottom>
+   <top>
+      <HBox prefHeight="26.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="oursBranch" prefHeight="17.0" prefWidth="194.0" />
+            <Label fx:id="baseCommit" prefHeight="17.0" prefWidth="194.0" />
+            <Label fx:id="theirsBranch" prefHeight="17.0" prefWidth="194.0" />
+         </children>
+      </HBox>
+   </top>
+</BorderPane>

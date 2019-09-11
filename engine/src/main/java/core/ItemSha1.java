@@ -7,9 +7,12 @@ import java.util.List;
 public class ItemSha1{
 
     String sha1;
+    String content;
 
-    ItemSha1(String strForSha1, boolean isContent){
+    ItemSha1(String strForSha1, boolean isContent, boolean saveContent){
         sha1 = (isContent) ? getSha1FromContent(strForSha1): strForSha1;
+        if(saveContent)
+            content = strForSha1;
     }
 
     private static String getSha1FromContent(String content){
@@ -31,6 +34,4 @@ public class ItemSha1{
         ItemSha1 other = (ItemSha1) object;
         return sha1.equals(other.sha1) ;
     }
-
-
 }

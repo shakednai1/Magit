@@ -3,6 +3,7 @@ package commitTree.node;
 import com.fxgraph.cells.AbstractCell;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.IEdge;
+import core.Settings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -74,8 +75,15 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
 
     @Override
     public DoubleBinding getXAnchor(Graph graph, IEdge edge) {
-        final Region graphic = graph.getGraphic(this);
-        return graphic.layoutXProperty().add(commitNodeController.getCircleRadius());
+        try{
+            final Region graphic = graph.getGraphic(this);
+            return graphic.layoutXProperty().add(commitNodeController.getCircleRadius());
+        }
+        catch( NullPointerException e){
+            System.out.println("source "+ edge.getSource().toString());
+            System.out.println("target "+ edge.getTarget().toString());
+            throw e;
+        }
     }
 
     @Override
@@ -96,7 +104,7 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
     @Override
     public int compareTo(CommitNode other) {
 
-        final DateFormat commitDateFormat = new SimpleDateFormat("yyyy.MM.dd-HH:mm:ss:SSS");
+        final DateFormat commitDateFormat = Settings.commitDateFormat;
         Date comTime = null, otherTime = null;
 
         try{
@@ -105,6 +113,10 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
         }
         catch (Exception e) {/*cant be*/}
         return comTime.compareTo(otherTime);
+    }
+
+    public String toString(){
+        return commit.getSha1() + ", " + commit.getMessage();
     }
 
 }
