@@ -20,15 +20,16 @@ public class Commit implements CommitRepresentative {
     private String secondPreviousCommitSHA1 = ""; // The commit that was merged with prevCommit of the head branch
     private String userLastModified;
 
-    Commit(String msg, String rootFolderSha, String userLastModified, String commitTime, String firstPreviousCommitSHA1){
+    Commit(String msg, String rootFolderSha,
+           String userLastModified, String commitTime,
+           String firstPreviousCommitSHA1, String secondPreviousCommitSHA1){
         this.msg = msg;
         this.firstPreviousCommitSHA1 = firstPreviousCommitSHA1 == null ? "" : firstPreviousCommitSHA1;
         this.rootSha1 = rootFolderSha;
+        this.secondPreviousCommitSHA1 = secondPreviousCommitSHA1 == null ? "" : secondPreviousCommitSHA1;
         this.commitTime = commitTime;
         this.userLastModified = userLastModified;
         commitSha1 = calcCommitSha1();
-
-        zipCommit();
     }
 
     Commit(String commitSha1){
@@ -41,7 +42,7 @@ public class Commit implements CommitRepresentative {
         this.commitTime = commitData[commitData.length - 2];
         this.userLastModified = commitData[commitData.length - 1];
         this.firstPreviousCommitSHA1 = commitData[1].equals("null") ? "" : commitData[1];
-        this.firstPreviousCommitSHA1 = commitData[2].equals("null") ? "" : commitData[1];
+        this.secondPreviousCommitSHA1= commitData[2].equals("null") ? "" : commitData[1];
 
         String[] msgParts = Arrays.copyOfRange(commitData, 3, commitData.length - 2);
         this.msg = String.join( Settings.delimiter, msgParts);
@@ -50,11 +51,18 @@ public class Commit implements CommitRepresentative {
     @Override
     public String getSha1(){return commitSha1;}
     public String getRootFolderSHA1(){ return rootSha1; }
-    public String getFirstPreviousCommitSHA1(){ return firstPreviousCommitSHA1; }
     public String getUserLastModified() { return userLastModified; }
     public String getCommitTime() { return commitTime; }
     public String getMsg(){ return msg;}
+    @Override
+    public String getFirstPrecedingSha1() {
+        return firstPreviousCommitSHA1;
+    }
 
+    @Override
+    public String getSecondPrecedingSha1() {
+        return secondPreviousCommitSHA1;
+    }
 
     public String toString(){
         return commitSha1 + Settings.delimiter +
@@ -96,7 +104,7 @@ public class Commit implements CommitRepresentative {
             if(!commitMap.get(currCommitSha1).hasPrecedingCommit()){
                 break;
             }
-            currCommitSha1 = commitMap.get(currCommitSha1).getFirstPreviousCommitSHA1();
+            currCommitSha1 = commitMap.get(currCommitSha1).getFirstPrecedingSha1();
             commitMap.put(currCommitSha1, new Commit(currCommitSha1));
         }
 
@@ -107,15 +115,7 @@ public class Commit implements CommitRepresentative {
         return !firstPreviousCommitSHA1.equals("");
     }
 
-    @Override
-    public String getFirstPrecedingSha1() {
-        return firstPreviousCommitSHA1;
-    }
 
-    @Override
-    public String getSecondPrecedingSha1() {
-        return secondPreviousCommitSHA1;
-    }
 
     static protected Map<String, Blob> getAllFilesOfCommit(String commitSha1){
         Folder commitFolder = Commit.getCommitRootFolder(commitSha1);

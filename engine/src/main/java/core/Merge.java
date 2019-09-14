@@ -1,5 +1,7 @@
 package core;
 
+import exceptions.NoChangesToCommitError;
+import models.BranchData;
 import models.CommitData;
 
 import java.util.LinkedList;
@@ -11,10 +13,14 @@ public class Merge {
     String secondCommitSha1;
     List<FileChanges> conflicts = new LinkedList<>();
     FolderChanges folderChanges;
+    BranchData mergingBranch;
+
+    private String commitMsg = "";
 
 
-    public Merge(String firstCommitSha1, String secondCommitSha1){
+    public Merge(String firstCommitSha1, String secondCommitSha1, BranchData branchToMerge){
         MainEngine engine = new MainEngine();
+        this.mergingBranch = branchToMerge;
         this.firstCommitSha1 = firstCommitSha1;
         this.secondCommitSha1 = secondCommitSha1;
         folderChanges = engine.getDiffBetweenCommits(firstCommitSha1, secondCommitSha1);
@@ -22,6 +28,8 @@ public class Merge {
             setConflictFiles();
         }
     }
+
+    public BranchData getMergingBranch(){ return mergingBranch; }
 
     public List<FileChanges> getConflicts(){
         return conflicts;
@@ -49,12 +57,27 @@ public class Merge {
 
     public CommitData commit(){
         String msg = String.format("Merge %s into %s", MainEngine.getBranchMergeName(), MainEngine.getCurrentBranchName());
-        // open FS for folderChanges
-        // commit active branch
-        // set commit second
-        // zip commit
 
-        return null;
+        folderChanges.unfoldFS();
+        RepositoryManager repositoryManager = MainEngine.getRepositoryManager();
+        Branch activeBranch = repositoryManager.getActiveRepository().getActiveBranch();
+
+        Commit commit;
+        try{
+            commit = activeBranch.commit(commitMsg, secondCommitSha1);
+        }
+        catch (NoChangesToCommitError e){
+            return null;
+        }
+        commit.zipCommit();
+
+        return new CommitData(commit);
+
+    }
+
+
+    public void setCommitMsg(String msg){
+        commitMsg = msg;
     }
 
 

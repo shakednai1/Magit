@@ -27,7 +27,7 @@ public class CommitData {
         this.message = commit.getMsg();
         this.committer = commit.getUserLastModified();
         this.commitTime = commit.getCommitTime();
-        this.previousCommitSha1 = commit.getFirstPreviousCommitSHA1().equals("null") ? null: commit.getFirstPreviousCommitSHA1();
+        this.previousCommitSha1 = commit.getFirstPrecedingSha1();
         this.secondPreviousCommitSha1 = commit.getSecondPrecedingSha1();
     }
 

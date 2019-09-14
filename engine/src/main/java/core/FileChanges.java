@@ -1,5 +1,7 @@
 package core;
 
+import javax.rmi.CORBA.Util;
+
 public class FileChanges extends Blob{
 
     private Blob baseElement;
@@ -111,10 +113,25 @@ public class FileChanges extends Blob{
     public String getSha1(){ return resElement.getSha1(); }
 
     @Override
-    public void zip(){ resElement.zip(); }
+    public void zip(){
+        if(state == Common.FilesStatus.NEW|| state == Common.FilesStatus.UPDATED)
+            resElement.zip();
+    }
 
     public void setContent(String text) {
         currentSHA1 = new ItemSha1(text, true, true);
         state = Common.FilesStatus.RESOLVED;
     }
+
+    public void markDeleted() {
+        state = Common.FilesStatus.DELETED;
+    }
+
+    public void rewriteFS(){
+        if (state == Common.FilesStatus.DELETED)
+            Utils.deleteFile(fullPath);
+        else if(state == Common.FilesStatus.RESOLVED)
+            Utils.createNewFile(fullPath, currentSHA1.content);
+    }
+
 }

@@ -81,8 +81,7 @@ public class Utils {
                 file.getParentFile().mkdirs();
 
             file.createNewFile();
-            FileWriter writer = null;
-            writer = new FileWriter(file);
+            FileWriter writer = new FileWriter(file);
             writer.write(content);
             writer.close();
         } catch (IOException e) {

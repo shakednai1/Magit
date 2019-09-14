@@ -7,6 +7,10 @@ import exceptions.UncommittedChangesError;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 import models.CommitData;
 import models.BranchData;
 
@@ -25,12 +29,14 @@ public class Repository {
     private String name;
     private String fullPath;
     private Branch activeBranch = null;
-    private List<BranchData> branches = new LinkedList<>();
-    private Map<String, CommitData> commits = new HashMap<>();
+    private ObservableList<BranchData> branches = FXCollections.observableArrayList();
+    private ObservableMap<String, CommitData> commits = FXCollections.observableHashMap();
 
     private String remoteRepositoryPath = null;
     private String remoteRepositoryName = null;
     private List<RemoteBranch> remoteBranches = new LinkedList<>();
+
+    Merge currentMerge;
 
     class BranchHeadCommitListener implements ChangeListener<String> {
 
@@ -109,10 +115,10 @@ public class Repository {
 
     String getFullPath(){ return fullPath; }
     String getName(){ return name; }
-
     Branch getActiveBranch(){ return activeBranch; }
+    ObservableList<BranchData> getAllBranches(){ return branches; }
+    Merge getCurrentMerge(){ return currentMerge; }
 
-    List<BranchData> getAllBranches(){ return branches; }
 
     static Repository load(String repositoryPath){
         // we know that the repo exists and valid
@@ -141,7 +147,7 @@ public class Repository {
         }
 
     }
-    Map<String, CommitData> getAllCommitsData(){ return new HashMap<>(commits); }
+    ObservableMap<String, CommitData> getAllCommitsData(){ return commits; }
 
 
     private void loadAllCommitsData(){
@@ -171,7 +177,7 @@ public class Repository {
     CommitData  commitActiveBranch(String msg) throws NoChangesToCommitError {
         // this function is for assert that branch details at `branches` object will stay updated
 
-        Commit commit = activeBranch.commit(msg);
+        Commit commit = activeBranch.commit(msg, null);
         CommitData commitData = __createCommitData(commit);
         commits.put(commitData.getSha1(), commitData);
 
@@ -360,18 +366,6 @@ public class Repository {
         }
     }
 
-
-    static private Map<String, Blob> getAllFilesOfCommit(String commitSha1){
-        Commit commit = new Commit(commitSha1);
-
-        Folder commitFolder = new Folder(new File(Settings.repositoryFullPath),
-                new ItemSha1(commit.getRootFolderSHA1(), false, false),
-                commit.getUserLastModified(),
-                commit.getCommitTime(),false);
-
-        return commitFolder.getCommittedFilesState(false);
-    }
-
     BranchData createNewBranchFromSha1(String branchName, String sha1, String trackingAfter){
         Branch newBranch = new Branch(branchName, sha1, trackingAfter, false);
         return addNewBranch(newBranch);
@@ -385,4 +379,36 @@ public class Repository {
         }
         return true;
     }
+
+    public Merge getMerge(String branchName) throws ValueException{
+        String commitSha1 = "";
+        List<BranchData> branchesData = getAllBranches();
+        BranchData mergeBranch = null;
+
+        for(BranchData branchData: branchesData){
+            if(branchData.getName().equals(branchName)){
+                commitSha1 = branchData.getHeadSha1();
+                mergeBranch = branchData;
+                break;
+            }
+        }
+
+        if (mergeBranch == null) throw new ValueException("Invalid branch name");
+
+        currentMerge = new Merge(getActiveBranch().getHead().getSha1(), commitSha1, mergeBranch);
+        return currentMerge;
+    }
+
+    public void makeMerge(Merge merge){
+        merge.setConflictFiles();
+        if(merge.getConflicts().size() != 0){ return; }
+
+        CommitData commitData = merge.commit();
+        commits.put(commitData.getSha1(), commitData);
+
+        currentMerge = null;
+    }
+
+
+
 }

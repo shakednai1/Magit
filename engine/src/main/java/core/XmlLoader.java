@@ -140,14 +140,16 @@ class XmlLoader {
                 }
             }
         }
+        commitObj.zipCommit();
     }
 
     Commit openCommit(String commitID, String prevCommit){
         MagitSingleCommit magitCommit = commitMap.get(commitID);
         MagitSingleFolder magitRootFolder = folderMap.get(magitCommit.getRootFolder().getId());
         Folder rootFolder = createFilesTree(magitRootFolder, Settings.repositoryFullPath);
-        Commit commit = new Commit(magitCommit.getMessage(), rootFolder.getSha1(), magitCommit.getAuthor(),
-                magitCommit.getDateOfCreation(), prevCommit);
+        Commit commit = new Commit(magitCommit.getMessage(), rootFolder.getSha1(),
+                magitCommit.getAuthor(), magitCommit.getDateOfCreation(), prevCommit, null);
+//        commit.zipCommit();
 
         List<MagitSingleBranch> pointingBranches = getPointedMagitBranch(magitCommit.getId(), false);
         List<MagitSingleBranch> pointingRemoteBranches = getPointedMagitBranch(magitCommit.getId(), true);
@@ -175,7 +177,7 @@ class XmlLoader {
         }
         else{
             rootFolder.zipRec();
-            commit.zipCommit();
+//            commit.zipCommit();
         }
 
         Utils.clearCurrentWC();

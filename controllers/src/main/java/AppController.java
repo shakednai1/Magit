@@ -1,11 +1,11 @@
 import commitTree.CommitTree;
 import core.*;
 import exceptions.*;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.collections.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -33,8 +33,8 @@ public class AppController extends BaseController {
     private MainEngine engine ;
     private RepositoryModel repositoryModel;
     private CommitTree commitTree;
-    private Map<String, CommitData> commits = new HashMap<>(); // TODO make observable & commit tree should listen
-    private List<BranchData> branches = new LinkedList<>();
+    private ObservableMap<String, CommitData> commits;
+    private ObservableList<BranchData> branches;
 
     // TODO active branch property, relate current core.Branch label
 
@@ -315,8 +315,7 @@ public class AppController extends BaseController {
         Optional<String> commitMsg = dialog.showAndWait();
         try{
             try{
-                CommitData commitData = engine.commit(commitMsg.get());
-                commitTree.addCommit(commitData);
+                engine.commit(commitMsg.get());
             }
             catch (NoChangesToCommitError e){
                 showErrorAlert(new Exception("There are no changes to commit"));
@@ -358,21 +357,22 @@ public class AppController extends BaseController {
 
     }
 
-    private List<BranchData> getAllBranchesDetails() throws NoActiveRepositoryError{
-        return engine.getAllBranches();
-    }
-
     private void updateCurrentRepo(String repoPath){
         try{
             repositoryModel.setRepo(engine.getCurrentRepoName(), repoPath);
             updateBranch();
 
-            branches.clear();
             branches = engine.getAllBranches();
 
-            commits.clear();
             commits = engine.getAllCommitsData();
-            commitTree.setCommitsTree(engine.getAllCommitsData());
+            commitTree.setCommitsTree(commits);
+            commits.addListener(new MapChangeListener<String, CommitData>() {
+                @Override
+                public void onChanged(Change<? extends String, ? extends CommitData> change) {
+                    if(change.wasAdded())
+                        commitTree.addCommit(change.getValueAdded());
+                }
+            });
         }
         catch (NoActiveRepositoryError e){
 
@@ -499,7 +499,7 @@ public class AppController extends BaseController {
             choiceDialog.setContentText("Choose branch to Merge with the head branch");
             choiceDialog.setHeaderText("Merge branch");
             Optional<String> branchToMerge = choiceDialog.showAndWait();
-            Merge merge = engine.merge(branchToMerge.get());
+            Merge merge = engine.getActiveRepository().getMerge(branchToMerge.get());
             if(merge.getConflicts().size() != 0){
 
                 try{
@@ -519,20 +519,41 @@ public class AppController extends BaseController {
                     Stage stage = new Stage();
                     stage.setScene(new Scene(anchorPane));
                     stage.show();
+
+                    items.addListener(new ListChangeListener() {
+
+                        public void onChanged(Change change){
+                            if (!change.getList().isEmpty()) return;
+                            stage.close();
+
+                            TextInputDialog d = new TextInputDialog() ;
+
+                            d.setTitle("Commit getMerge");
+                            d.setContentText("Enter getMerge commit message");
+                            d.showAndWait();
+                            // TODO cannot be an empty getMerge msg
+                            merge.setCommitMsg(d.getResult());
+                            engine.getActiveRepository().makeMerge(merge);
+                        }
+                    });
+
                 }
                 catch (NoSuchElementException e){}
-                // TODO close when list empty
             }
 
-            merge.setConflictFiles();
-            if(merge.getConflicts().size() != 0){ return; }
 
-            CommitData commitData = merge.commit();
         }
         catch (NoActiveRepositoryError e) {
             showErrorAlert(e); }
 
     }
+
+    void makeActualMerge(Merge merge){
+
+
+
+    }
+
 
     public String showCreateBranchDialog(){
         TextInputDialog BranchDialog = new TextInputDialog("");

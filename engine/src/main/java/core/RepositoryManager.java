@@ -5,7 +5,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 
-class RepositoryManager {
+public class RepositoryManager {
 
     private static Repository activeRepository = null;
 

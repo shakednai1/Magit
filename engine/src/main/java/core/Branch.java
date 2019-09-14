@@ -133,7 +133,7 @@ public class Branch {
         }
     }
 
-    Commit commit(String msg) throws NoChangesToCommitError{
+    Commit commit(String msg, String secondCommit) throws NoChangesToCommitError{
         if (!haveChanges())
             throw new NoChangesToCommitError("");
 
@@ -141,7 +141,9 @@ public class Branch {
         rootFolder.commit(Settings.getUser(), commitTime);
 
         String prevCommitSha1 = (head==null)? null : head.getSha1();
-        Commit com = new Commit(msg, rootFolder.getSha1(), rootFolder.userLastModified, commitTime,prevCommitSha1);
+        Commit com = new Commit(msg, rootFolder.getSha1(),
+                rootFolder.userLastModified, commitTime,
+                prevCommitSha1, secondCommit);
         com.zipCommit();
 
         setHead(com);
@@ -179,7 +181,7 @@ public class Branch {
         Commit currentCommit = head;
         while (currentCommit != null){
             res.add(currentCommit.toString());
-            currentCommit = commitData.get(currentCommit.getFirstPreviousCommitSHA1());
+            currentCommit = commitData.get(currentCommit.getFirstPrecedingSha1());
         }
         return res;
     }

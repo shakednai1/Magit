@@ -1,6 +1,8 @@
 package core;
 
 import exceptions.*;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import models.BranchData;
 import models.CommitData;
 
@@ -12,13 +14,17 @@ public class MainEngine {
 
     private static RepositoryManager repositoryManager = new RepositoryManager();
     private static XmlLoader xmlLoader;
-    private static BranchData currentBranchMerge;
 
     public MainEngine(){ }
 
     public static RepositoryManager getRepositoryManager(){
         return repositoryManager;
     }
+
+    public static Repository getActiveRepository(){
+        return repositoryManager.getActiveRepository();
+    }
+
 
     public FilesDelta getWorkingCopyStatus() throws NoActiveRepositoryError{
         if(repositoryManager.getActiveRepository() == null){
@@ -67,7 +73,7 @@ public class MainEngine {
         return repositoryManager.getActiveRepository().createNewBranch(name, checkout);
     }
 
-    public List<BranchData> getAllBranches() throws NoActiveRepositoryError{
+    public ObservableList<BranchData> getAllBranches() throws NoActiveRepositoryError{
         validateActiveRepository();
         return repositoryManager.getActiveRepository().getAllBranches();
     }
@@ -121,7 +127,7 @@ public class MainEngine {
         return repositoryManager.getActiveRepository().getActiveBranch().getName();
     }
 
-    public Map<String, CommitData> getAllCommitsData(){ return repositoryManager.getActiveRepository().getAllCommitsData();}
+    public ObservableMap<String, CommitData> getAllCommitsData(){ return repositoryManager.getActiveRepository().getAllCommitsData();}
 
     public void resetBranch(String commitSha1){
         Utils.clearCurrentWC();
@@ -206,22 +212,9 @@ public class MainEngine {
         return Utils.getZippedContent(fileSha1);
     }
 
-    public Merge merge(String branchName) {
-        String commitSha1 = "";
-        List<BranchData> branchesData = repositoryManager.getActiveRepository().getAllBranches();
-        for(BranchData branchData: branchesData){
-            if(branchData.getName().equals(branchName)){
-                commitSha1 = branchData.getHeadSha1();
-                this.currentBranchMerge = branchData;
-                break;
-            }
-        }
-        Merge merge = new Merge(repositoryManager.getActiveRepository().getActiveBranch().getHead().getSha1(), commitSha1);
-        return merge;
-    }
 
     public static String getBranchMergeName(){
-        return currentBranchMerge.getName();
+        return getActiveRepository().getCurrentMerge().getMergingBranch().getName();
     }
 
 

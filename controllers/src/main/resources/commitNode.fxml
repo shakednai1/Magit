@@ -9,7 +9,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.TextFlow?>
 
-<GridPane fx:id="commitRow" hgap="5.0" maxHeight="60.0" maxWidth="1.7976931348623157E308" minHeight="44.0" minWidth="-Infinity" prefHeight="44.0" prefWidth="672.0" styleClass="single-commit-row-container" stylesheets="@/commitNode.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="commitTree.node.CommitNodeController">
+<GridPane fx:id="commitRow" hgap="5.0" maxHeight="60.0" maxWidth="1.7976931348623157E308" minHeight="44.0" minWidth="-Infinity" prefHeight="44.0" prefWidth="672.0" styleClass="single-commit-row-container" stylesheets="@/commitNode.css" xmlns="http://javafx.com/javafx/8.0.221" xmlns:fx="http://javafx.com/fxml/1" fx:controller="commitTree.node.CommitNodeController">
 <columnConstraints>
     <ColumnConstraints hgrow="NEVER" minWidth="-Infinity" />
     <ColumnConstraints hgrow="NEVER" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />

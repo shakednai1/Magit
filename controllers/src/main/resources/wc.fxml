@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="300.0"  xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.1" fx:controller="workingCopy.WorkingCopyController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="300.0"  xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.221" fx:controller="workingCopy.WorkingCopyController">
      <children>
          <ListView fx:id="filesListView" prefHeight="291.0" prefWidth="600.0" />
      </children>

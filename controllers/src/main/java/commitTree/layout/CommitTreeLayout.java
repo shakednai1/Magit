@@ -97,7 +97,7 @@ public class CommitTreeLayout implements Layout {
 
         CommitData currentCommit = branchHead;
 
-        while(true){
+        while(true && currentCommit != null){
 
             if(currentCommit.getIsInMasterChain())
                 break;
@@ -105,7 +105,7 @@ public class CommitTreeLayout implements Layout {
             if(commitsToBranches.get(currentCommit.getSha1()) != null)
                 break;
 
-            // TODO HOW DOES IT LOOKS WITH merge after merge
+            // TODO HOW DOES IT LOOKS WITH getMerge after getMerge
 
             commitsToBranches.put(currentCommit.getSha1(), branch);
             currentCommit = commits.get(currentCommit.getPreviousCommitSha1());

@@ -49,6 +49,8 @@ public class CommitTree {
 
         tree.layout(new CommitTreeLayout());
 
+
+
     }
 
     private ICell __addCommitToTree(CommitData commitData){

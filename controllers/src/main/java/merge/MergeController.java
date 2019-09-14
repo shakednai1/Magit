@@ -4,10 +4,7 @@ import core.FileChanges;
 import core.MainEngine;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import utils.BaseController;
 
@@ -43,6 +40,9 @@ public class MergeController extends BaseController {
         private Button cancelBtn;
 
         @FXML
+        private RadioButton markAsDeleted;
+
+        @FXML
         private TextArea resultContent;
 
         @FXML
@@ -53,7 +53,11 @@ public class MergeController extends BaseController {
 
         @FXML
         void OnResolveConflict(ActionEvent event) {
-            conflict.setContent(resultContent.getText());
+
+            if(markAsDeleted.isSelected())
+                conflict.markDeleted();
+            else
+                conflict.setContent(resultContent.getText());
             resolved=true;
             stage.close();
         }

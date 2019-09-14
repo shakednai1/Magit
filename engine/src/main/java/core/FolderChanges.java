@@ -114,4 +114,9 @@ public class FolderChanges extends Folder {
         return subChangesFolders;
     }
 
+    public void unfoldFS(){
+        subChangesFiles.forEach(FileChanges::rewriteFS);
+        subChangesFolders.forEach(FolderChanges::unfoldFS);
+    }
+
 }
