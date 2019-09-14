@@ -14,6 +14,7 @@ public class MainEngine {
 
     private static RepositoryManager repositoryManager = new RepositoryManager();
     private static XmlLoader xmlLoader;
+    private static boolean canPull = true;
 
     public MainEngine(){ }
 
@@ -35,6 +36,7 @@ public class MainEngine {
 
     public CommitData commit(String msg) throws NoActiveRepositoryError, NoChangesToCommitError{
         validateActiveRepository();
+        canPull = false;
         return repositoryManager.getActiveRepository().commitActiveBranch(msg);
     }
 
@@ -217,5 +219,25 @@ public class MainEngine {
         return getActiveRepository().getCurrentMerge().getMergingBranch().getName();
     }
 
+    public Merge pull(){
+        if(getActiveRepository().getActiveBranch().isTracking()){
+            return getActiveRepository().pull();
+        }
+        else{
+            throw new IllegalArgumentException("Current active branch is not remote tracking branch");
+        }
+    }
 
+    public Merge getCurrentMerge(){
+        return getActiveRepository().getCurrentMerge();
+    }
+
+    public void push() {
+        getActiveRepository().push();
+        canPull = true;
+    }
+
+    public boolean getCanPull(){
+        return canPull;
+    }
 }
