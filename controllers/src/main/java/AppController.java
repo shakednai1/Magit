@@ -501,58 +501,69 @@ public class AppController extends BaseController {
 
     @FXML
     void OnMerge(ActionEvent event) {
-
-
         try {
-            if(!canExecuteMerge()) showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));;
-
+            if (!canExecuteMerge())
+                showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));
             Merge merge = engine.getActiveRepository().getMerge(getBranchToMerge());
-            if(merge.getConflicts().size() != 0){
-
-                try{
-                    ListView listView = new ListView();
-
-                    listView.setCellFactory(new Callback<ListView<FileChanges>, ListCell<FileChanges>>() {
-                        @Override
-                        public ListCell<FileChanges> call(ListView param) {
-                            return new ConflictFileCell();
-                        }
-                    });
-
-                    ObservableList<FileChanges> items= FXCollections.observableList(merge.getConflicts());
-                    listView.setItems(items);
-                    AnchorPane anchorPane = new AnchorPane();
-                    anchorPane.getChildren().add(listView);
-                    Stage stage = new Stage();
-                    stage.setScene(new Scene(anchorPane));
-                    stage.show();
-
-                    items.addListener(new ListChangeListener() {
-
-                        public void onChanged(Change change){
-                            if (!change.getList().isEmpty()) return;
-                            stage.close();
-
-                            TextInputDialog d = new TextInputDialog() ;
-
-                            d.setTitle("Commit getMerge");
-                            d.setContentText("Enter getMerge commit message");
-                            d.showAndWait();
-                            // TODO cannot be an empty getMerge msg
-                            merge.setCommitMsg(d.getResult());
-                            engine.getActiveRepository().makeMerge(merge);
-                        }
-                    });
-
-                }
-                catch (NoSuchElementException e){}
+            handleConflicts(merge);
+        }
+        catch(NoActiveRepositoryError e){
+                showErrorAlert(e);
             }
 
+    }
 
+    void handleConflicts(Merge merge) {
+        if (merge.getConflicts().size() != 0) {
+            ListView listView = new ListView();
+            listView.setCellFactory(new Callback<ListView<FileChanges>, ListCell<FileChanges>>() {
+                @Override
+                public ListCell<FileChanges> call(ListView param) {
+                    return new ConflictFileCell();
+                }
+            });
+            ObservableList<FileChanges> items = FXCollections.observableList(merge.getConflicts());
+            listView.setItems(items);
+            AnchorPane anchorPane = new AnchorPane();
+            anchorPane.getChildren().add(listView);
+            Stage stage = new Stage();
+            stage.setScene(new Scene(anchorPane));
+            stage.show();
+            items.addListener(new ListChangeListener() {
+
+                public void onChanged(Change change) {
+                    if (!change.getList().isEmpty()) return;
+                    stage.close();
+
+                    TextInputDialog d = new TextInputDialog();
+
+                    d.setTitle("Commit getMerge");
+                    d.setContentText("Enter getMerge commit message");
+                    d.showAndWait();
+                    // TODO cannot be an empty getMerge msg
+                    merge.setCommitMsg(d.getResult());
+                    engine.getActiveRepository().makeMerge(merge);
+                }
+            });
         }
-        catch (NoActiveRepositoryError e) {
-            showErrorAlert(e); }
+    }
 
+    @FXML
+    void OnPull(ActionEvent event) {
+        try{
+            if(!canExecuteMerge()) showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));;
+            Merge merge = engine.pull();
+            handleConflicts(merge);
+        }
+        catch (IllegalArgumentException | NoActiveRepositoryError e){
+            showErrorAlert(e);
+        }
+    }
+
+    @FXML
+    void OnPush(ActionEvent event) {
+        OnPull(event);
+        engine.push();
     }
 
     private boolean canExecuteMerge() throws NoActiveRepositoryError {

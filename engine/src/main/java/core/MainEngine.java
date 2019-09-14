@@ -217,5 +217,20 @@ public class MainEngine {
         return getActiveRepository().getCurrentMerge().getMergingBranch().getName();
     }
 
+    public Merge pull(){
+        if(getActiveRepository().getActiveBranch().isTracking()){
+            return getActiveRepository().pull();
+        }
+        else{
+            throw new IllegalArgumentException("Current active branch is not remote tracking branch");
+        }
+    }
 
+    public Merge getCurrentMerge(){
+        return getActiveRepository().getCurrentMerge();
+    }
+
+    public void push() {
+        getActiveRepository().push();
+    }
 }

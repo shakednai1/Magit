@@ -410,7 +410,7 @@ public class Repository {
 
 
 
-    public void pull(){
+    public Merge pull(){
         String trackingAfterBranchName = getActiveBranch().getTrackingAfter();
         String pointingCommitOfRemoteBranch = getPointingCommitOfRB(trackingAfterBranchName);
         updateRBDataFromRemote(trackingAfterBranchName);
@@ -421,11 +421,10 @@ public class Repository {
                 activeBranchData = branchData;
             }
         }
-        makeMerge(new Merge(getActiveBranch().getHead().getSha1(), pointingCommitOfRemoteBranch, activeBranchData));
+        return new Merge(getActiveBranch().getHead().getSha1(), pointingCommitOfRemoteBranch, activeBranchData);
     }
 
     public void push(){
-        pull();
         pushObjectsToRemote();
         updateRBDataFromLocal(getActiveBranch().getTrackingAfter());
     }
