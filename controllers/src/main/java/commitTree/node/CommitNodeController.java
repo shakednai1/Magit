@@ -110,10 +110,10 @@ public class CommitNodeController {
                 TreeView treeView = new TreeView();
                 treeView.setRoot(root);
                 VBox vbox = new VBox(treeView);
-                treeView.getSelectionModel()
-                        .selectedItemProperty()
-                        .addListener((observable, oldValue, newValue) -> showFileContent(newValue));
-                Dialog dialog = new Dialog();
+                EventHandler<MouseEvent> mouseEventHandle = (MouseEvent event) -> {
+                    handleClick(event);
+                };
+                treeView.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseEventHandle);                Dialog dialog = new Dialog();
                 dialog.setHeaderText("File System");
                 dialog.getDialogPane().setContent(vbox);
                 dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
@@ -124,10 +124,11 @@ public class CommitNodeController {
         messageLabel.setContextMenu(contextMenu);
     }
 
-    private void showFileContent(Object value) {
-        if (value != null) {
-            TreeItem treeItem = (TreeItem) value;
-            FSObject file = (FSObject) treeItem.getValue();
+    private void handleClick(MouseEvent event) {
+        TreeView treeView = (TreeView)event.getSource();
+        TreeItem<FSObject> treeItem = (TreeItem<FSObject>)treeView.getSelectionModel().getSelectedItem();
+        if (treeItem != null && treeItem.getChildren().isEmpty()){
+            FSObject file = treeItem.getValue();
             List<String> fileLines = engine.getFileLines(file.getSha1());
             Dialog dialog = new Dialog();
             dialog.setContentText(String.join("\n", fileLines));
@@ -136,7 +137,6 @@ public class CommitNodeController {
             dialog.showAndWait();
         }
     }
-
 
     private void buildTreeView(Folder folder, TreeItem<FSObject> root) {
         for(Blob subFile: folder.getSubFiles().values()){

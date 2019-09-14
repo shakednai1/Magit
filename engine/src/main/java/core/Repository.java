@@ -1,5 +1,6 @@
 package core;
 
+import com.sun.xml.internal.ws.api.config.management.policy.ManagementAssertion;
 import exceptions.InvalidBranchNameError;
 import exceptions.NoActiveRepositoryError;
 import exceptions.NoChangesToCommitError;
@@ -11,6 +12,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
+import jdk.nashorn.internal.ir.BreakableNode;
 import models.CommitData;
 import models.BranchData;
 
@@ -410,5 +412,87 @@ public class Repository {
     }
 
 
+
+    public void pull(){
+        String trackingAfterBranchName = getActiveBranch().getTrackingAfter();
+        String pointingCommitOfRemoteBranch = getPointingCommitOfRB(trackingAfterBranchName);
+        updateRBDataFromRemote(trackingAfterBranchName);
+        getObjectsFromRemote();
+        // make merge between getActiveBranch().getHead().getSha1() and pointingCommitOfRemoteBranch
+    }
+
+    public void push(){
+        pull();
+        pushObjectsToRemote();
+        updateRBDataFromLocal(getActiveBranch().getTrackingAfter());
+    }
+
+    private void updateRBDataFromLocal(String remoteBranchName){
+        File destBranchFile= new File(remoteRepositoryPath + Settings.branchFolder + remoteBranchName + ".txt");
+        File sourceBranchFile = new File(Settings.branchFolderPath + remoteBranchName + ".txt");
+        File destBranchFileRemote= new File(remoteRepositoryPath + Settings.branchFolder + remoteBranchName + ".txt");
+        try {
+            FileUtils.copyFile(sourceBranchFile, destBranchFile);
+            FileUtils.copyFile(destBranchFile, destBranchFileRemote);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        updatePointingBranchOfRB(remoteBranchName);
+    }
+
+    private void pushObjectsToRemote(){
+        File sourceObjFolder = new File(Settings.objectsFolderPath);
+        try {
+            for (File file : sourceObjFolder.listFiles()) {
+                File destFile = new File(remoteRepositoryPath + Settings.objectsFolder + "/" + file.getName());
+                FileUtils.copyFile(file, destFile);
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getObjectsFromRemote(){
+        File sourceObjFolder = new File(remoteRepositoryPath + Settings.objectsFolder);
+        try {
+            for (File file : sourceObjFolder.listFiles()) {
+                File destFile = new File(Settings.objectsFolderPath + "/" + file.getName());
+                FileUtils.copyFile(file, destFile);
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void updateRBDataFromRemote(String remoteBranchName){
+        File sourceBranchFile = new File(remoteRepositoryPath + Settings.branchFolder + remoteBranchName + ".txt");
+        File destBranchFile = new File(Settings.remoteBranchFolder + remoteBranchName + ".txt");
+        try {
+            FileUtils.copyFile(sourceBranchFile, destBranchFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        updatePointingBranchOfRB(remoteBranchName);
+
+    }
+
+    private void updatePointingBranchOfRB(String remoteBranchName){
+        String pointingCommitOfRemoteBranch = getPointingCommitOfRB(remoteBranchName);
+        for(RemoteBranch remoteBranch : remoteBranches){
+            if(remoteBranch.getName().equals(remoteBranchName)){
+                remoteBranch.pointedCommitSha1 = pointingCommitOfRemoteBranch;
+            }
+        }
+    }
+
+    private String getPointingCommitOfRB(String remoteBranchName){
+        String branchDataFromFile = Utils.getFileLines(Settings.remoteBranchFolder + remoteBranchName + ".txt").get(0);
+        String pointingCommitOfRemoteBranch = branchDataFromFile.split(",")[0];
+        return pointingCommitOfRemoteBranch;
+    }
 
 }

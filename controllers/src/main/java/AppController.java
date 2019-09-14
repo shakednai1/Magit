@@ -6,6 +6,9 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -249,15 +252,21 @@ public class AppController extends BaseController {
         File selectedFile = fileChooser.showOpenDialog(MyApp.stage);
         try{
             engine.isXmlValid(selectedFile.getPath());
-            engine.loadRepositoyFromXML();
-            updateCurrentRepo(engine.getCurrentRepoPath());
+            Task task = new LoadXmlTask(selectedFile.getPath(), engine);
+            new Thread(task).start();
+            task.setOnSucceeded(e -> {
+                try{
+                    updateCurrentRepo(engine.getCurrentRepoPath());
+                }
+                catch (NoActiveRepositoryError ex){
+
+                }
+            });
         }
-        catch (XmlException | UncommittedChangesError | InvalidBranchNameError e){
+        catch (XmlException e){
             showErrorAlert(e);
         }
-        catch (NoActiveRepositoryError e){
 
-        }
     }
 
     @FXML
