@@ -219,9 +219,6 @@ public class Repository {
 
     }
 
-
-
-
     FilesDelta getWorkingCopy(){
         return activeBranch.getWorkingCopy();
     }

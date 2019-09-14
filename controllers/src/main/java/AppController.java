@@ -28,6 +28,7 @@ import workingCopy.WorkingCopyStage;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.NoRouteToHostException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -500,15 +501,12 @@ public class AppController extends BaseController {
 
     @FXML
     void OnMerge(ActionEvent event) {
-        List<String> branchesName = null;
+
+
         try {
-            branchesName = getAllBranchNames();
-            branchesName.remove(engine.getCurrentBranchName());
-            ChoiceDialog<String> choiceDialog = new ChoiceDialog<String>(branchesName.get(0), branchesName);
-            choiceDialog.setContentText("Choose branch to Merge with the head branch");
-            choiceDialog.setHeaderText("Merge branch");
-            Optional<String> branchToMerge = choiceDialog.showAndWait();
-            Merge merge = engine.getActiveRepository().getMerge(branchToMerge.get());
+            if(!canExecuteMerge()) showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));;
+
+            Merge merge = engine.getActiveRepository().getMerge(getBranchToMerge());
             if(merge.getConflicts().size() != 0){
 
                 try{
@@ -557,12 +555,21 @@ public class AppController extends BaseController {
 
     }
 
-    void makeActualMerge(Merge merge){
-
-
-
+    private boolean canExecuteMerge() throws NoActiveRepositoryError {
+        return engine.getActiveBranch().haveChanges();
     }
 
+
+    private String getBranchToMerge() throws NoActiveRepositoryError{
+        List<String> branchesName = getAllBranchNames();
+        branchesName.remove(engine.getCurrentBranchName());
+
+        ChoiceDialog<String> choiceDialog = new ChoiceDialog<String>(branchesName.get(0), branchesName);
+        choiceDialog.setContentText("Choose branch to Merge with the head branch");
+        choiceDialog.setHeaderText("Merge branch");
+        Optional<String> branchToMerge = choiceDialog.showAndWait();
+        return branchToMerge.get();
+    }
 
     public String showCreateBranchDialog(){
         TextInputDialog BranchDialog = new TextInputDialog("");

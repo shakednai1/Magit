@@ -59,7 +59,11 @@ abstract public class Item implements Zipable {
         if (object.getClass() != this.getClass()) return false;
 
         Item other = (Item) object;
-        return currentSHA1.equals(other.currentSHA1) && fullPath.equals(other.fullPath);
+        if (!fullPath.equals(other.fullPath)) return false;
+        if (currentSHA1 == null && other.currentSHA1 == null) return true;
+        if (currentSHA1 == null || other.currentSHA1 == null) return false;
+
+        return currentSHA1.equals(other.currentSHA1) ;
     }
 
     public String getName(){

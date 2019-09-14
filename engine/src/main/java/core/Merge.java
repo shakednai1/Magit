@@ -30,6 +30,9 @@ public class Merge {
     }
 
     public BranchData getMergingBranch(){ return mergingBranch; }
+    public String getCommitMsg(){ return commitMsg;}
+    public String getFirstCommitSha1(){ return firstCommitSha1;}
+    public String getSecondCommitSha1(){ return secondCommitSha1;}
 
     public List<FileChanges> getConflicts(){
         return conflicts;
@@ -56,8 +59,6 @@ public class Merge {
     }
 
     public CommitData commit(){
-        String msg = String.format("Merge %s into %s", MainEngine.getBranchMergeName(), MainEngine.getCurrentBranchName());
-
         folderChanges.unfoldFS();
         RepositoryManager repositoryManager = MainEngine.getRepositoryManager();
         Branch activeBranch = repositoryManager.getActiveRepository().getActiveBranch();
