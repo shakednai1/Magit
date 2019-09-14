@@ -550,20 +550,25 @@ public class AppController extends BaseController {
 
     @FXML
     void OnPull(ActionEvent event) {
+        if(!engine.getCanPull()) showErrorAlert(new Exception("You have commits that not pushed yet \n Please push first and then pull"));
+        pull();
+    }
+
+    void pull(){
         try{
-            if(!engine.getCanPull()) showErrorAlert(new Exception("You have commits that not pushed yet \n Please push first and then pull"));
             if(!canExecuteMerge()) showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));
             Merge merge = engine.pull();
             handleConflicts(merge);
-        }
-        catch (IllegalArgumentException | NoActiveRepositoryError e){
-            showErrorAlert(e);
+            }
+            catch (IllegalArgumentException | NoActiveRepositoryError e) {
+                showErrorAlert(e);
+
         }
     }
 
     @FXML
     void OnPush(ActionEvent event) {
-        OnPull(event);
+        pull();
         engine.push();
     }
 
