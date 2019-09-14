@@ -502,8 +502,11 @@ public class AppController extends BaseController {
     @FXML
     void OnMerge(ActionEvent event) {
         try {
-            if (!canExecuteMerge())
+            if(!canExecuteMerge()) {
                 showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));
+                return;
+            };
+
             Merge merge = engine.getActiveRepository().getMerge(getBranchToMerge());
             handleConflicts(merge);
         }
@@ -573,7 +576,7 @@ public class AppController extends BaseController {
     }
 
     private boolean canExecuteMerge() throws NoActiveRepositoryError {
-        return engine.getActiveBranch().haveChanges();
+        return !engine.getActiveBranch().haveChanges();
     }
 
 

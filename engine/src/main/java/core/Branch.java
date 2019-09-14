@@ -156,16 +156,14 @@ public class Branch {
         String commitTime = Settings.commitDateFormat.format(new Date());
         merge.folderChanges.commit(Settings.getUser(), commitTime);
 
-        Commit com = new Commit(merge.getCommitMsg(), rootFolder.getSha1(),
-                rootFolder.userLastModified, commitTime,
+        Commit com = new Commit(merge.getCommitMsg(), merge.folderChanges.getSha1(),
+                merge.folderChanges.userLastModified, commitTime,
                 merge.getFirstCommitSha1(), merge.getSecondCommitSha1());
         com.zipCommit();
 
         setHead(com);
 
-//        rootFolder = null;
-//        make folder chnages to root folder / load rootfolder from commit
-
+        rootFolder = (Folder) merge.folderChanges;
         currentStateOfFiles = rootFolder.getCommittedFilesState(false);
 
         return com;

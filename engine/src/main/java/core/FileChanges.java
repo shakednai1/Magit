@@ -1,6 +1,11 @@
 package core;
 
 import javax.rmi.CORBA.Util;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Set;
 
 public class FileChanges extends Blob{
 
@@ -57,6 +62,9 @@ public class FileChanges extends Blob{
     void setResAndStatus(Blob resElement, Common.FilesStatus state){
         this.resElement = resElement;
         this.state = state;
+
+        currentSHA1 = resElement.currentSHA1;
+        fullPath = resElement.fullPath;
     }
 
     Common.FilesStatus getStatus(){return state;}
@@ -116,6 +124,21 @@ public class FileChanges extends Blob{
     public void zip(){
         if(state == Common.FilesStatus.NEW|| state == Common.FilesStatus.UPDATED)
             resElement.zip();
+        else if(state == Common.FilesStatus.RESOLVED){
+            File resolvedFile = new File(Settings.objectsFolderPath, currentSHA1.sha1 + ".txt");
+            Utils.writeFile(resolvedFile.getAbsolutePath(), currentSHA1.content, false);
+            Utils.zip(Utils.getZippedPath(currentSHA1.sha1),  resolvedFile.getAbsolutePath());
+        }
+    }
+
+    @Override
+    public void updateState(){
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(fullPath)));
+            currentSHA1 = new ItemSha1(content, true, false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setContent(String text) {
