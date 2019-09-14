@@ -418,7 +418,13 @@ public class Repository {
         String pointingCommitOfRemoteBranch = getPointingCommitOfRB(trackingAfterBranchName);
         updateRBDataFromRemote(trackingAfterBranchName);
         getObjectsFromRemote();
-        // make merge between getActiveBranch().getHead().getSha1() and pointingCommitOfRemoteBranch
+        BranchData activeBranchData = null;
+        for(BranchData branchData : getAllBranches()){
+            if(branchData.getName().equals(getActiveBranch().getName())){
+                activeBranchData = branchData;
+            }
+        }
+        makeMerge(new Merge(getActiveBranch().getHead().getSha1(), pointingCommitOfRemoteBranch, activeBranchData));
     }
 
     public void push(){
