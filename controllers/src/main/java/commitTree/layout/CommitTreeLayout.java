@@ -39,9 +39,6 @@ public class CommitTreeLayout implements Layout {
         int startX = 10;
         int startY = 50;
 
-        commits.clear();
-        commitsToBranches.clear();
-
         setCommits(cells);
         setOrderedNodes(cells);
         setBranchesLayout();
@@ -54,6 +51,8 @@ public class CommitTreeLayout implements Layout {
     }
 
     void setCommits(List<ICell> cells ){
+        commits.clear();
+
         for(ICell _commit: cells){
             CommitNode commit = (CommitNode) _commit;
             commits.put(commit.getCommit().getSha1(), commit.getCommit());

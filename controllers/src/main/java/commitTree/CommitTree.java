@@ -64,11 +64,8 @@ public class CommitTree {
         model.clear(); //     TODO MOVE FROM HERE
 
 
-        ICell secondPrevCommit = null;
         ICell prevCommit = commitCells.get(commitData.getPreviousCommitSha1());
-        if(commitData.getSecondPreviousCommitSha1() != null){
-            secondPrevCommit = commitCells.get(commitData.getSecondPreviousCommitSha1());
-        }
+        ICell secondPrevCommit = commitCells.get(commitData.getSecondPreviousCommitSha1());
 
         ICell cell = __addCommitToTree(commitData);
         model.addCell(cell);

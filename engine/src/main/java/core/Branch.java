@@ -152,6 +152,25 @@ public class Branch {
         return com;
     }
 
+    Commit mergeCommit(Merge merge){
+        String commitTime = Settings.commitDateFormat.format(new Date());
+        merge.folderChanges.commit(Settings.getUser(), commitTime);
+
+        Commit com = new Commit(merge.getCommitMsg(), rootFolder.getSha1(),
+                rootFolder.userLastModified, commitTime,
+                merge.getFirstCommitSha1(), merge.getSecondCommitSha1());
+        com.zipCommit();
+
+        setHead(com);
+
+//        rootFolder = null;
+//        make folder chnages to root folder / load rootfolder from commit
+
+        currentStateOfFiles = rootFolder.getCommittedFilesState(false);
+
+        return com;
+    }
+
 
     private void updateChangedFilesState(){ // TODO better name for function
         newStateOfFiles.clear();
