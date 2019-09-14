@@ -45,13 +45,13 @@ public class Merge {
     }
 
     private void setConflictFilesRec(FolderChanges folder){
-        for(FileChanges file : folder.getSubChangesFiles()){
+        for(FileChanges file : folder.getSubChangesFiles().values()){
             Common.FilesStatus status = file.getState();
             if(status == Common.FilesStatus.CONFLICTED){
                 conflicts.add(file);
             }
         }
-        for(FolderChanges subFolder: folder.getSubChangesFolders()){
+        for(FolderChanges subFolder: folder.getSubChangesFolders().values()){
             if(subFolder.getHasConflicts()){
                 setConflictFilesRec(subFolder);
             }
@@ -63,17 +63,8 @@ public class Merge {
         RepositoryManager repositoryManager = MainEngine.getRepositoryManager();
         Branch activeBranch = repositoryManager.getActiveRepository().getActiveBranch();
 
-        Commit commit;
-        try{
-            commit = activeBranch.commit(commitMsg, secondCommitSha1);
-        }
-        catch (NoChangesToCommitError e){
-            return null;
-        }
-        commit.zipCommit();
-
+        Commit commit = activeBranch.mergeCommit(this);
         return new CommitData(commit);
-
     }
 
 

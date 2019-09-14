@@ -504,7 +504,10 @@ public class AppController extends BaseController {
 
 
         try {
-            if(!canExecuteMerge()) showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));;
+            if(!canExecuteMerge()) {
+                showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));
+                return;
+            };
 
             Merge merge = engine.getActiveRepository().getMerge(getBranchToMerge());
             if(merge.getConflicts().size() != 0){
@@ -556,7 +559,7 @@ public class AppController extends BaseController {
     }
 
     private boolean canExecuteMerge() throws NoActiveRepositoryError {
-        return engine.getActiveBranch().haveChanges();
+        return !engine.getActiveBranch().haveChanges();
     }
 
 

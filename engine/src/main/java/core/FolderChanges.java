@@ -10,11 +10,12 @@ public class FolderChanges extends Folder {
     Folder aElement;
     Folder bElement;
 
-    private List<FileChanges> subChangesFiles = new ArrayList<>();
-    private List<FolderChanges> subChangesFolders= new ArrayList<>();
+    private Map<String, FileChanges> subChangesFiles = new HashMap<>();
+    private Map<String, FolderChanges> subChangesFolders = new HashMap<>();
 
     private boolean hasConflicts;
 
+    private boolean folderDeleted;
 
 
     FolderChanges(Folder baseFolder, Folder aFolder, Folder bFolder){
@@ -28,7 +29,6 @@ public class FolderChanges extends Folder {
         setSubFoldersChanges();
 
         setHasConflicts();
-
         // at this point, no sha1 need to be calc. only at commit
     }
 
@@ -45,7 +45,7 @@ public class FolderChanges extends Folder {
 
         for (Map.Entry<String, Blob> file : baseSubFiles.entrySet()) {
             String filePath = file.getKey();
-            subChangesFiles.add(new FileChanges(file.getValue(), aSubFiles.get(filePath), bSubFiles.get(filePath)));
+            subChangesFiles.put(fullPath, new FileChanges(file.getValue(), aSubFiles.get(filePath), bSubFiles.get(filePath)));
 
             aSubFiles.remove(filePath);
             bSubFiles.remove(filePath);
@@ -54,7 +54,7 @@ public class FolderChanges extends Folder {
 
         for (Map.Entry<String, Blob> file : aSubFiles.entrySet()) {
             String filePath = file.getKey();
-            subChangesFiles.add(new FileChanges(null, file.getValue(), bSubFiles.get(filePath)));
+            subChangesFiles.put(filePath, new FileChanges(null, file.getValue(), bSubFiles.get(filePath)));
 
             bSubFiles.remove(filePath);
         }
@@ -62,7 +62,7 @@ public class FolderChanges extends Folder {
 
         for (Map.Entry<String, Blob> file : bSubFiles.entrySet()) {
             String filePath = file.getKey();
-            subChangesFiles.add(new FileChanges(null, null, file.getValue()));
+            subChangesFiles.put(filePath, new FileChanges(null, null, file.getValue()));
 
             bSubFiles.remove(filePath);
         }
@@ -75,7 +75,7 @@ public class FolderChanges extends Folder {
 
         for (Map.Entry<String, Folder> folder : baseSubFolders.entrySet()) {
             String filePath = folder.getKey();
-            subChangesFolders.add(new FolderChanges(folder.getValue(), aSubFolders.get(filePath), bSubFolders.get(filePath)));
+            subChangesFolders.put(filePath, new FolderChanges(folder.getValue(), aSubFolders.get(filePath), bSubFolders.get(filePath)));
 
             aSubFolders.remove(filePath);
             bSubFolders.remove(filePath);
@@ -84,39 +84,95 @@ public class FolderChanges extends Folder {
 
         for (Map.Entry<String, Folder> file : aSubFolders.entrySet()) {
             String filePath = file.getKey();
-            subChangesFolders.add(new FolderChanges(null, file.getValue(), bSubFolders.get(filePath)));
+            subChangesFolders.put(filePath, new FolderChanges(null, file.getValue(), bSubFolders.get(filePath)));
 
             bSubFolders.remove(filePath);
         }
         aSubFolders.clear();
 
         for (Map.Entry<String, Folder> file : bSubFolders.entrySet()) {
-            subChangesFolders.add(new FolderChanges(null, null, file.getValue()));
+            String filePath = file.getKey();
+            subChangesFolders.put(filePath, new FolderChanges(null, null, file.getValue()));
         }
         bSubFolders.clear();
 
     }
 
     private void setHasConflicts(){
-        hasConflicts = subChangesFiles.stream().anyMatch(fileChanges -> fileChanges.getStatus() == Common.FilesStatus.CONFLICTED);
+        hasConflicts = subChangesFiles.values().stream().anyMatch(fileChanges -> fileChanges.getStatus() == Common.FilesStatus.CONFLICTED);
 
         if(!hasConflicts)
-            hasConflicts = subChangesFolders.stream().anyMatch(FolderChanges::getHasConflicts);
+            hasConflicts = subChangesFolders.values().stream().anyMatch(FolderChanges::getHasConflicts);
+    }
+
+    private void setFolderDeleted(){
+        folderDeleted = subChangesFolders.values().stream().allMatch(FolderChanges::getFolderDeleted);
+
+        if(folderDeleted) {
+            folderDeleted = subChangesFiles.values().stream().allMatch(fileChanges -> fileChanges.getStatus() == Common.FilesStatus.DELETED);
+        }
     }
 
     public boolean getHasConflicts(){return hasConflicts;}
+    public boolean getFolderDeleted(){return folderDeleted;}
 
-    public List<FileChanges> getSubChangesFiles(){
+
+    public Map<String, FileChanges> getSubChangesFiles(){
         return subChangesFiles;
     }
 
-    public List<FolderChanges> getSubChangesFolders(){
+    public Map<String, FolderChanges> getSubChangesFolders(){
         return subChangesFolders;
     }
 
     public void unfoldFS(){
-        subChangesFiles.forEach(FileChanges::rewriteFS);
-        subChangesFolders.forEach(FolderChanges::unfoldFS);
+        subChangesFiles.values().forEach(FileChanges::rewriteFS);
+        subChangesFolders.values().forEach(FolderChanges::unfoldFS);
+    }
+
+    @Override
+    boolean commit(String commitUser, String commitTime){
+        // function assume the items are up-to-date
+        boolean subItemsChanged = false;
+
+        subFiles.clear();
+        for(FileChanges file: subChangesFiles.values()){
+            if(file.state == Common.FilesStatus.NEW || file.state == Common.FilesStatus.UPDATED || file.state == Common.FilesStatus.RESOLVED ){
+                subItemsChanged = true;
+                file.updateUserAndDate(commitUser, commitTime);
+            }
+            else if (file.state == Common.FilesStatus.DELETED){
+                continue;
+            }
+            file.zip();
+            subFiles.put(file.fullPath, (Blob) file);
+        }
+
+        subFolders.clear();
+        for(FolderChanges folder: subChangesFolders.values()){
+            boolean subFolderChanged = folder.commit(commitUser, commitTime);
+            subItemsChanged = subItemsChanged || subFolderChanged;
+
+            setFolderDeleted();
+
+            if(folder.getFolderDeleted()) {
+                continue;
+            }
+            subFolders.put(fullPath, (Folder) folder);
+        }
+
+        if(subItemsChanged)
+            updateUserAndDate(commitUser, commitTime);
+
+        setSHA1();
+        zip();
+
+        return subItemsChanged;
+    }
+
+    @Override
+    protected List<Item> getOrderedItemsForSha1(){
+        return getOrderedItems(subFiles, subFolders);
     }
 
 }

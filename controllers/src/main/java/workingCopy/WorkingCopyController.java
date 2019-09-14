@@ -58,7 +58,7 @@ public class WorkingCopyController {
     }
 
     public void getFilesState(List<Blob> deletedFiles, List<Blob> updatedFiles, List<Blob> newFiles, FolderChanges folder){
-        for(FileChanges file : folder.getSubChangesFiles()){
+        for(FileChanges file : folder.getSubChangesFiles().values()){
             Common.FilesStatus status = file.getState();
             if(status == Common.FilesStatus.NEW) {
                 newFiles.add(file);
@@ -70,7 +70,7 @@ public class WorkingCopyController {
                 deletedFiles.add(file);
             }
         }
-        for(FolderChanges subFolder: folder.getSubChangesFolders()){
+        for(FolderChanges subFolder: folder.getSubChangesFolders().values()){
             getFilesState(deletedFiles, updatedFiles, newFiles, subFolder);
         }
     }

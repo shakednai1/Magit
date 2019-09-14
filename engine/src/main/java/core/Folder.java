@@ -7,8 +7,8 @@ public class Folder extends Item {
 
     final private String typeItem = "core.Folder";
 
-    private Map<String, Blob> subFiles = new HashMap<>();
-    private Map<String, Folder> subFolders = new HashMap<>();
+    protected Map<String, Blob> subFiles = new HashMap<>();
+    protected Map<String, Folder> subFolders = new HashMap<>();
 
     private Map<String, Blob> curSubFiles = new HashMap<>();
     private Map<String, Folder> curSubFolders = new HashMap<>();
@@ -151,7 +151,7 @@ public class Folder extends Item {
         for(Item item: getOrderedItems(subFiles, subFolders)){
             folderDataString = folderDataString +
                     item.name + Settings.delimiter +
-                    item.currentSHA1 + Settings.delimiter +
+                    item.currentSHA1.sha1 + Settings.delimiter +
                     item.getTypeItem() + Settings.delimiter +
                     item.userLastModified + Settings.delimiter +
                     item.lastModified + "\r\n";
@@ -161,17 +161,21 @@ public class Folder extends Item {
 
     private String getStringToCalcSHA1(){
         String strForSha1 = "";
-        for(Item item: getOrderedItems(curSubFiles, curSubFolders)){
+        for(Item item: getOrderedItemsForSha1()){
             strForSha1 = strForSha1 +
                     item.name + Settings.delimiter +
-                    item.currentSHA1 + Settings.delimiter +
+                    item.currentSHA1.sha1 + Settings.delimiter +
                     item.getTypeItem() + "\r\n";
         }
 
         return strForSha1;
     }
 
-    private List<Item> getOrderedItems(Map<String , Blob> fileItems, Map<String , Folder> folderItems){
+    protected List<Item> getOrderedItemsForSha1(){
+        return getOrderedItems(curSubFiles, curSubFolders);
+    }
+
+    protected List<Item> getOrderedItems(Map<String , Blob> fileItems, Map<String , Folder> folderItems){
         List<Item> ordItems = new LinkedList<>();
 
         ordItems.addAll(fileItems.values());

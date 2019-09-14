@@ -66,11 +66,19 @@ public class Utils {
         }
     }
 
+    static String getZippedPath(String fileName){
+        return new File(Settings.objectsFolderPath , fileName+".zip").getAbsolutePath();
+    }
+
     static List<String> getZippedContent(String sha1){
-        Utils.unzip(Settings.objectsFolderPath + sha1 + ".zip", Settings.objectsFolderPath , sha1 + ".txt");
+        Utils.unzip(getZippedPath(sha1), Settings.objectsFolderPath , sha1 + ".txt");
         List<String > content = Utils.getFileLines(Settings.objectsFolderPath + sha1+ ".txt");
         Utils.deleteFile(Settings.objectsFolderPath + sha1 + ".txt");
         return content;
+    }
+
+    static String getTxtPath(String fileName){
+        return new File(Settings.objectsFolderPath , fileName+".txt").getAbsolutePath();
     }
 
     static void createNewFile(String fileName, String content){
