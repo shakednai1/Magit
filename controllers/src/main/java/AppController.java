@@ -551,7 +551,8 @@ public class AppController extends BaseController {
     @FXML
     void OnPull(ActionEvent event) {
         try{
-            if(!canExecuteMerge()) showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));;
+            if(!engine.getCanPull()) showErrorAlert(new Exception("You have commits that not pushed yet \n Please push first and then pull"));
+            if(!canExecuteMerge()) showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));
             Merge merge = engine.pull();
             handleConflicts(merge);
         }

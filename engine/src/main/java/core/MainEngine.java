@@ -14,6 +14,7 @@ public class MainEngine {
 
     private static RepositoryManager repositoryManager = new RepositoryManager();
     private static XmlLoader xmlLoader;
+    private static boolean canPull = true;
 
     public MainEngine(){ }
 
@@ -35,6 +36,7 @@ public class MainEngine {
 
     public CommitData commit(String msg) throws NoActiveRepositoryError, NoChangesToCommitError{
         validateActiveRepository();
+        canPull = false;
         return repositoryManager.getActiveRepository().commitActiveBranch(msg);
     }
 
@@ -232,5 +234,10 @@ public class MainEngine {
 
     public void push() {
         getActiveRepository().push();
+        canPull = true;
+    }
+
+    public boolean getCanPull(){
+        return canPull;
     }
 }
