@@ -48,7 +48,7 @@ public class RepositoryManager {
         String remoteBranchesPath = destPath + Settings.remoteBranchFolder;
 
         // extract remote repo name
-        String remoteRepoName = Utils.getFileLines(sourcePath + Settings.repositoryDetailsFile).get(0);
+        String remoteRepoName = FSUtils.getFileLines(sourcePath + Settings.repositoryDetailsFile).get(0);
 
         // copy remote repo to local repo
         File srcDir = new File(sourcePath);
@@ -67,8 +67,8 @@ public class RepositoryManager {
         }
 
         // update repo file name
-        Utils.writeFile(destDir + Settings.repositoryDetailsFile, repoName, false);
-        Utils.writeFile(destDir + Settings.repositoryRemoteDetailsFile, sourcePath + Settings.delimiter + remoteRepoName, false);
+        FSUtils.writeFile(destDir + Settings.repositoryDetailsFile, repoName, false);
+        FSUtils.writeFile(destDir + Settings.repositoryRemoteDetailsFile, sourcePath + Settings.delimiter + remoteRepoName, false);
 
         createNewBranchFilsTrackingAfter(remoteBranchesPath, branchesPath);
         switchActiveRepository(destPath);
@@ -76,13 +76,13 @@ public class RepositoryManager {
 
     public void createNewBranchFilsTrackingAfter(String remoteBranchesPath, String branchesPath){
         // create new branch pointing to the current commit
-        String branchName = Utils.getFileLines(remoteBranchesPath + "HEAD").get(0);
-        String headRemotePointedCommit = Utils.getFileLines( remoteBranchesPath + branchName + ".txt").get(0);
+        String branchName = FSUtils.getFileLines(remoteBranchesPath + "HEAD").get(0);
+        String headRemotePointedCommit = FSUtils.getFileLines( remoteBranchesPath + branchName + ".txt").get(0);
         String content = headRemotePointedCommit + Settings.delimiter + branchName;
 
         // create branch file + update head
-        Utils.createNewFile(branchesPath + branchName + ".txt", content);
-        Utils.createNewFile(branchesPath + "HEAD", branchName);
+        FSUtils.createNewFile(branchesPath + branchName + ".txt", content);
+        FSUtils.createNewFile(branchesPath + "HEAD", branchName);
     }
 
     public void copyBranchesFromRemote(String branchesPath, String remoteBranchesPath){

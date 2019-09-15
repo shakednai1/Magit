@@ -9,7 +9,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-public class Utils {
+public class FSUtils {
 
     static void zip(String fullZipPath, String fullFilePath){
         try {
@@ -66,14 +66,14 @@ public class Utils {
         }
     }
 
-    static String getZippedPath(String fileName){
+    public static String getZippedPath(String fileName){
         return new File(Settings.objectsFolderPath , fileName+".zip").getAbsolutePath();
     }
 
     static List<String> getZippedContent(String sha1){
-        Utils.unzip(getZippedPath(sha1), Settings.objectsFolderPath , sha1 + ".txt");
-        List<String > content = Utils.getFileLines(Settings.objectsFolderPath + sha1+ ".txt");
-        Utils.deleteFile(Settings.objectsFolderPath + sha1 + ".txt");
+        FSUtils.unzip(getZippedPath(sha1), Settings.objectsFolderPath , sha1 + ".txt");
+        List<String > content = FSUtils.getFileLines(Settings.objectsFolderPath + sha1+ ".txt");
+        FSUtils.deleteFile(Settings.objectsFolderPath + sha1 + ".txt");
         return content;
     }
 
@@ -138,7 +138,7 @@ public class Utils {
                 }
             }
             else{
-                Utils.deleteFile(item.getPath());
+                FSUtils.deleteFile(item.getPath());
             }
         }
     }
@@ -151,9 +151,9 @@ public class Utils {
                 deleteSubFilesRec(item);
             }
             else{
-                Utils.deleteFile(item.getPath());
+                FSUtils.deleteFile(item.getPath());
             }
         }
-        Utils.deleteFile(folder.getPath());
+        FSUtils.deleteFile(folder.getPath());
     }
 }

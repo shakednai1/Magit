@@ -132,7 +132,7 @@ public class MainEngine {
     public ObservableMap<String, CommitData> getAllCommitsData(){ return repositoryManager.getActiveRepository().getAllCommitsData();}
 
     public void resetBranch(String commitSha1){
-        Utils.clearCurrentWC();
+        FSUtils.clearCurrentWC();
 
         try{
             repositoryManager.getActiveRepository().resetActiveBranch(commitSha1);
@@ -199,7 +199,7 @@ public class MainEngine {
     public String findTrackingAfterBySha1(String sha1){
         File rbDir = new File(Settings.remoteBranchesPath);
         for (File rb : rbDir.listFiles()){
-            if(Utils.getFileLines(rb.getPath()).get(0).split(Settings.delimiter)[0].equals(sha1)){
+            if(FSUtils.getFileLines(rb.getPath()).get(0).split(Settings.delimiter)[0].equals(sha1)){
                 return rb.getName().split(".txt")[0];
             }
         }
@@ -207,11 +207,11 @@ public class MainEngine {
     }
 
     public String getSha1FromRemoteBranch(String remote){
-        return Utils.getFileLines(Settings.remoteBranchesPath + remote + ".txt").get(0).split(Settings.delimiter)[0];
+        return FSUtils.getFileLines(Settings.remoteBranchesPath + remote + ".txt").get(0).split(Settings.delimiter)[0];
     }
 
     public List<String> getFileLines(String fileSha1){
-        return Utils.getZippedContent(fileSha1);
+        return FSUtils.getZippedContent(fileSha1);
     }
 
 

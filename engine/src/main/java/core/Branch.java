@@ -3,11 +3,8 @@ package core;
 import exceptions.NoChangesToCommitError;
 import models.BranchData;
 import org.apache.commons.collections4.CollectionUtils;
-import sun.text.normalizer.CharacterIteratorWrapper;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,7 +58,7 @@ public class Branch {
     }
 
     Branch(String name, String trackingAfter){
-        String branchData = Utils.getFileLines(Settings.remoteBranchesPath + trackingAfter + ".txt").get(0);
+        String branchData = FSUtils.getFileLines(Settings.remoteBranchesPath + trackingAfter + ".txt").get(0);
         this.name=  name;
         this.trackingAfter = trackingAfter;
         this.head = new Commit(branchData.split(Settings.delimiter)[0]);
@@ -90,13 +87,13 @@ public class Branch {
     static Branch load(String branchName, boolean rewriteWC){
         // TODO deprecate load function and build constractor that knows how to handle only branch name
 
-        List<String> branchData = Utils.getFileLines(getBranchFilePath(branchName));
+        List<String> branchData = FSUtils.getFileLines(getBranchFilePath(branchName));
         String headCommitSha1 = branchData.get(0).split(Settings.delimiter)[0];
         String trackingAfterRemote = branchData.get(0).split(Settings.delimiter)[1];
 
         if(headCommitSha1.equals("null")){
             // loading empty repo
-            if (rewriteWC) Utils.clearCurrentWC();
+            if (rewriteWC) FSUtils.clearCurrentWC();
             return new Branch(branchName);
         }
 
@@ -104,7 +101,7 @@ public class Branch {
     }
 
     static BranchData getBranchDisplayData(String branchName, Repository repository){
-        List<String> branchData = Utils.getFileLines(getBranchFilePath(branchName));
+        List<String> branchData = FSUtils.getFileLines(getBranchFilePath(branchName));
         String headCommitSha1 = branchData.get(0).split(Settings.delimiter)[0];
         String trackingAfter = branchData.get(0).split(Settings.delimiter)[1];
         String headCommitMsg;
@@ -163,6 +160,8 @@ public class Branch {
 
         setHead(com);
 
+        merge.folderChanges.unfoldFS();
+
         rootFolder = (Folder) merge.folderChanges;
         currentStateOfFiles = rootFolder.getCommittedFilesState(false);
 
@@ -186,7 +185,7 @@ public class Branch {
         String branchFileContentCommit =  (head == null)? "null": head.getSha1();
         String branchFileContentTracking = (trackingAfter == null) ? "null" : trackingAfter;
         String content = String.join(Settings.delimiter, branchFileContentCommit, branchFileContentTracking);
-        Utils.writeFile(getBranchFilePath(name), content, false);
+        FSUtils.writeFile(getBranchFilePath(name), content, false);
     }
 
     private static String getBranchFilePath(String branchName){
@@ -233,7 +232,7 @@ public class Branch {
     }
 
     static boolean deleteBranch(String branchName){
-        return Utils.deleteFile(getBranchFilePath(branchName));
+        return FSUtils.deleteFile(getBranchFilePath(branchName));
     }
 
     public boolean isTracking(){

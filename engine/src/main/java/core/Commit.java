@@ -4,13 +4,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 import puk.team.course.magit.ancestor.finder.CommitRepresentative;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Commit implements CommitRepresentative {
-
-    static DateFormat commitDateFormat = Settings.commitDateFormat;
 
     private String msg;
     private String commitTime;
@@ -35,7 +31,7 @@ public class Commit implements CommitRepresentative {
     Commit(String commitSha1){
         this.commitSha1 = commitSha1;
 
-        List<String> content = Utils.getZippedContent(commitSha1);
+        List<String> content = FSUtils.getZippedContent(commitSha1);
         String[] commitData = content.get(0).split(Settings.delimiter);
 
         this.rootSha1 = commitData[0];
@@ -89,9 +85,9 @@ public class Commit implements CommitRepresentative {
 
     void zipCommit(){
         String fileNameWOExtension = Settings.objectsFolderPath + commitSha1;
-        Utils.createNewFile(fileNameWOExtension+".txt", getCommitTxt());
-        Utils.zip(fileNameWOExtension + ".zip",fileNameWOExtension + ".txt");
-        Utils.deleteFile(fileNameWOExtension + ".txt");
+        FSUtils.createNewFile(fileNameWOExtension+".txt", getCommitTxt());
+        FSUtils.zip(fileNameWOExtension + ".zip",fileNameWOExtension + ".txt");
+        FSUtils.deleteFile(fileNameWOExtension + ".txt");
     }
 
     static Map<String, Commit> loadAll(String endCommitSha1){

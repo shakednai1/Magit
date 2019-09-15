@@ -59,7 +59,6 @@ public class Merge {
     }
 
     public CommitData commit(){
-        folderChanges.unfoldFS();
         RepositoryManager repositoryManager = MainEngine.getRepositoryManager();
         Branch activeBranch = repositoryManager.getActiveRepository().getActiveBranch();
 

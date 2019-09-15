@@ -1,11 +1,9 @@
 package core;
 
-import javax.rmi.CORBA.Util;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Set;
 
 public class FileChanges extends Blob{
 
@@ -17,13 +15,12 @@ public class FileChanges extends Blob{
 
     private Blob resElement;
 
-
     FileChanges(Blob baseBlob, Blob aBlob, Blob bBlob){
         this.baseElement = baseBlob;
         this.aElement = aBlob;
         this.bElement = bBlob;
 
-        setFullPath();
+        setBasicDetails();
 
         // two ver has the same sha1
         if(setStateIfDeletedInBothVer()) return;
@@ -57,22 +54,24 @@ public class FileChanges extends Blob{
         return baseElement;
     }
 
-
-
     void setResAndStatus(Blob resElement, Common.FilesStatus state){
         this.resElement = resElement;
         this.state = state;
 
         currentSHA1 = resElement.currentSHA1;
-        fullPath = resElement.fullPath;
+        userLastModified = resElement.userLastModified;
+        lastModified = resElement.lastModified;
     }
 
     Common.FilesStatus getStatus(){return state;}
 
-    private void setFullPath(){
-        this.fullPath = (this.baseElement != null)? this.baseElement.fullPath :
-                (this.aElement != null)? this.aElement.fullPath:
-                        this.bElement.fullPath;
+    private void setBasicDetails(){
+        Blob dataElement = (this.baseElement != null)? this.baseElement :
+                (this.aElement != null)? this.aElement:
+                        this.bElement;
+
+        this.fullPath = dataElement.fullPath;
+        this.name = dataElement.name;
     }
 
 
@@ -126,8 +125,8 @@ public class FileChanges extends Blob{
             resElement.zip();
         else if(state == Common.FilesStatus.RESOLVED){
             File resolvedFile = new File(Settings.objectsFolderPath, currentSHA1.sha1 + ".txt");
-            Utils.writeFile(resolvedFile.getAbsolutePath(), currentSHA1.content, false);
-            Utils.zip(Utils.getZippedPath(currentSHA1.sha1),  resolvedFile.getAbsolutePath());
+            FSUtils.writeFile(resolvedFile.getAbsolutePath(), currentSHA1.content, false);
+            FSUtils.zip(FSUtils.getZippedPath(currentSHA1.sha1),  resolvedFile.getAbsolutePath());
         }
     }
 
@@ -150,11 +149,13 @@ public class FileChanges extends Blob{
         state = Common.FilesStatus.DELETED;
     }
 
-    public void rewriteFS(){
+    public void rewriteFS() {
         if (state == Common.FilesStatus.DELETED)
-            Utils.deleteFile(fullPath);
-        else if(state == Common.FilesStatus.RESOLVED)
-            Utils.createNewFile(fullPath, currentSHA1.content);
+            FSUtils.deleteFile(fullPath);
+        else if (state == Common.FilesStatus.UPDATED || state == Common.FilesStatus.NEW) {
+            FSUtils.createNewFile(fullPath, resElement.getContent());
+        } else if (state == Common.FilesStatus.RESOLVED) {
+            FSUtils.createNewFile(fullPath, currentSHA1.content);
+        }
     }
-
 }

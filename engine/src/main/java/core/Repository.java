@@ -1,6 +1,5 @@
 package core;
 
-import com.sun.xml.internal.ws.api.config.management.policy.ManagementAssertion;
 import exceptions.InvalidBranchNameError;
 import exceptions.NoActiveRepositoryError;
 import exceptions.NoChangesToCommitError;
@@ -8,11 +7,8 @@ import exceptions.UncommittedChangesError;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
+import javafx.collections.*;
 import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
-import jdk.nashorn.internal.ir.BreakableNode;
 import models.CommitData;
 import models.BranchData;
 
@@ -22,9 +18,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import puk.team.course.magit.ancestor.finder.AncestorFinder;
-
-import java.util.*;
 
 public class Repository {
 
@@ -55,9 +48,49 @@ public class Repository {
         }
     }
 
+    class CommitsListener implements MapChangeListener<String , CommitData> {
+
+        @Override
+        public void onChanged(Change<? extends String, ? extends CommitData> change) {
+            if(change.wasAdded()){
+                CommitData newCommit = change.getValueAdded();
+
+                for (BranchData branch: branches){
+                    if(branch.getHeadSha1().equals(newCommit.getSha1())){
+                        newCommit.addPointingBranch(branch);
+                    }
+                }
+            }
+        }
+    }
+
+    class BranchesListener implements ListChangeListener<BranchData>{
+
+        @Override
+        public void onChanged(Change<? extends BranchData> c) {
+
+            if (c.wasAdded()){
+                BranchData branchData = c.getAddedSubList().get(0);
+                if(commits.get(branchData.getHeadSha1()) != null)
+                    commits.get(branchData.getHeadSha1()).addPointingBranch(branchData);
+            }
+
+            else if (c.wasRemoved()){
+                BranchData branchData = c.getRemoved().get(0);
+
+                if(commits.containsKey(branchData.getHeadSha1()))
+                    commits.get(branchData.getHeadSha1()).removePointingBranch(branchData);
+            }
+        }
+    }
+
+
     Repository(String fullPath, String name, boolean empty) {
         this.fullPath = fullPath;
         this.name = name;
+
+        commits.addListener(new CommitsListener());
+        branches.addListener(new BranchesListener());
 
         saveRepositoryDetails();
 
@@ -72,6 +105,9 @@ public class Repository {
         this.fullPath = fullPath;
         this.name = loadRepositoryName();
 
+        commits.addListener(new CommitsListener());
+        branches.addListener(new BranchesListener());
+
         loadRemoteRepoDetails();
         loadRemoteBranches();
 
@@ -84,7 +120,7 @@ public class Repository {
 
     private void loadRemoteRepoDetails(){
         if(isRemote()){
-            List<String> remoteData = Utils.getFileLines(Settings.repositoryRemoteDetailsFilePath);
+            List<String> remoteData = FSUtils.getFileLines(Settings.repositoryRemoteDetailsFilePath);
             String[] remoteDetails = remoteData.get(0).split(Settings.delimiter);
             this.remoteRepositoryName = remoteDetails[1];
             this.remoteRepositoryPath = remoteDetails[0];
@@ -102,7 +138,7 @@ public class Repository {
             File remoteBranchesFolder = new File(Settings.remoteBranchesPath);
             for(File branch : remoteBranchesFolder.listFiles()){
                 if(!branch.getName().equals("HEAD")){
-                    String pointedCommit = Utils.getFileLines(branch.getPath()).get(0).split(Settings.delimiter)[0];
+                    String pointedCommit = FSUtils.getFileLines(branch.getPath()).get(0).split(Settings.delimiter)[0];
                     RemoteBranch remoteBranch = new RemoteBranch(branch.getName().split(".txt")[0], pointedCommit);
                     remoteBranches.add(remoteBranch);
                 }
@@ -111,7 +147,7 @@ public class Repository {
     }
 
     private String loadRepositoryName(){
-        List<String> repoDetails = Utils.getFileLines(Settings.repositoryDetailsFilePath);
+        List<String> repoDetails = FSUtils.getFileLines(Settings.repositoryDetailsFilePath);
         return repoDetails.get(0);
     }
 
@@ -127,7 +163,7 @@ public class Repository {
 
         Settings.setNewRepository(repositoryPath);
 
-        List<String> contentByLines = Utils.getFileLines(Settings.activeBranchFilePath);
+        List<String> contentByLines = FSUtils.getFileLines(Settings.activeBranchFilePath);
         String activeBranchName = contentByLines.get(0);
 
         Branch activeBranch = Branch.load(activeBranchName, false);
@@ -261,7 +297,7 @@ public class Repository {
         if(activeBranch.haveChanges() && !force)
             throw new UncommittedChangesError("UncommittedChangesError");
 
-        Utils.clearCurrentWC();
+        FSUtils.clearCurrentWC();
 
         Branch checkedoutBranch = Branch.load(name, true);
         setActiveBranch(checkedoutBranch);
@@ -286,19 +322,17 @@ public class Repository {
                 break;
         }
 
-        BranchData branchData = branches.get(i);
-        commits.get(branchData.getHeadSha1()).removePointingBranch(branchData);
         branches.remove(i);
     }
 
     boolean haveOpenChanges(){ return activeBranch.haveChanges();}
 
     private void saveRepositoryDetails(){
-        Utils.writeFile(Settings.repositoryDetailsFilePath, name, false);
+        FSUtils.writeFile(Settings.repositoryDetailsFilePath, name, false);
     }
 
     private void saveRepositoryActiveBranch(){
-        Utils.writeFile(Settings.activeBranchFilePath, activeBranch.getName(), false);
+        FSUtils.writeFile(Settings.activeBranchFilePath, activeBranch.getName(), false);
     }
 
     boolean validBranchName(String branchName) {
@@ -310,9 +344,6 @@ public class Repository {
     public BranchData addNewBranch(Branch branch){
         BranchData branchData = new BranchData(branch);
         branchData.getHeadSha1Property().addListener(new BranchHeadCommitListener(branchData));
-
-        if(commits.get(branchData.getHeadSha1()) != null)
-            commits.get(branchData.getHeadSha1()).addPointingBranch(branchData);
 
         branches.add(branchData);
 
@@ -332,7 +363,7 @@ public class Repository {
 
     public void addRemoteBranch(RemoteBranch remoteBranch){
         remoteBranches.add(remoteBranch);
-        Utils.createNewFile(Settings.remoteBranchesPath + remoteBranch.name + ".txt",
+        FSUtils.createNewFile(Settings.remoteBranchesPath + remoteBranch.name + ".txt",
                 remoteBranch.pointedCommitSha1);
     }
 
@@ -404,6 +435,7 @@ public class Repository {
 
         CommitData commitData = merge.commit();
         commits.put(commitData.getSha1(), commitData);
+        updateActiveBranchDataInHistory();
 
         currentMerge = null;
     }
@@ -492,7 +524,7 @@ public class Repository {
     }
 
     private String getPointingCommitOfRB(String remoteBranchName){
-        String branchDataFromFile = Utils.getFileLines(Settings.remoteBranchFolder + remoteBranchName + ".txt").get(0);
+        String branchDataFromFile = FSUtils.getFileLines(Settings.remoteBranchFolder + remoteBranchName + ".txt").get(0);
         String pointingCommitOfRemoteBranch = branchDataFromFile.split(",")[0];
         return pointingCommitOfRemoteBranch;
     }

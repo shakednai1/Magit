@@ -1,5 +1,6 @@
 package core;
 
+import java.text.ParseException;
 import java.util.*;
 
 public class FolderChanges extends Folder {
@@ -23,7 +24,7 @@ public class FolderChanges extends Folder {
         this.aElement = aFolder;
         this.bElement = bFolder;
 
-        setFullPath();
+        setBasicDetails();
 
         setSubFilesChanges();
         setSubFoldersChanges();
@@ -32,10 +33,13 @@ public class FolderChanges extends Folder {
         // at this point, no sha1 need to be calc. only at commit
     }
 
-    private void setFullPath(){ // TODO it is the same as FilesChanges - Merge them somehow
-        this.fullPath = (this.baseElement != null)? this.baseElement.fullPath :
-                (this.aElement != null)? this.aElement.fullPath:
-                        this.bElement.fullPath;
+    private void setBasicDetails(){
+        Folder dataElement = (this.baseElement != null)? this.baseElement :
+                (this.aElement != null)? this.aElement:
+                        this.bElement;
+
+        this.fullPath = dataElement.fullPath;
+        this.name = dataElement.name;
     }
 
     private void setSubFilesChanges() {
@@ -44,8 +48,8 @@ public class FolderChanges extends Folder {
         Map<String, Blob> bSubFiles = (bElement != null)? bElement.getCommittedFilesState(true): new HashMap<>();
 
         for (Map.Entry<String, Blob> file : baseSubFiles.entrySet()) {
-            String filePath = file.getKey();
-            subChangesFiles.put(fullPath, new FileChanges(file.getValue(), aSubFiles.get(filePath), bSubFiles.get(filePath)));
+            String filePath = file.getValue().fullPath;
+            subChangesFiles.put(filePath, new FileChanges(file.getValue(), aSubFiles.get(filePath), bSubFiles.get(filePath)));
 
             aSubFiles.remove(filePath);
             bSubFiles.remove(filePath);
@@ -53,7 +57,7 @@ public class FolderChanges extends Folder {
         baseSubFiles.clear();
 
         for (Map.Entry<String, Blob> file : aSubFiles.entrySet()) {
-            String filePath = file.getKey();
+            String filePath = file.getValue().fullPath;
             subChangesFiles.put(filePath, new FileChanges(null, file.getValue(), bSubFiles.get(filePath)));
 
             bSubFiles.remove(filePath);
@@ -61,7 +65,7 @@ public class FolderChanges extends Folder {
         aSubFiles.clear();
 
         for (Map.Entry<String, Blob> file : bSubFiles.entrySet()) {
-            String filePath = file.getKey();
+            String filePath = file.getValue().fullPath;
             subChangesFiles.put(filePath, new FileChanges(null, null, file.getValue()));
 
             bSubFiles.remove(filePath);
@@ -125,11 +129,6 @@ public class FolderChanges extends Folder {
         return subChangesFolders;
     }
 
-    public void unfoldFS(){
-        subChangesFiles.values().forEach(FileChanges::rewriteFS);
-        subChangesFolders.values().forEach(FolderChanges::unfoldFS);
-    }
-
     @Override
     boolean commit(String commitUser, String commitTime){
         // function assume the items are up-to-date
@@ -142,9 +141,11 @@ public class FolderChanges extends Folder {
                 file.updateUserAndDate(commitUser, commitTime);
             }
             else if (file.state == Common.FilesStatus.DELETED){
+                subItemsChanged = true;
                 continue;
             }
             file.zip();
+            file.state = Common.FilesStatus.NO_CHANGE;
             subFiles.put(file.fullPath, (Blob) file);
         }
 
@@ -158,11 +159,15 @@ public class FolderChanges extends Folder {
             if(folder.getFolderDeleted()) {
                 continue;
             }
-            subFolders.put(fullPath, (Folder) folder);
+            subFolders.put(folder.fullPath, (Folder) folder);
         }
 
         if(subItemsChanged)
             updateUserAndDate(commitUser, commitTime);
+        else{
+            if(!folderDeleted)
+                setUserAndDateByLastUpdatedFile();
+        }
 
         setSHA1();
         zip();
@@ -175,4 +180,33 @@ public class FolderChanges extends Folder {
         return getOrderedItems(subFiles, subFolders);
     }
 
+
+    void setUserAndDateByLastUpdatedFile(){
+
+        String user = null;
+        String time = null;
+
+        Date maxTime = null;
+
+        for(Blob file: subFiles.values()){
+            try{
+                Date curTime = Settings.commitDateFormat.parse(file.lastModified);
+
+                if(maxTime == null || (maxTime != null && curTime.after(maxTime))) {
+                    maxTime = curTime;
+                    user = file.userLastModified;
+                    time = file.lastModified;
+                }
+
+            }
+            catch (ParseException e) {}
+        }
+        updateUserAndDate(user, time);
+    }
+
+
+    public void unfoldFS(){
+        subChangesFiles.values().forEach(FileChanges::rewriteFS);
+        subChangesFolders.values().forEach(FolderChanges::unfoldFS);
+    }
 }

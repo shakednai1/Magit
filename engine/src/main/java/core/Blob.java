@@ -1,17 +1,14 @@
 package core;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
 
 public class Blob extends Item {
-    final private String typeItem = "File";
+    final private String typeItem = Common.ItemTypes.File.name();
     protected Common.FilesStatus state;
 
     Blob(){}
@@ -29,7 +26,7 @@ public class Blob extends Item {
         this.lastModified = lastModified;
 
         if (rewriteFS)
-            Utils.unzip(Settings.objectsFolderPath + this.currentSHA1 + ".zip",
+            FSUtils.unzip(Settings.objectsFolderPath + this.currentSHA1 + ".zip",
                     itemPath.getParent(), itemPath.getName());
 
     }
@@ -44,7 +41,7 @@ public class Blob extends Item {
     public void zip(){
         updateState();
         if(!isExistInObjects()){
-            Utils.zip(getZipPath(), fullPath);
+            FSUtils.zip(getZipPath(), fullPath);
         }
     }
 
@@ -58,8 +55,8 @@ public class Blob extends Item {
         }
     }
 
-    public List<String> getContent(){
-        return currentSHA1.getContent();
+    public String getContent(){
+        return String.join("\n", currentSHA1.getContent());
     }
 
     String getTypeItem(){ return this.typeItem; }

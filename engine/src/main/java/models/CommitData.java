@@ -45,7 +45,10 @@ public class CommitData {
 
     public boolean getIsInMasterChain() { return isInMasterChain; }
 
-    public void addPointingBranch(BranchData branch){ pointingBranches.add(branch); }
+    public void addPointingBranch(BranchData branch){
+        if(pointingBranches.contains(branch)) return;
+        pointingBranches.add(branch);
+    }
 
     public void removePointingBranch(BranchData branch){ pointingBranches.remove(branch); }
 

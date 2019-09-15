@@ -20,7 +20,7 @@ public class ItemSha1{
     }
 
     List<String > getContent(){
-        return Utils.getZippedContent(sha1);
+        return FSUtils.getZippedContent(sha1);
     }
 
     @Override

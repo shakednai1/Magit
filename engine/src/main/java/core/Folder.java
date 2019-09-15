@@ -5,7 +5,7 @@ import java.util.*;
 
 public class Folder extends Item {
 
-    final private String typeItem = "core.Folder";
+    final private String typeItem = Common.ItemTypes.Folder.name();
 
     protected Map<String, Blob> subFiles = new HashMap<>();
     protected Map<String, Folder> subFolders = new HashMap<>();
@@ -189,9 +189,9 @@ public class Folder extends Item {
     @Override
     public void zip(){
         if (!isExistInObjects()){
-            Utils.createNewFile(getTxtFilePath(), getFolderDataString());
-            Utils.zip(getZipPath(), getTxtFilePath());
-            Utils.deleteFile(getTxtFilePath());
+            FSUtils.createNewFile(getTxtFilePath(), getFolderDataString());
+            FSUtils.zip(getZipPath(), getTxtFilePath());
+            FSUtils.deleteFile(getTxtFilePath());
         }
     }
 
@@ -248,9 +248,5 @@ public class Folder extends Item {
 
     String getTypeItem(){ return this.typeItem; }
 
-
-    void unfoldFS(){
-
-    }
 
 }

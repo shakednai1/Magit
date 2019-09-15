@@ -71,11 +71,11 @@ public class MergeController extends BaseController {
             Blob bElement =  fileChanges.getbElement();
 
             if(aElement != null)
-                oursContent.setText(String.join("\n", aElement.getContent()));
+                oursContent.setText(aElement.getContent());
             if(baseElement != null)
-                baseContent.setText(String.join("\n", baseElement.getContent()));
+                baseContent.setText(baseElement.getContent());
             if(bElement != null)
-                theirsContent.setText(String.join("\n", bElement.getContent()));
+                theirsContent.setText(bElement.getContent());
 
             oursBranch.setText(MainEngine.getCurrentBranchName());
             theirsBranch.setText(MainEngine.getBranchMergeName());

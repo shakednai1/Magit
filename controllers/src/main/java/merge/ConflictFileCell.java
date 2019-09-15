@@ -60,8 +60,7 @@ public class ConflictFileCell extends ListCell<FileChanges> {
     }
 
 
-    public ConflictFileCell() {
-    }
+    public ConflictFileCell() {}
 
     @Override
     protected void updateItem(FileChanges item, boolean empty) {

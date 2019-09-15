@@ -5,8 +5,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import exceptions.InvalidBranchNameError;
@@ -14,8 +12,6 @@ import exceptions.UncommittedChangesError;
 import exceptions.XmlException;
 import fromXml.*;
 import fromXml.Item;
-import models.BranchData;
-import models.CommitData;
 import org.apache.commons.io.FileUtils;
 
 class XmlLoader {
@@ -78,7 +74,7 @@ class XmlLoader {
         //create empty repository
         repositoryManager.createNewRepository(repositoryPath, magitRepository.getName(), true);
 
-        Utils.clearCurrentWC();
+        FSUtils.clearCurrentWC();
 
         setFirstCommit();
         if (firstCommit == null) {
@@ -178,7 +174,7 @@ class XmlLoader {
 //            commit.zipCommit();
         }
 
-        Utils.clearCurrentWC();
+        FSUtils.clearCurrentWC();
         return commit;
     }
 
@@ -228,7 +224,7 @@ class XmlLoader {
                     Blob blob = new Blob(new File(path, magitBlob.getName()), new ItemSha1(magitBlob.getContent(), true, false),
                             magitBlob.getLastUpdater(), magitBlob.getLastUpdateDate(), false);
 
-                    Utils.createNewFile(path + "/" + magitBlob.getName(), magitBlob.getContent());
+                    FSUtils.createNewFile(path + "/" + magitBlob.getName(), magitBlob.getContent());
                     subBlobs.put(blob.fullPath, blob);
                     break;
                 case "folder":
