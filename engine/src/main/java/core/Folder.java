@@ -149,6 +149,9 @@ public class Folder extends Item {
         for(Blob file: subFiles.values()){
             file.rewriteFS();
         }
+        for(Folder folder: subFolders.values()){
+            folder.rewriteFS();
+        }
     }
 
     // create string from the folder data to calculate currentSHA1 + write to zip file under .objects
