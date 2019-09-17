@@ -135,6 +135,7 @@ public class FolderChanges extends Folder {
         // function assume the items are up-to-date
         boolean subItemsChanged = false;
 
+        subFiles.clear();
         for(FileChanges file: subChangesFiles.values()){
             if(file.state == Common.FilesStatus.NEW || file.state == Common.FilesStatus.UPDATED || file.state == Common.FilesStatus.RESOLVED ){
                 subItemsChanged = true;
@@ -148,8 +149,10 @@ public class FolderChanges extends Folder {
 //            file.rewriteFS();
 
             file.state = Common.FilesStatus.NO_CHANGE;
+            subFiles.put(file.fullPath, file);
         }
 
+        subFolders.clear();
         for(FolderChanges folder: subChangesFolders.values()){
             boolean subFolderChanged = folder.commit(commitUser, commitTime);
             subItemsChanged = subItemsChanged || subFolderChanged;
@@ -159,6 +162,8 @@ public class FolderChanges extends Folder {
             if(folder.getFolderDeleted()) {
                 continue;
             }
+
+            subFolders.put(folder.fullPath, folder);
         }
 
         if(subItemsChanged)

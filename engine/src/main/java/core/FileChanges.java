@@ -59,9 +59,11 @@ public class FileChanges extends Blob{
         this.resElement = resElement;
         this.state = state;
 
-//        currentSHA1 = resElement.currentSHA1;
-//        userLastModified = resElement.userLastModified;
-//        lastModified = resElement.lastModified;
+        if (resElement != null){
+            currentSHA1 = resElement.currentSHA1;
+            userLastModified = resElement.userLastModified;
+            lastModified = resElement.lastModified;
+        }
     }
 
     Common.FilesStatus getStatus(){return state;}
