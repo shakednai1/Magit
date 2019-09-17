@@ -461,9 +461,7 @@ public class AppController extends BaseController {
             engine.fetchRepo();
         }
         catch (IllegalArgumentException | NoActiveRepositoryError e){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
+            showErrorAlert(e);
         }
     }
 
@@ -508,7 +506,8 @@ public class AppController extends BaseController {
             };
 
             Merge merge = engine.getActiveRepository().getMerge(getBranchToMerge());
-            handleConflicts(merge);
+            if(!merge.getFastForward())
+                handleConflicts(merge);
         }
         catch(NoActiveRepositoryError e){
                 showErrorAlert(e);
@@ -537,31 +536,40 @@ public class AppController extends BaseController {
                 public void onChanged(Change change) {
                     if (!change.getList().isEmpty()) return;
                     stage.close();
-
-                    TextInputDialog d = new TextInputDialog();
-
-                    d.setTitle("Commit getMerge");
-                    d.setContentText("Enter getMerge commit message");
-                    d.showAndWait();
-                    // TODO cannot be an empty getMerge msg
-                    merge.setCommitMsg(d.getResult());
-                    engine.getActiveRepository().makeMerge(merge);
                 }
             });
         }
+        showGetCommitMsgDialogAfterAndMerge(merge);
+
+    }
+
+    public void showGetCommitMsgDialogAfterAndMerge(Merge merge){
+        TextInputDialog d = new TextInputDialog();
+
+        d.setTitle("Commit getMerge");
+        d.setContentText("Enter getMerge commit message");
+        d.showAndWait();
+        // TODO cannot be an empty getMerge msg
+        merge.setCommitMsg(d.getResult());
+        engine.getActiveRepository().makeMerge(merge);
     }
 
     @FXML
     void OnPull(ActionEvent event) {
         if(!engine.getCanPull()) showErrorAlert(new Exception("You have commits that not pushed yet \n Please push first and then pull"));
-        pull();
+        try{
+            pull();
+        }
+        catch (IllegalArgumentException e){
+            showErrorAlert(e);
+        }
     }
 
     void pull(){
         try{
             if(!canExecuteMerge()) showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));
             Merge merge = engine.pull();
-            handleConflicts(merge);
+            if(merge != null) handleConflicts(merge);
             }
             catch (IllegalArgumentException | NoActiveRepositoryError e) {
                 showErrorAlert(e);

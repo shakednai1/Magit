@@ -220,11 +220,11 @@ public class MainEngine {
     }
 
     public Merge pull(){
-        if(getActiveRepository().getActiveBranch().isTracking()){
+        if(getActiveRepository().isRemote()) {
             return getActiveRepository().pull();
         }
         else{
-            throw new IllegalArgumentException("Current active branch is not remote tracking branch");
+            throw new IllegalArgumentException("current repo has no remote repository");
         }
     }
 
@@ -232,12 +232,21 @@ public class MainEngine {
         return getActiveRepository().getCurrentMerge();
     }
 
-    public void push() {
-        getActiveRepository().push();
-        canPull = true;
+    public void push() throws IllegalArgumentException{
+        if(getActiveRepository().isRemote()){
+            getActiveRepository().push();
+            canPull = true;
+        }
+        else{
+            throw new IllegalArgumentException("current repo has no remote repository");
+        }
     }
 
     public boolean getCanPull(){
         return canPull;
+    }
+
+    public Repository getActiveRepo(){
+        return repositoryManager.getActiveRepository();
     }
 }
