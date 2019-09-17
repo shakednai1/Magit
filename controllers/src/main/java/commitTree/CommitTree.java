@@ -46,8 +46,14 @@ public class CommitTree {
 
         for(CommitNode commitCell: commitCells.values()){
             String prevCommitSha1 = commitCell.getCommit().getPreviousCommitSha1();
+            String secondCommitSha1 = commitCell.getCommit().getSecondPreviousCommitSha1();
+
             if(prevCommitSha1 != null && !prevCommitSha1.isEmpty()){
                 Edge edge = new Edge(commitCell, commitCells.get(prevCommitSha1));
+                model.addEdge(edge);
+            }
+            if(secondCommitSha1 != null && !secondCommitSha1.isEmpty()){
+                Edge edge = new Edge(commitCell, commitCells.get(secondCommitSha1));
                 model.addEdge(edge);
             }
         }
