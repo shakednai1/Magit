@@ -461,9 +461,7 @@ public class AppController extends BaseController {
             engine.fetchRepo();
         }
         catch (IllegalArgumentException | NoActiveRepositoryError e){
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
+            showErrorAlert(e);
         }
     }
 
@@ -559,7 +557,12 @@ public class AppController extends BaseController {
     @FXML
     void OnPull(ActionEvent event) {
         if(!engine.getCanPull()) showErrorAlert(new Exception("You have commits that not pushed yet \n Please push first and then pull"));
-        pull();
+        try{
+            pull();
+        }
+        catch (IllegalArgumentException e){
+            showErrorAlert(e);
+        }
     }
 
     void pull(){

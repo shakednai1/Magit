@@ -220,16 +220,26 @@ public class MainEngine {
     }
 
     public Merge pull(){
-        return getActiveRepository().pull();
+        if(getActiveRepository().isRemote()) {
+            return getActiveRepository().pull();
+        }
+        else{
+            throw new IllegalArgumentException("current repo has no remote repository");
+        }
     }
 
     public Merge getCurrentMerge(){
         return getActiveRepository().getCurrentMerge();
     }
 
-    public void push() {
-        getActiveRepository().push();
-        canPull = true;
+    public void push() throws IllegalArgumentException{
+        if(getActiveRepository().isRemote()){
+            getActiveRepository().push();
+            canPull = true;
+        }
+        else{
+            throw new IllegalArgumentException("current repo has no remote repository");
+        }
     }
 
     public boolean getCanPull(){
