@@ -24,4 +24,19 @@ public class BaseController {
 
         return stage;
     }
+
+    public FXMLLoader openStageReturnFxml(String resourceRelatedPath) throws IOException {
+        Stage stage = new Stage();
+
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        URL url = getClass().getResource(resourceRelatedPath);
+        fxmlLoader.setLocation(url);
+        AnchorPane root = fxmlLoader.load(url.openStream());
+        Scene scene = new Scene(root);
+
+        stage.setScene(scene);
+        stage.show();
+
+        return fxmlLoader;
+    }
 }

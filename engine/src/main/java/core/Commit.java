@@ -28,7 +28,7 @@ public class Commit implements CommitRepresentative {
         commitSha1 = calcCommitSha1();
     }
 
-    Commit(String commitSha1){
+    public Commit(String commitSha1){
         this.commitSha1 = commitSha1;
 
         List<String> content = FSUtils.getZippedContent(commitSha1);

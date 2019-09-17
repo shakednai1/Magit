@@ -1,10 +1,12 @@
 package commitTree.node;
 
+import commitTree.CommitDetailsController;
 import core.*;
 import exceptions.NoActiveRepositoryError;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.ContextMenuEvent;
@@ -13,16 +15,19 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.TextFlow;
+import javafx.stage.Stage;
 import models.BranchData;
 import sun.applet.Main;
+import utils.BaseController;
 import workingCopy.WorkingCopyController;
 import workingCopy.WorkingCopyStage;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class CommitNodeController {
+public class CommitNodeController extends BaseController {
 
     @FXML protected Label commitTimeStampLabel;
     @FXML protected Label messageLabel;
@@ -125,7 +130,19 @@ public class CommitNodeController {
                 dialog.showAndWait();
             }
         });
-        contextMenu.getItems().addAll(item1, item2);
+        MenuItem item3 = new MenuItem("Get Commit Details");
+        item3.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+                try {
+                    FXMLLoader fxmlLoader = openStageReturnFxml("../../commitDetails.fxml");
+                    CommitDetailsController controller = fxmlLoader.getController();
+                    controller.display(new Commit(commitSha1));
+
+                } catch (IOException ex) {
+                    System.out.println("dfsg");
+                }
+            }});
+        contextMenu.getItems().addAll(item1, item2, item3);
         messageLabel.setContextMenu(contextMenu);
     }
 
