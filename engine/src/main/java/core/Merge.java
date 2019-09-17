@@ -1,19 +1,24 @@
 package core;
 
+import exceptions.NoActiveRepositoryError;
 import exceptions.NoChangesToCommitError;
 import models.BranchData;
 import models.CommitData;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class Merge {
 
     String firstCommitSha1;
     String secondCommitSha1;
+    String mergeTime;
     List<FileChanges> conflicts = new LinkedList<>();
     FolderChanges folderChanges;
     BranchData mergingBranch;
+    boolean fastForward;
 
     private String commitMsg = "";
 
@@ -23,9 +28,20 @@ public class Merge {
         this.mergingBranch = branchToMerge;
         this.firstCommitSha1 = firstCommitSha1;
         this.secondCommitSha1 = secondCommitSha1;
-        folderChanges = engine.getDiffBetweenCommits(firstCommitSha1, secondCommitSha1);
-        if(folderChanges.getHasConflicts()){
-            setConflictFiles();
+        if (!DoNothing()) {
+            setFastForward();
+            if (fastForward) {
+                try {
+                    engine.getActiveBranch().setHead(new Commit(secondCommitSha1));
+                    engine.getActiveRepo().updateActiveBranchDataInHistory();
+                } catch (NoActiveRepositoryError e) {
+                }
+            } else {
+                folderChanges = engine.getDiffBetweenCommits(firstCommitSha1, secondCommitSha1);
+                if (folderChanges.getHasConflicts()) {
+                    setConflictFiles();
+                }
+            }
         }
     }
 
@@ -62,8 +78,19 @@ public class Merge {
         RepositoryManager repositoryManager = MainEngine.getRepositoryManager();
         Branch activeBranch = repositoryManager.getActiveRepository().getActiveBranch();
 
-        Commit commit = activeBranch.mergeCommit(this);
-        return new CommitData(commit);
+        mergeTime = Settings.commitDateFormat.format(new Date());
+
+
+        activeBranch.mergeCommit(this);
+
+        Commit com = new Commit(getCommitMsg(), folderChanges.getSha1(),
+                folderChanges.userLastModified, mergeTime,
+                getFirstCommitSha1(), getSecondCommitSha1());
+        com.zipCommit();
+
+        activeBranch.setHead(com);
+
+        return new CommitData(com);
     }
 
 
@@ -71,5 +98,27 @@ public class Merge {
         commitMsg = msg;
     }
 
+    void setFastForward() {
+        Map<String, Commit> commitParents = Commit.loadAll(secondCommitSha1);
+        if (commitParents.keySet().contains(firstCommitSha1)) {
+            fastForward = true;
+        } else {
+            fastForward = false;
+        }
+    }
+
+    public boolean getFastForward(){
+        return fastForward;
+    }
+    private boolean DoNothing() {
+        Map<String, Commit> commitParents = Commit.loadAll(firstCommitSha1);
+        if (commitParents.keySet().contains(secondCommitSha1)) {
+            fastForward = true;
+            return true;
+        } else {
+            fastForward = false;
+            return false;
+        }
+    }
 
 }

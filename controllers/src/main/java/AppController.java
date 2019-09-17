@@ -508,7 +508,8 @@ public class AppController extends BaseController {
             };
 
             Merge merge = engine.getActiveRepository().getMerge(getBranchToMerge());
-            handleConflicts(merge);
+            if(!merge.getFastForward())
+                handleConflicts(merge);
         }
         catch(NoActiveRepositoryError e){
                 showErrorAlert(e);

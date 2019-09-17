@@ -150,22 +150,12 @@ public class Branch {
         return com;
     }
 
-    Commit mergeCommit(Merge merge){
-        String commitTime = Settings.commitDateFormat.format(new Date());
-        merge.folderChanges.commit(Settings.getUser(), commitTime);
-
-        Commit com = new Commit(merge.getCommitMsg(), merge.folderChanges.getSha1(),
-                merge.folderChanges.userLastModified, commitTime,
-                merge.getFirstCommitSha1(), merge.getSecondCommitSha1());
-        com.zipCommit();
-
-        setHead(com);
+    void mergeCommit(Merge merge){
+        merge.folderChanges.commit(Settings.getUser(), merge.mergeTime);
 
         rootFolder = merge.folderChanges.getResFolder();
         rootFolder.rewriteFS();
         currentStateOfFiles = rootFolder.getCommittedFilesState(false);
-
-        return com;
     }
 
 
@@ -174,7 +164,7 @@ public class Branch {
         newStateOfFiles = rootFolder.getCurrentFilesState(false);
     }
 
-    private void setHead(Commit newHead) {
+    protected void setHead(Commit newHead) {
         head = newHead;
 
         addCommitToHistory(head);

@@ -235,4 +235,8 @@ public class MainEngine {
     public boolean getCanPull(){
         return canPull;
     }
+
+    public Repository getActiveRepo(){
+        return repositoryManager.getActiveRepository();
+    }
 }
