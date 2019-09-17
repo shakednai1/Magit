@@ -353,13 +353,15 @@ class XmlLoader {
     }
 
     private void checkRemoteRepository() throws XmlException {
-        String remoteRepoPath = magitRepository.getMagitRemoteReference().getLocation();
-        if(remoteRepoPath == null){
-            return;
-        }
-        File remoteRepoDir = new File(remoteRepoPath + Settings.magitFolder);
-        if (!remoteRepoDir.exists()) {
-            throw new XmlException("Given remote repository path is not a valid repository");
+        if(magitRepository.getMagitRemoteReference() != null){
+            String remoteRepoPath = magitRepository.getMagitRemoteReference().getLocation();
+            if(remoteRepoPath == null){
+                return;
+            }
+            File remoteRepoDir = new File(remoteRepoPath + Settings.magitFolder);
+            if (!remoteRepoDir.exists()) {
+                throw new XmlException("Given remote repository path is not a valid repository");
+            }
         }
     }
 

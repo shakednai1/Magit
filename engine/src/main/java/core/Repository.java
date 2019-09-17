@@ -462,7 +462,7 @@ public class Repository {
     }
 
     private void updateRBDataFromLocal(String remoteBranchName){
-        File destBranchFile= new File(remoteRepositoryPath + Settings.branchFolder + remoteBranchName + ".txt");
+        File destBranchFile= new File(Settings.remoteBranchesPath + remoteBranchName + ".txt");
         File sourceBranchFile = new File(Settings.branchFolderPath + remoteBranchName + ".txt");
         File destBranchFileRemote= new File(remoteRepositoryPath + Settings.branchFolder + remoteBranchName + ".txt");
         try {
@@ -524,7 +524,7 @@ public class Repository {
     }
 
     private String getPointingCommitOfRB(String remoteBranchName){
-        String branchDataFromFile = FSUtils.getFileLines(Settings.remoteBranchFolder + remoteBranchName + ".txt").get(0);
+        String branchDataFromFile = FSUtils.getFileLines(remoteRepositoryPath + Settings.remoteBranchFolder + remoteBranchName + ".txt").get(0);
         String pointingCommitOfRemoteBranch = branchDataFromFile.split(",")[0];
         return pointingCommitOfRemoteBranch;
     }
