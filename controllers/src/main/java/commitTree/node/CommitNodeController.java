@@ -77,21 +77,26 @@ public class CommitNodeController {
         item1.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                 try {
-                    if (secondPrevCommitSha1 == null || secondPrevCommitSha1.isEmpty()) {
-                        new WorkingCopyStage().displayCommitDiff(commitSha1, prevCommitSha1);
-                    } else {
-                        Dialog sha1Dialog = new Dialog();
-                        sha1Dialog.setContentText("There are two previous commits for this commit\n please choose one to compare");
-                        ButtonType firstSha1Btn = new ButtonType(prevCommitSha1, ButtonBar.ButtonData.APPLY);
-                        ButtonType secondSha1Btn = new ButtonType(secondPrevCommitSha1, ButtonBar.ButtonData.APPLY);
-                        sha1Dialog.getDialogPane().getButtonTypes().addAll(firstSha1Btn, secondSha1Btn);
-                        Optional<ButtonType> result = sha1Dialog.showAndWait();
-                        if (result.get() == firstSha1Btn) {
+                    if (!(prevCommitSha1 == null) && !prevCommitSha1.isEmpty()) {
+                        if (secondPrevCommitSha1 == null || secondPrevCommitSha1.isEmpty()) {
                             new WorkingCopyStage().displayCommitDiff(commitSha1, prevCommitSha1);
+                        } else {
+                            Dialog sha1Dialog = new Dialog();
+                            sha1Dialog.setContentText("There are two previous commits for this commit\n please choose one to compare");
+                            ButtonType firstSha1Btn = new ButtonType(prevCommitSha1, ButtonBar.ButtonData.APPLY);
+                            ButtonType secondSha1Btn = new ButtonType(secondPrevCommitSha1, ButtonBar.ButtonData.APPLY);
+                            sha1Dialog.getDialogPane().getButtonTypes().addAll(firstSha1Btn, secondSha1Btn);
+                            Optional<ButtonType> result = sha1Dialog.showAndWait();
+                            if (result.get() == firstSha1Btn) {
+                                new WorkingCopyStage().displayCommitDiff(commitSha1, prevCommitSha1);
+                            }
+                            if (result.get() == secondSha1Btn) {
+                                new WorkingCopyStage().displayCommitDiff(commitSha1, secondPrevCommitSha1);
+                            }
                         }
-                        if (result.get() == secondSha1Btn) {
-                            new WorkingCopyStage().displayCommitDiff(commitSha1, secondPrevCommitSha1);
-                        }
+                    }
+                    else{
+                        new WorkingCopyStage().displayCommitDiff(commitSha1, commitSha1);
                     }
                 }
                 catch (NoActiveRepositoryError ex){
