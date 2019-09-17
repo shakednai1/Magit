@@ -222,7 +222,7 @@ class XmlLoader {
                     MagitBlob magitBlob = blobMap.get(itemId);
 
                     Blob blob = new Blob(new File(path, magitBlob.getName()), new ItemSha1(magitBlob.getContent(), true, false),
-                            magitBlob.getLastUpdater(), magitBlob.getLastUpdateDate(), false);
+                            magitBlob.getLastUpdater(), magitBlob.getLastUpdateDate());
 
                     FSUtils.createNewFile(path + "/" + magitBlob.getName(), magitBlob.getContent());
                     subBlobs.put(blob.fullPath, blob);

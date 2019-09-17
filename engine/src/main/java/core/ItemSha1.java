@@ -19,8 +19,10 @@ public class ItemSha1{
         return DigestUtils.sha1Hex(content);
     }
 
-    List<String > getContent(){
-        return FSUtils.getZippedContent(sha1);
+    String getContent(){
+        if (content != null)
+            return content;
+        return String.join("\n", FSUtils.getZippedContent(sha1));
     }
 
     @Override

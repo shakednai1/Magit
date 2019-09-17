@@ -18,17 +18,12 @@ public class Blob extends Item {
         this.name = new File(fullPath).getName();
     }
 
-    Blob(File itemPath, ItemSha1 sha1, String lastUser, String lastModified, boolean rewriteFS){
+    Blob(File itemPath, ItemSha1 sha1, String lastUser, String lastModified){
         this.fullPath = itemPath.getAbsolutePath();
         this.name = itemPath.getName();
         this.currentSHA1 = sha1;
         this.userLastModified = lastUser;
         this.lastModified = lastModified;
-
-        if (rewriteFS)
-            FSUtils.unzip(Settings.objectsFolderPath + this.currentSHA1 + ".zip",
-                    itemPath.getParent(), itemPath.getName());
-
     }
 
     String getUser(){ return userLastModified; }
@@ -56,7 +51,13 @@ public class Blob extends Item {
     }
 
     public String getContent(){
-        return String.join("\n", currentSHA1.getContent());
+        return currentSHA1.getContent();
+    }
+
+    void rewriteFS(){
+       FSUtils.unzip(Settings.objectsFolderPath + this.currentSHA1 + ".zip",
+                new File(fullPath).getParent(), name);
+
     }
 
     String getTypeItem(){ return this.typeItem; }

@@ -124,7 +124,7 @@ public class Commit implements CommitRepresentative {
         return new Folder(new File(Settings.repositoryFullPath),
                 new ItemSha1(commit.getRootFolderSHA1(), false, false),
                 commit.getUserLastModified(),
-                commit.getCommitTime(),false);
+                commit.getCommitTime());
 
     }
 
