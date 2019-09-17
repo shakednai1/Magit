@@ -34,19 +34,8 @@ public class MyApp extends Application{
 
         Scene scene = new Scene(root, 1200, 600);
 
-        PannableCanvas canvas = appController.getCommitTree().getTree().getCanvas();
-        //canvas.setPrefWidth(100);
-        //canvas.setPrefHeight(100);
-        appController.commitTreeScroll.setContent(canvas);
-
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        Platform.runLater(() -> {
-            appController.getCommitTree().getTree().getUseViewportGestures().set(false);
-            appController.getCommitTree().getTree().getUseNodeGestures().set(false);
-        });
-
 
         stage = primaryStage;
     }

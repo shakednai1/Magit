@@ -52,8 +52,6 @@ public class AppController extends BaseController {
         currentRepo.textProperty().bind(Bindings.format("%s > %s",
                 repositoryModel.getRepoNameProperty(),
                 repositoryModel.getRepoPathProperty()));
-
-        commitTree = new CommitTree();
     }
 
     @FXML
@@ -375,6 +373,8 @@ public class AppController extends BaseController {
             branches = engine.getAllBranches();
 
             commits = engine.getAllCommitsData();
+
+            commitTree = new CommitTree(commitTreeScroll);
             commitTree.setCommitsTree(commits);
             commits.addListener(new MapChangeListener<String, CommitData>() {
                 @Override

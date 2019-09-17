@@ -6,7 +6,7 @@ import com.fxgraph.graph.ICell;
 import com.fxgraph.graph.Model;
 import commitTree.layout.CommitTreeLayout;
 import commitTree.node.CommitNode;
-import commitTree.node.CommitNodeController;
+import javafx.scene.control.ScrollPane;
 import models.CommitData;
 
 import java.util.Hashtable;
@@ -17,18 +17,25 @@ import java.util.Map;
 
 public class CommitTree {
 
-    private Graph tree;
+    private  Graph tree;
     private Map<String , CommitNode> commitCells = new Hashtable<>();
+    ScrollPane contentContainer;
 
-    public CommitTree(){
+    public CommitTree(ScrollPane contentContainer){
         tree = new Graph();
+        this.contentContainer = contentContainer;
+        this.contentContainer.setContent(tree.getCanvas());
+
+        tree.getUseViewportGestures().set(false);
+        tree.getUseNodeGestures().set(false);
     }
 
     public Graph getTree() {return tree;}
 
+
     public void setCommitsTree(Map<String, CommitData> repoCommits) {
         final Model model = tree.getModel();
-        resetTree();
+//        resetTree();
 
         tree.beginUpdate();
 
@@ -76,12 +83,22 @@ public class CommitTree {
 
         tree.layout(new CommitTreeLayout());
     }
-
-    public void resetTree(){
-        final Model model = tree.getModel();
-        model.clear(); //     TODO MOVE FROM HERE
-        commitCells.clear();
-
-    }
+//
+//    public void resetTree(){
+//
+////        tree = new Graph();
+//
+//        tree.getModel().clear();
+//
+//
+//
+//        tree.getUseViewportGestures().set(false);
+//        tree.getUseNodeGestures().set(false);
+//
+////        contentContainer.setContent(tree.getCanvas());
+//
+//        commitCells.clear();
+//
+//    }
 
 }

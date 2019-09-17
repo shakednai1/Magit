@@ -69,11 +69,12 @@ public class Repository {
         @Override
         public void onChanged(Change<? extends BranchData> c) {
 
+            c.next();
             if (c.wasAdded()){
                 BranchData branchData = c.getAddedSubList().get(0);
                 if(commits.get(branchData.getHeadSha1()) != null)
                     commits.get(branchData.getHeadSha1()).addPointingBranch(branchData);
-            }
+         }
 
             else if (c.wasRemoved()){
                 BranchData branchData = c.getRemoved().get(0);
@@ -524,6 +525,8 @@ public class Repository {
     }
 
     private String getPointingCommitOfRB(String remoteBranchName){
+
+
         String branchDataFromFile = FSUtils.getFileLines(remoteRepositoryPath + Settings.remoteBranchFolder + remoteBranchName + ".txt").get(0);
         String pointingCommitOfRemoteBranch = branchDataFromFile.split(",")[0];
         return pointingCommitOfRemoteBranch;
