@@ -236,7 +236,7 @@ public class Branch {
     }
 
     public boolean isTracking(){
-        return trackingAfter != null;
+        return trackingAfter != null && !trackingAfter.equals("null");
     }
 
     public void addTracking(String remoteBranchName){

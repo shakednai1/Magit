@@ -561,7 +561,7 @@ public class AppController extends BaseController {
         try{
             if(!canExecuteMerge()) showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));
             Merge merge = engine.pull();
-            handleConflicts(merge);
+            if(merge != null) handleConflicts(merge);
             }
             catch (IllegalArgumentException | NoActiveRepositoryError e) {
                 showErrorAlert(e);

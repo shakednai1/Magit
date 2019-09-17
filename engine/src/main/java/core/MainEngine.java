@@ -220,12 +220,7 @@ public class MainEngine {
     }
 
     public Merge pull(){
-        if(getActiveRepository().getActiveBranch().isTracking()){
-            return getActiveRepository().pull();
-        }
-        else{
-            throw new IllegalArgumentException("Current active branch is not remote tracking branch");
-        }
+        return getActiveRepository().pull();
     }
 
     public Merge getCurrentMerge(){

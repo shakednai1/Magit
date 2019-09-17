@@ -443,31 +443,42 @@ public class Repository {
 
 
     public Merge pull(){
-        String trackingAfterBranchName = getActiveBranch().getTrackingAfter();
-        String pointingCommitOfRemoteBranch = getPointingCommitOfRB(trackingAfterBranchName);
-        updateRBDataFromRemote(trackingAfterBranchName);
-        getObjectsFromRemote();
-        BranchData activeBranchData = null;
-        for(BranchData branchData : getAllBranches()){
-            if(branchData.getName().equals(getActiveBranch().getName())){
-                activeBranchData = branchData;
+        if(getActiveBranch().isTracking()){
+            String trackingAfterBranchName = getActiveBranch().getTrackingAfter();
+            String pointingCommitOfRemoteBranch = getPointingCommitOfRB(trackingAfterBranchName);
+            updateRBDataFromRemote(trackingAfterBranchName);
+            getObjectsFromRemote();
+            BranchData activeBranchData = null;
+            for(BranchData branchData : getAllBranches()){
+                if(branchData.getName().equals(getActiveBranch().getName())){
+                    activeBranchData = branchData;
+                }
             }
+            return new Merge(getActiveBranch().getHead().getSha1(), pointingCommitOfRemoteBranch, activeBranchData);
         }
-        return new Merge(getActiveBranch().getHead().getSha1(), pointingCommitOfRemoteBranch, activeBranchData);
+        return null;
     }
 
     public void push(){
+        if(!getActiveBranch().isTracking()){
+            String branchFilePath = Settings.branchFolderPath + getActiveBranch().getName() + ".txt";
+            FSUtils.writeFile(branchFilePath, getActiveBranch().getHead().getSha1() + Settings.delimiter + getActiveBranch().getName(), false);
+            RemoteBranch remoteBranch = new RemoteBranch(getActiveBranch().getName(), getActiveBranch().getHead().getSha1());
+            getActiveBranch().trackingAfter = remoteBranch.name;
+            addRemoteBranch(remoteBranch);
+        }
+        String RBbranchName = getActiveBranch().isTracking() ? getActiveBranch().getTrackingAfter() : getActiveBranch().getName();
         pushObjectsToRemote();
-        updateRBDataFromLocal(getActiveBranch().getTrackingAfter());
+        updateRBDataFromLocal(RBbranchName);
     }
 
     private void updateRBDataFromLocal(String remoteBranchName){
-        File destBranchFile= new File(Settings.remoteBranchesPath + remoteBranchName + ".txt");
-        File sourceBranchFile = new File(Settings.branchFolderPath + remoteBranchName + ".txt");
+        String rbPath = Settings.remoteBranchesPath + remoteBranchName + ".txt";
+        File branchFile= new File(rbPath);
         File destBranchFileRemote= new File(remoteRepositoryPath + Settings.branchFolder + remoteBranchName + ".txt");
         try {
-            FileUtils.copyFile(sourceBranchFile, destBranchFile);
-            FileUtils.copyFile(destBranchFile, destBranchFileRemote);
+            FSUtils.writeFile(rbPath, getActiveBranch().getHead().getSha1() + ",null", false);
+            FileUtils.copyFile(branchFile, destBranchFileRemote);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -524,7 +535,7 @@ public class Repository {
     }
 
     private String getPointingCommitOfRB(String remoteBranchName){
-        String branchDataFromFile = FSUtils.getFileLines(remoteRepositoryPath + Settings.remoteBranchFolder + remoteBranchName + ".txt").get(0);
+        String branchDataFromFile = FSUtils.getFileLines(remoteRepositoryPath + Settings.branchFolder + remoteBranchName + ".txt").get(0);
         String pointingCommitOfRemoteBranch = branchDataFromFile.split(",")[0];
         return pointingCommitOfRemoteBranch;
     }
