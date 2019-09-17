@@ -359,7 +359,7 @@ class XmlLoader {
         }
         File remoteRepoDir = new File(remoteRepoPath + Settings.magitFolder);
         if (!remoteRepoDir.exists()) {
-            throw new XmlException("Given remote repository path is in a valid repository");
+            throw new XmlException("Given remote repository path is not a valid repository");
         }
     }
 
