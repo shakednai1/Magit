@@ -21,14 +21,14 @@ public class Folder extends Item {
         name = folderPath.getName();
     }
 
-    Folder(File folderPath, ItemSha1 folderSha1, String lastUser, String lastModified , boolean rewriteFS){
-         this.fullPath = folderPath.getAbsolutePath();
+    Folder(File folderPath, ItemSha1 folderSha1, String lastUser, String lastModified ){
+        this.fullPath = folderPath.getAbsolutePath();
         this.name = folderPath.getName();
         this.userLastModified = lastUser;
-         this.lastModified = lastModified;
-         this.currentSHA1 = folderSha1;
+        this.lastModified = lastModified;
+        this.currentSHA1 = folderSha1;
 
-        for (String itemData: this.currentSHA1.getContent()){
+        for (String itemData: this.currentSHA1.getContent().split("\\n")){
             String[] item = itemData.split(Settings.delimiter);
 
             String itemName = item[0];
@@ -39,11 +39,11 @@ public class Folder extends Item {
             String itemLastModified = item[4];
 
             if (itemType.equals("File")){
-                subFiles.put(itemFullPath, new Blob(new File(itemFullPath), new ItemSha1(itemSha1, false, false), itemLastUser, itemLastModified, rewriteFS));
+                subFiles.put(itemFullPath, new Blob(new File(itemFullPath), new ItemSha1(itemSha1, false, false), itemLastUser, itemLastModified));
             }
             else{
                 subFolders.put(itemFullPath, new Folder(new File(itemFullPath),
-                        new ItemSha1(itemSha1, false, false), itemLastUser, itemLastModified, rewriteFS));
+                        new ItemSha1(itemSha1, false, false), itemLastUser, itemLastModified));
             }
         }
     }
@@ -143,6 +143,12 @@ public class Folder extends Item {
         }
 
         setSHA1();
+    }
+
+    void rewriteFS(){
+        for(Blob file: subFiles.values()){
+            file.rewriteFS();
+        }
     }
 
     // create string from the folder data to calculate currentSHA1 + write to zip file under .objects

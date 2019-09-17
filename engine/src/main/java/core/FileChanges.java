@@ -53,14 +53,15 @@ public class FileChanges extends Blob{
     public Blob getBaseElement(){
         return baseElement;
     }
+    Blob getResElement(){ return resElement; }
 
     void setResAndStatus(Blob resElement, Common.FilesStatus state){
         this.resElement = resElement;
         this.state = state;
 
-        currentSHA1 = resElement.currentSHA1;
-        userLastModified = resElement.userLastModified;
-        lastModified = resElement.lastModified;
+//        currentSHA1 = resElement.currentSHA1;
+//        userLastModified = resElement.userLastModified;
+//        lastModified = resElement.lastModified;
     }
 
     Common.FilesStatus getStatus(){return state;}
@@ -121,28 +122,19 @@ public class FileChanges extends Blob{
 
     @Override
     public void zip(){
-        if(state == Common.FilesStatus.NEW|| state == Common.FilesStatus.UPDATED)
-            resElement.zip();
-        else if(state == Common.FilesStatus.RESOLVED){
-            File resolvedFile = new File(Settings.objectsFolderPath, currentSHA1.sha1 + ".txt");
-            FSUtils.writeFile(resolvedFile.getAbsolutePath(), currentSHA1.content, false);
-            FSUtils.zip(FSUtils.getZippedPath(currentSHA1.sha1),  resolvedFile.getAbsolutePath());
-        }
-    }
-
-    @Override
-    public void updateState(){
-        try {
-            String content = new String(Files.readAllBytes(Paths.get(fullPath)));
-            currentSHA1 = new ItemSha1(content, true, false);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(state == Common.FilesStatus.RESOLVED){
+            ItemSha1 sha1 = resElement.currentSHA1;
+            File resolvedFile = new File(Settings.objectsFolderPath, sha1.sha1 + ".txt");
+            FSUtils.writeFile(resolvedFile.getAbsolutePath(), sha1.content, false);
+            FSUtils.zip(FSUtils.getZippedPath(sha1.sha1),  resolvedFile.getAbsolutePath());
         }
     }
 
     public void setContent(String text) {
         currentSHA1 = new ItemSha1(text, true, true);
         state = Common.FilesStatus.RESOLVED;
+
+        resElement = new Blob(new File(fullPath), currentSHA1, "", "");
     }
 
     public void markDeleted() {
@@ -152,10 +144,8 @@ public class FileChanges extends Blob{
     public void rewriteFS() {
         if (state == Common.FilesStatus.DELETED)
             FSUtils.deleteFile(fullPath);
-        else if (state == Common.FilesStatus.UPDATED || state == Common.FilesStatus.NEW) {
+        else if (state == Common.FilesStatus.UPDATED || state == Common.FilesStatus.NEW || state == Common.FilesStatus.RESOLVED) {
             FSUtils.createNewFile(fullPath, resElement.getContent());
-        } else if (state == Common.FilesStatus.RESOLVED) {
-            FSUtils.createNewFile(fullPath, currentSHA1.content);
         }
     }
 }

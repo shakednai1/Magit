@@ -51,8 +51,9 @@ public class Branch {
         rootFolder = new Folder(rootFolderPath,
                 new ItemSha1(this.head.getRootFolderSHA1(), false, false),
                 head.getUserLastModified(),
-                head.getCommitTime(),
-                rewriteFS);
+                head.getCommitTime());
+        if(rewriteFS)
+            rootFolder.rewriteFS();
 
         currentStateOfFiles = rootFolder.getCommittedFilesState(false);
     }
@@ -160,9 +161,8 @@ public class Branch {
 
         setHead(com);
 
-        merge.folderChanges.unfoldFS();
-
-        rootFolder = (Folder) merge.folderChanges;
+        rootFolder = merge.folderChanges.getResFolder();
+        rootFolder.rewriteFS();
         currentStateOfFiles = rootFolder.getCommittedFilesState(false);
 
         return com;
