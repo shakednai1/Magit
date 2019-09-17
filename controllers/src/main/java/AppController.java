@@ -536,10 +536,13 @@ public class AppController extends BaseController {
                 public void onChanged(Change change) {
                     if (!change.getList().isEmpty()) return;
                     stage.close();
+                    showGetCommitMsgDialogAfterAndMerge(merge);
                 }
             });
         }
-        showGetCommitMsgDialogAfterAndMerge(merge);
+        else{
+            showGetCommitMsgDialogAfterAndMerge(merge);
+        }
 
     }
 
