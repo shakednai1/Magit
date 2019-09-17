@@ -537,18 +537,22 @@ public class AppController extends BaseController {
                 public void onChanged(Change change) {
                     if (!change.getList().isEmpty()) return;
                     stage.close();
-
-                    TextInputDialog d = new TextInputDialog();
-
-                    d.setTitle("Commit getMerge");
-                    d.setContentText("Enter getMerge commit message");
-                    d.showAndWait();
-                    // TODO cannot be an empty getMerge msg
-                    merge.setCommitMsg(d.getResult());
-                    engine.getActiveRepository().makeMerge(merge);
                 }
             });
         }
+        showGetCommitMsgDialogAfterAndMerge(merge);
+
+    }
+
+    public void showGetCommitMsgDialogAfterAndMerge(Merge merge){
+        TextInputDialog d = new TextInputDialog();
+
+        d.setTitle("Commit getMerge");
+        d.setContentText("Enter getMerge commit message");
+        d.showAndWait();
+        // TODO cannot be an empty getMerge msg
+        merge.setCommitMsg(d.getResult());
+        engine.getActiveRepository().makeMerge(merge);
     }
 
     @FXML
