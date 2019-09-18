@@ -93,7 +93,6 @@ public class Merge {
         return new CommitData(com);
     }
 
-
     public void setCommitMsg(String msg){
         commitMsg = msg;
     }

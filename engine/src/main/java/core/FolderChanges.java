@@ -111,9 +111,10 @@ public class FolderChanges extends Folder {
     }
 
     private void setFolderDeleted(){
-        folderDeleted = subChangesFolders.values().stream().allMatch(FolderChanges::getFolderDeleted);
+        if (subChangesFolders.size() > 0)
+            folderDeleted = subChangesFolders.values().stream().allMatch((f) ->{return f.getFolderDeleted();});
 
-        if(folderDeleted) {
+        if(!folderDeleted) {
             folderDeleted = subChangesFiles.values().stream().allMatch(fileChanges -> fileChanges.getStatus() == Common.FilesStatus.DELETED);
         }
     }
@@ -146,7 +147,6 @@ public class FolderChanges extends Folder {
                 continue;
             }
             file.zip();
-//            file.rewriteFS();
 
             file.state = Common.FilesStatus.NO_CHANGE;
             subFiles.put(file.fullPath, file);
@@ -157,7 +157,6 @@ public class FolderChanges extends Folder {
             boolean subFolderChanged = folder.commit(commitUser, commitTime);
             subItemsChanged = subItemsChanged || subFolderChanged;
 
-            setFolderDeleted();
 
             if(folder.getFolderDeleted()) {
                 continue;
@@ -165,6 +164,8 @@ public class FolderChanges extends Folder {
 
             subFolders.put(folder.fullPath, folder);
         }
+
+        setFolderDeleted();
 
         if(subItemsChanged)
             updateUserAndDate(commitUser, commitTime);
@@ -208,11 +209,6 @@ public class FolderChanges extends Folder {
         updateUserAndDate(user, time);
     }
 
-
-    public void unfoldFS(){
-        subChangesFiles.values().forEach(FileChanges::rewriteFS);
-        subChangesFolders.values().forEach(FolderChanges::unfoldFS);
-    }
 
     Folder getResFolder(){
         return new Folder(new File(fullPath), currentSHA1, userLastModified, lastModified);

@@ -38,7 +38,7 @@ public class Commit implements CommitRepresentative {
         this.commitTime = commitData[commitData.length - 2];
         this.userLastModified = commitData[commitData.length - 1];
         this.firstPreviousCommitSHA1 = commitData[1].equals("null") ? "" : commitData[1];
-        this.secondPreviousCommitSHA1= commitData[2].equals("null") ? "" : commitData[1];
+        this.secondPreviousCommitSHA1= commitData[2].equals("null") ? "" : commitData[2];
 
         String[] msgParts = Arrays.copyOfRange(commitData, 3, commitData.length - 2);
         this.msg = String.join( Settings.delimiter, msgParts);

@@ -146,11 +146,16 @@ public class Folder extends Item {
     }
 
     void rewriteFS(){
+        FSUtils.clearCurrentWC();
+        _rewriteFS();
+    }
+
+    private void _rewriteFS(){
         for(Blob file: subFiles.values()){
             file.rewriteFS();
         }
         for(Folder folder: subFolders.values()){
-            folder.rewriteFS();
+            folder._rewriteFS();
         }
     }
 
