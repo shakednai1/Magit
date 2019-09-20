@@ -1,9 +1,12 @@
 package core;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 public class Settings {
+
+    static File runningPath;
 
     final public static DateFormat commitDateFormat = new SimpleDateFormat("dd.MM.yyyy-HH:mm:ss:SSS");
 
@@ -30,7 +33,6 @@ public class Settings {
 
     final static String gitFolder = ".magit";
 
-
     private static String currentUser = "Administrator";
 
     static void setNewRepository(String repositoryPath ){
@@ -48,4 +50,10 @@ public class Settings {
     public static void setUser(String user){
         currentUser = user;
     }
+
+    public static void setRunningPath(File path){
+        runningPath = path;
+    }
+
+    public static File getRunningPath(){ return runningPath; }
 }

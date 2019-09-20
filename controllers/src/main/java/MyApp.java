@@ -1,5 +1,6 @@
 
 import com.fxgraph.graph.PannableCanvas;
+import core.Settings;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -8,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -18,6 +20,10 @@ public class MyApp extends Application{
 
     public static void main(String[] args) {
         Thread.currentThread().setName("main");
+
+        final File f = new File(MyApp.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        Settings.setRunningPath(f);
+
         launch(args);
     }
 
@@ -26,6 +32,8 @@ public class MyApp extends Application{
         FXMLLoader fxmlLoader = new FXMLLoader();
         // The path is relative to the MyApp.class and not MyApp.java
         URL url = getClass().getResource("app.fxml");
+        System.out.println("Resource path: "+url.getPath());
+
         fxmlLoader.setLocation(url);
         InputStream urlStream = url.openStream();
         Parent root = fxmlLoader.load(urlStream);

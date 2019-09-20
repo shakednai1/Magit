@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="455.0" prefWidth="735.0" xmlns="http://javafx.com/javafx/8.0.221" xmlns:fx="http://javafx.com/fxml/1" fx:controller="merge.MergeController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="455.0" prefWidth="735.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="merge.MergeController">
    <center>
       <Pane prefHeight="303.0" prefWidth="200.0" style="-fx-border-color: gray;" BorderPane.alignment="CENTER">
          <children>
@@ -39,11 +39,11 @@
       </Pane>
    </bottom>
    <top>
-      <HBox prefHeight="26.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="oursBranch" prefHeight="17.0" prefWidth="194.0" />
-            <Label fx:id="baseCommit" prefHeight="17.0" prefWidth="194.0" />
-            <Label fx:id="theirsBranch" prefHeight="17.0" prefWidth="194.0" />
+            <Label fx:id="oursBranch" contentDisplay="CENTER" textAlignment="CENTER" />
+            <Label fx:id="baseCommit" alignment="CENTER" contentDisplay="CENTER" textAlignment="CENTER" />
+            <Label fx:id="theirsBranch" alignment="BASELINE_CENTER" contentDisplay="CENTER" textAlignment="CENTER" textOverrun="CENTER_ELLIPSIS" />
          </children>
       </HBox>
    </top>

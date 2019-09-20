@@ -33,7 +33,7 @@ public class CommitNodeController extends BaseController {
     @FXML protected Label messageLabel;
     @FXML protected Label committerLabel;
     @FXML protected Circle CommitCircle;
-    @FXML protected Label pointingBranches;
+    @FXML public Label pointingBranches;
     String commitSha1;
     String prevCommitSha1 = "";
     String secondPrevCommitSha1 = "";

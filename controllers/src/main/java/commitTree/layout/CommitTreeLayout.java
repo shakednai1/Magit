@@ -4,7 +4,6 @@ import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.ICell;
 import com.fxgraph.layout.Layout;
 import commitTree.node.CommitNode;
-import core.Commit;
 import models.CommitData;
 
 import java.util.*;

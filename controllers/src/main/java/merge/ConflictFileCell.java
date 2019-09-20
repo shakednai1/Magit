@@ -31,13 +31,13 @@ public class ConflictFileCell extends ListCell<FileChanges> {
 
         public void handle(MouseEvent e) {
 
-            String resourceRelatedPath = "../conflictResolve.fxml";
+            String resourceRelatedPath = "conflictResolve.fxml";
 
             try {
                 Stage stage = new Stage();
 
                 FXMLLoader fxmlLoader = new FXMLLoader();
-                URL url = getClass().getResource(resourceRelatedPath);
+                URL url = getClass().getClassLoader().getResource(resourceRelatedPath);
                 fxmlLoader.setLocation(url);
                 BorderPane root = fxmlLoader.load(url.openStream());
                 Scene scene = new Scene(root);

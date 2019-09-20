@@ -5,23 +5,18 @@ import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.IEdge;
 import core.Settings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
-import models.BranchData;
 import models.CommitData;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
 
@@ -29,7 +24,7 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
     class PointingBranchListener implements ListChangeListener {
 
         public void onChanged(Change change){
-            commitNodeController.pointingBranches.setText(String.join(", ", commit.getPointingBranchNames()));
+            commitNodeController.setPointingBranches(commit.getPointingBranchNames());
         }
     }
 
@@ -49,10 +44,24 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
         try {
 
             FXMLLoader fxmlLoader = new FXMLLoader();
-            URL url = getClass().getResource("../../commitNode.fxml");
+
+            File resourceFile = new File(Settings.getRunningPath().getAbsolutePath(), "commitNode.fxml");
+            System.out.println(String.format("resource file : %s", resourceFile.getAbsolutePath()));
+            URL url = null;
+            try{
+
+
+                url = getClass().getClassLoader().getResource("commitNode.fxml");
+                System.out.println("Resource path: "+url.getPath());
+
+
+            }
+            catch (NullPointerException e){
+                System.out.println("Cannot file resource ");
+            }
+
             fxmlLoader.setLocation(url);
             GridPane root = fxmlLoader.load(url.openStream());
-
             commitNodeController = fxmlLoader.getController();
 
 
