@@ -31,7 +31,7 @@ public class MyApp extends Application{
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader();
         // The path is relative to the MyApp.class and not MyApp.java
-        URL url = getClass().getResource("app.fxml");
+        URL url = getClass().getClassLoader().getResource("app.fxml");
         System.out.println("Resource path: "+url.getPath());
 
         fxmlLoader.setLocation(url);

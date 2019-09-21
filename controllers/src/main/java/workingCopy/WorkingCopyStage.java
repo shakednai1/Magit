@@ -26,7 +26,7 @@ public class WorkingCopyStage {
 
         try{
             FXMLLoader fxmlLoader = new FXMLLoader();
-            URL url = getClass().getResource("../wc.fxml");
+            URL url = getClass().getClassLoader().getResource("wc.fxml");
             fxmlLoader.setLocation(url);
             AnchorPane root = fxmlLoader.load(url.openStream());
             root.autosize();
@@ -52,7 +52,7 @@ public class WorkingCopyStage {
 
         try{
             FXMLLoader fxmlLoader = new FXMLLoader();
-            URL url = getClass().getResource("../wc.fxml");
+            URL url = getClass().getClassLoader().getResource("wc.fxml");
             fxmlLoader.setLocation(url);
             AnchorPane root = fxmlLoader.load(url.openStream());
             root.autosize();

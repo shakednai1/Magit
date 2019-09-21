@@ -14,7 +14,7 @@ public class BaseController {
         Stage stage = new Stage();
 
         FXMLLoader fxmlLoader = new FXMLLoader();
-        URL url = getClass().getResource(resourceRelatedPath);
+        URL url = getClass().getClassLoader().getResource(resourceRelatedPath);
         fxmlLoader.setLocation(url);
         AnchorPane root = fxmlLoader.load(url.openStream());
         Scene scene = new Scene(root);
@@ -29,7 +29,7 @@ public class BaseController {
         Stage stage = new Stage();
 
         FXMLLoader fxmlLoader = new FXMLLoader();
-        URL url = getClass().getResource(resourceRelatedPath);
+        URL url = getClass().getClassLoader().getResource(resourceRelatedPath);
         fxmlLoader.setLocation(url);
         AnchorPane root = fxmlLoader.load(url.openStream());
         Scene scene = new Scene(root);

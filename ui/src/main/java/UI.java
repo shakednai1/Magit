@@ -339,7 +339,7 @@ public class UI {
         try {
             engine.createNewRepository(repoPath, repoName);
         }
-        catch (IllegalArgumentException e){
+        catch (IllegalArgumentException | InvalidRepositoryPath e){
             System.out.println(e.getMessage());
         }
     }

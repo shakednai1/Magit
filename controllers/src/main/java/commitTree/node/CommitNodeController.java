@@ -80,7 +80,7 @@ public class CommitNodeController extends BaseController {
     class CommitDetailsEvent implements EventHandler<ActionEvent> {
         public void handle(ActionEvent e) {
             try {
-                FXMLLoader fxmlLoader = openStageReturnFxml("../../commitDetails.fxml");
+                FXMLLoader fxmlLoader = openStageReturnFxml("commitDetails.fxml");
                 CommitDetailsController controller = fxmlLoader.getController();
                 controller.display(commitData);
 
@@ -90,7 +90,7 @@ public class CommitNodeController extends BaseController {
         }
     }
 
-        @FXML protected Label commitTimeStampLabel;
+    @FXML protected Label commitTimeStampLabel;
     @FXML protected Label messageLabel;
     @FXML protected Label committerLabel;
     @FXML protected Circle CommitCircle;

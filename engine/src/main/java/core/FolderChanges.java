@@ -68,9 +68,8 @@ public class FolderChanges extends Folder {
         for (Map.Entry<String, Blob> file : bSubFiles.entrySet()) {
             String filePath = file.getValue().fullPath;
             subChangesFiles.put(filePath, new FileChanges(null, null, file.getValue()));
-
-            bSubFiles.remove(filePath);
         }
+        bSubFiles.clear();
     }
 
     private void setSubFoldersChanges(){
