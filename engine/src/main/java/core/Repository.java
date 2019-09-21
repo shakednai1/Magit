@@ -5,6 +5,7 @@ import exceptions.NoActiveRepositoryError;
 import exceptions.NoChangesToCommitError;
 import exceptions.UncommittedChangesError;
 
+import fromXml.RootFolder;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.*;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Repository {
 
@@ -44,7 +46,9 @@ public class Repository {
             CommitData oldCommit = commits.get(oldValue);
             if(oldCommit != null)
                 oldCommit.removePointingBranch(branchData);
-            commits.get(newValue).addPointingBranch(branchData);
+            if(commits.get(newValue) != null){
+                commits.get(newValue).addPointingBranch(branchData);
+            }
         }
     }
 
@@ -72,17 +76,61 @@ public class Repository {
             c.next();
             if (c.wasAdded()){
                 BranchData branchData = c.getAddedSubList().get(0);
-                if(commits.get(branchData.getHeadSha1()) != null)
+                if(commits.get(branchData.getHeadSha1()) != null){
                     commits.get(branchData.getHeadSha1()).addPointingBranch(branchData);
-         }
+                    addBranchToAllRelatedCommits(branchData);
+                }
+            }
 
             else if (c.wasRemoved()){
                 BranchData branchData = c.getRemoved().get(0);
 
-                if(commits.containsKey(branchData.getHeadSha1()))
+                if(commits.containsKey(branchData.getHeadSha1())){
                     commits.get(branchData.getHeadSha1()).removePointingBranch(branchData);
+                    removeBranchFromAllRelatedCommits(branchData);
+                }
             }
         }
+
+        private void addBranchToAllRelatedCommits(BranchData branchData){
+            String commitSha1 = branchData.getHeadSha1();
+
+            List<String> commitsToExplore = new LinkedList<>();
+            commitsToExplore.add(commitSha1);
+
+            while (!commitsToExplore.isEmpty()){
+                CommitData commitData = commits.get(commitsToExplore.get(0));
+                commitData.addContainingBranch(branchData);
+                if (commitData.getPreviousCommitSha1() != null && !commitData.getPreviousCommitSha1().equals(""))
+                    commitsToExplore.add(commitData.getPreviousCommitSha1());
+
+                if (commitData.getSecondPreviousCommitSha1() != null && !commitData.getSecondPreviousCommitSha1().equals(""))
+                    commitsToExplore.add(commitData.getSecondPreviousCommitSha1());
+
+                commitsToExplore.remove(commitsToExplore.get(0));
+            }
+        }
+
+        private void removeBranchFromAllRelatedCommits(BranchData branchData){
+            String commitSha1 = branchData.getHeadSha1();
+
+            List<String> commitsToExplore = new LinkedList<>();
+            commitsToExplore.add(commitSha1);
+
+            while (!commitsToExplore.isEmpty()){
+                CommitData commitData = commits.get(commitsToExplore.get(0));
+                commitData.removeContainingBranch(branchData);
+
+                if (commitData.getPreviousCommitSha1() != null && !commitData.getPreviousCommitSha1().equals(""))
+                    commitsToExplore.add(commitData.getPreviousCommitSha1());
+
+                if (commitData.getSecondPreviousCommitSha1() != null && !commitData.getSecondPreviousCommitSha1().equals(""))
+                    commitsToExplore.add(commitData.getSecondPreviousCommitSha1());
+
+                commitsToExplore.remove(commitsToExplore.get(0));
+            }
+        }
+
     }
 
 
@@ -105,6 +153,7 @@ public class Repository {
     private Repository(String fullPath, Branch activeBranch){
         this.fullPath = fullPath;
         this.name = loadRepositoryName();
+        this.activeBranch = activeBranch;
 
         commits.addListener(new CommitsListener());
         branches.addListener(new BranchesListener());
@@ -113,9 +162,10 @@ public class Repository {
         loadRemoteBranches();
 
         loadBranchesData();
-        loadAllCommitsData();
+        if(!isEmptyRepo()) {
+            loadAllCommitsData();
+        }
 
-        this.activeBranch = activeBranch;
         saveRepositoryActiveBranch();
     }
 
@@ -188,6 +238,9 @@ public class Repository {
     }
     ObservableMap<String, CommitData> getAllCommitsData(){ return commits; }
 
+    private boolean isEmptyRepo(){
+        return activeBranch.getHead() == null;
+    }
 
     private void loadAllCommitsData(){
         commits.clear();
@@ -195,22 +248,31 @@ public class Repository {
             __addBranchCommitsToAllCommits(branch);
             commits.get(branch.getHeadSha1()).addPointingBranch(branch);
         }
+
+        __setCommitDataInMasterMainChain();
+
     }
 
     private void __addBranchCommitsToAllCommits(BranchData branch){
-        boolean isMaster = branch.getName().equals("master");
-
         for(Map.Entry<String, Commit> c: Commit.loadAll(branch.getHeadSha1()).entrySet()){
             if(commits.get(c.getKey()) == null){
                 Commit commit = c.getValue();
                 CommitData commitData = new CommitData(commit);
                 commits.put(c.getKey(), commitData);
             }
-
-            if(isMaster)
-                commits.get(c.getKey()).setInMasterChain();
+            commits.get(c.getKey()).addContainingBranch(branch);
         }
+    }
 
+    private void __setCommitDataInMasterMainChain(){
+        BranchData masterBranch = getBranchDataByName("master");
+
+        CommitData commitData = commits.get(masterBranch.getHeadSha1());
+
+        while(commitData != null){
+            commitData.setInMasterChain();
+            commitData = commits.get(commitData.getPreviousCommitSha1());
+        }
     }
 
     CommitData  commitActiveBranch(String msg) throws NoChangesToCommitError {
@@ -218,9 +280,9 @@ public class Repository {
 
         Commit commit = activeBranch.commit(msg, null);
         CommitData commitData = __createCommitData(commit);
+        updateActiveBranchDataInHistory();
         commits.put(commitData.getSha1(), commitData);
 
-        updateActiveBranchDataInHistory();
 
         return commitData;
     }
@@ -239,6 +301,7 @@ public class Repository {
             if(branchDetails.getName().equals(activeBranch.getName())){
                 branchDetails.setHeadSha1(activeBranch.getHead().getSha1());
                 branchDetails.setHeadMsg(activeBranch.getHead().getMsg());
+                break;
             }
         }
     }
@@ -261,9 +324,12 @@ public class Repository {
     }
 
     BranchData createNewBranch(String branchName, boolean checkout) throws UncommittedChangesError, InvalidBranchNameError{
-        if(branches.stream().anyMatch(branch-> branch.getName().equals(branchName)) ||
-            branchName.contains(" "))
-            throw new InvalidBranchNameError("");
+        if (branchName.contains(" "))
+            throw new InvalidBranchNameError("Branch name cannot contain spaces");
+
+        if(branches.stream().anyMatch(branch-> branch.getName().equals(branchName))) {
+            throw new InvalidBranchNameError(String.format("Branch with name \"%s\" already exist", branchName));
+        }
 
         Branch newBranch;
         if (activeBranch == null){
@@ -273,7 +339,7 @@ public class Repository {
             newBranch = new Branch(branchName, activeBranch.getHead(),
                     activeBranch.getRootFolder());
         }
-        BranchData branchData = addNewBranch(newBranch);
+        BranchData branchData = addNewBranchIfNotExist(newBranch);
 
         if (checkout){
             if (activeBranch != null && haveOpenChanges())
@@ -301,6 +367,9 @@ public class Repository {
         FSUtils.clearCurrentWC();
 
         Branch checkedoutBranch = Branch.load(name, true);
+        BranchData branchData = addNewBranchIfNotExist(checkedoutBranch);
+
+        __addBranchCommitsToAllCommits(branchData);
         setActiveBranch(checkedoutBranch);
     }
 
@@ -342,7 +411,16 @@ public class Repository {
                 anyMatch(name -> name.equals(branchName));
     }
 
-    public BranchData addNewBranch(Branch branch){
+    private BranchData getBranchDataByName(String branchName) {
+        return branches.stream()
+                .filter((b)-> (b.getName().equals(branchName)))
+                .collect(Collectors.toList()).get(0);
+    }
+
+    public BranchData addNewBranchIfNotExist(Branch branch){
+        if(validBranchName(branch.getName()))
+            return getBranchDataByName(branch.getName());
+
         BranchData branchData = new BranchData(branch);
         branchData.getHeadSha1Property().addListener(new BranchHeadCommitListener(branchData));
 
@@ -399,7 +477,7 @@ public class Repository {
 
     BranchData createNewBranchFromSha1(String branchName, String sha1, String trackingAfter){
         Branch newBranch = new Branch(branchName, sha1, trackingAfter, false);
-        return addNewBranch(newBranch);
+        return addNewBranchIfNotExist(newBranch);
 
     }
 
@@ -426,22 +504,38 @@ public class Repository {
 
         if (mergeBranch == null) throw new ValueException("Invalid branch name");
 
-        currentMerge = new Merge(getActiveBranch().getHead().getSha1(), commitSha1, mergeBranch);
+        currentMerge = new Merge(getActiveBranch().getHead().getSha1(), commitSha1, mergeBranch.getName());
         return currentMerge;
     }
 
-    public void makeMerge(Merge merge){
-        merge.setConflictFiles();
-        if(merge.getConflicts().size() != 0){ return; }
+    public void makeFFMerge(Merge merge){
 
-        CommitData commitData = merge.commit();
-        commits.put(commitData.getSha1(), commitData);
-        updateActiveBranchDataInHistory();
+        if(merge.getFastForward() != null){
+            Commit commit = new Commit(merge.getFastForward());
 
+            if (!activeBranch.getHead().getSha1().equals(merge.getFastForward())){
+                activeBranch.setHead(commit);
+                activeBranch.setRootFolder(Commit.getCommitRootFolder(merge.getFastForward()), true);
+
+                updateActiveBranchDataInHistory();
+            }
+
+        }
         currentMerge = null;
     }
 
+    public void makeMerge(Merge merge){
 
+        merge.setConflictFiles();
+        if(merge.getConflicts().size() != 0){ return; }
+
+        Commit commit = merge.commit();
+        CommitData commitData = __createCommitData(commit);
+        updateActiveBranchDataInHistory();
+        commits.put(commitData.getSha1(), commitData);
+
+        currentMerge = null;
+    }
 
     public Merge pull(){
         if(getActiveBranch().isTracking()){
@@ -449,13 +543,16 @@ public class Repository {
             String pointingCommitOfRemoteBranch = getPointingCommitOfRB(trackingAfterBranchName);
             updateRBDataFromRemote(trackingAfterBranchName);
             getObjectsFromRemote();
-            BranchData activeBranchData = null;
-            for(BranchData branchData : getAllBranches()){
-                if(branchData.getName().equals(getActiveBranch().getName())){
-                    activeBranchData = branchData;
+
+            // load all new commits to repo
+            for(Commit commit: Commit.loadAll(pointingCommitOfRemoteBranch).values()){
+                if (commits.get(commit.getSha1()) == null){
+                    commits.put(commit.getSha1(), __createCommitData(commit));
                 }
             }
-            return new Merge(getActiveBranch().getHead().getSha1(), pointingCommitOfRemoteBranch, activeBranchData);
+
+            currentMerge = new Merge(getActiveBranch().getHead().getSha1(), pointingCommitOfRemoteBranch, trackingAfterBranchName);
+            return currentMerge;
         }
         return null;
     }
@@ -471,6 +568,19 @@ public class Repository {
         String RBbranchName = getActiveBranch().isTracking() ? getActiveBranch().getTrackingAfter() : getActiveBranch().getName();
         pushObjectsToRemote();
         updateRBDataFromLocal(RBbranchName);
+        rewriteRemoteFSIfNeeded();
+    }
+
+    private void rewriteRemoteFSIfNeeded(){
+        if(activeBranch.getName().equals(getRemoteRepoBranchHeadName())){
+            FSUtils.clearWC(remoteRepositoryPath);
+            FSUtils.copyCurrentWC(remoteRepositoryPath);
+        }
+    }
+
+    private String getRemoteRepoBranchHeadName(){
+        File remoteHeadFile = new File(remoteRepositoryPath, Settings.activeBranchFile);
+        return FSUtils.getFileLines(remoteHeadFile.getAbsolutePath()).get(0);
     }
 
     private void updateRBDataFromLocal(String remoteBranchName){

@@ -5,6 +5,7 @@ import exceptions.NoChangesToCommitError;
 import models.BranchData;
 import models.CommitData;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,35 +18,28 @@ public class Merge {
     String mergeTime;
     List<FileChanges> conflicts = new LinkedList<>();
     FolderChanges folderChanges;
-    BranchData mergingBranch;
-    boolean fastForward;
+    String mergingBranchName;
+    String fastForward = null;
 
     private String commitMsg = "";
 
 
-    public Merge(String firstCommitSha1, String secondCommitSha1, BranchData branchToMerge){
+    public Merge(String firstCommitSha1, String secondCommitSha1, String branchToMerge){
         MainEngine engine = new MainEngine();
-        this.mergingBranch = branchToMerge;
+        this.mergingBranchName = branchToMerge;
         this.firstCommitSha1 = firstCommitSha1;
         this.secondCommitSha1 = secondCommitSha1;
-        if (!DoNothing()) {
-            setFastForward();
-            if (fastForward) {
-                try {
-                    engine.getActiveBranch().setHead(new Commit(secondCommitSha1));
-                    engine.getActiveRepo().updateActiveBranchDataInHistory();
-                } catch (NoActiveRepositoryError e) {
-                }
-            } else {
-                folderChanges = engine.getDiffBetweenCommits(firstCommitSha1, secondCommitSha1);
-                if (folderChanges.getHasConflicts()) {
-                    setConflictFiles();
-                }
+
+        setFastForward();
+        if (fastForward == null) {
+            folderChanges = engine.getDiffBetweenCommits(firstCommitSha1, secondCommitSha1);
+            if (folderChanges.getHasConflicts()) {
+                setConflictFiles();
             }
         }
     }
 
-    public BranchData getMergingBranch(){ return mergingBranch; }
+    public String getMergingBranchName(){ return mergingBranchName; }
     public String getCommitMsg(){ return commitMsg;}
     public String getFirstCommitSha1(){ return firstCommitSha1;}
     public String getSecondCommitSha1(){ return secondCommitSha1;}
@@ -74,13 +68,11 @@ public class Merge {
         }
     }
 
-    public CommitData commit(){
+    public Commit commit(){
         RepositoryManager repositoryManager = MainEngine.getRepositoryManager();
         Branch activeBranch = repositoryManager.getActiveRepository().getActiveBranch();
 
         mergeTime = Settings.commitDateFormat.format(new Date());
-
-
         activeBranch.mergeCommit(this);
 
         Commit com = new Commit(getCommitMsg(), folderChanges.getSha1(),
@@ -89,8 +81,7 @@ public class Merge {
         com.zipCommit();
 
         activeBranch.setHead(com);
-
-        return new CommitData(com);
+        return com;
     }
 
     public void setCommitMsg(String msg){
@@ -98,26 +89,39 @@ public class Merge {
     }
 
     void setFastForward() {
-        Map<String, Commit> commitParents = Commit.loadAll(secondCommitSha1);
-        if (commitParents.keySet().contains(firstCommitSha1)) {
-            fastForward = true;
-        } else {
-            fastForward = false;
+
+        Commit firstCommit = new Commit(firstCommitSha1);
+        Commit secondCommit = new Commit(secondCommitSha1);
+
+        Date firstCommitTime = null;
+        Date secondCommitTime = null;
+        try{
+            firstCommitTime = Settings.commitDateFormat.parse(firstCommit.getCommitTime());
+            secondCommitTime = Settings.commitDateFormat.parse(secondCommit.getCommitTime());
+        }
+        catch(ParseException e){}
+
+        Map<String, Commit> commitParents;
+        if(firstCommitTime.after(secondCommitTime) || firstCommitTime.equals(secondCommitTime)){
+            commitParents = Commit.loadAll(firstCommit.getSha1());
+            if(commitParents.containsKey(secondCommitSha1)){
+                fastForward = firstCommitSha1;
+            }
+        }
+        else if(firstCommitTime.before(secondCommitTime)){
+            commitParents = Commit.loadAll(secondCommit.getSha1());
+            if(commitParents.containsKey(firstCommitSha1)){
+                fastForward = secondCommitSha1;
+            }
         }
     }
 
-    public boolean getFastForward(){
+    public String getFastForward(){
         return fastForward;
     }
-    private boolean DoNothing() {
-        Map<String, Commit> commitParents = Commit.loadAll(firstCommitSha1);
-        if (commitParents.keySet().contains(secondCommitSha1)) {
-            fastForward = true;
-            return true;
-        } else {
-            fastForward = false;
-            return false;
-        }
+
+    public boolean isFastForward(){
+        return fastForward !=null;
     }
 
 }

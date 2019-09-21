@@ -4,6 +4,7 @@ import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.ICell;
 import com.fxgraph.layout.Layout;
 import commitTree.node.CommitNode;
+import javafx.scene.layout.Region;
 import models.CommitData;
 
 import java.util.*;
@@ -11,10 +12,13 @@ import java.util.stream.Collectors;
 
 public class CommitTreeLayout implements Layout {
 
+    static boolean showStandAloneCommits = false;
+
     final static int masterXLayout = 50;
     final static int gapBetweenBranchesLayout = 50;
 
     Map<String, CommitData> commits = new HashMap<>();
+
     Map<String, TempBranch> commitsToBranches = new HashMap<>();
     List<CommitNode> orderedNodes;
 
@@ -43,8 +47,13 @@ public class CommitTreeLayout implements Layout {
         setBranchesLayout();
 
         for (CommitNode cn : orderedNodes) {
-            TempBranch branch = commitsToBranches.get(cn.getCommit().getSha1());
-            graph.getGraphic(cn).relocate(branch.xAsix, startY);
+            TempBranch branch = commitsToBranches.get(cn.getCommitData().getSha1());
+            if (branch == null) continue;
+
+            Region cnGraph = graph.getGraphic(cn);
+//            commitsGraphic.put(cn.getCommitData().getSha1(), cnGraph);
+            cnGraph.relocate(branch.xAsix, startY);
+
             startY += 50;
         }
     }
@@ -54,7 +63,7 @@ public class CommitTreeLayout implements Layout {
 
         for(ICell _commit: cells){
             CommitNode commit = (CommitNode) _commit;
-            commits.put(commit.getCommit().getSha1(), commit.getCommit());
+            commits.put(commit.getCommitData().getSha1(), commit.getCommitData());
         }
     }
 
@@ -71,18 +80,22 @@ public class CommitTreeLayout implements Layout {
 
 
         for(CommitNode cell: orderedNodes){
-            CommitData commitData = cell.getCommit();
+            CommitData commitData = cell.getCommitData();
 
             __closeTempBranchesByFirstCommit(currentY, openBranches, commitData);
-
-            if(commitsToBranches.get(commitData.getSha1()) != null){
-                continue;
-            }
 
             if(commitData.getIsInMasterChain()){
                 commitsToBranches.put(commitData.getSha1(), tempMaster);
                 continue;
             }
+
+            if(commitsToBranches.get(commitData.getSha1()) != null){
+                continue;
+            }
+
+//
+//            if(!showStandAloneCommits && commitData.getPointingBranches().isEmpty())
+//                continue;
 
             TempBranch newBranch = new TempBranch();
             openBranches.add(newBranch);

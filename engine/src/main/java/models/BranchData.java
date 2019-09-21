@@ -1,6 +1,7 @@
 package models;
 
 import core.Branch;
+import core.Commit;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -20,8 +21,11 @@ public class BranchData {
 
     public BranchData(Branch branch) {
         this.name = branch.getName();
-        this.headSha1.setValue(branch.getHead().getSha1());
-        this.headMsg = branch.getHead().getMsg();
+
+        if (branch.getHead() != null){
+            this.headSha1.setValue(branch.getHead().getSha1());
+            this.headMsg = branch.getHead().getMsg();
+        }
         this.trackingAfter = branch.getTrackingAfter();
     }
 

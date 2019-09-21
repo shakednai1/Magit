@@ -24,19 +24,20 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
     class PointingBranchListener implements ListChangeListener {
 
         public void onChanged(Change change){
-            commitNodeController.setPointingBranches(commit.getPointingBranchNames());
+            commitNodeController.setPointingBranches(commitData.getPointingBranchNames());
         }
     }
 
-    private CommitData commit;
+    private CommitData commitData;
 
     private CommitNodeController commitNodeController;
 
-    public CommitNode(CommitData commit) {
-        this.commit = commit;
+    public CommitNode(CommitData commitData) {
+        this.commitData = commitData;
+        commitData.getPointingBranches().addListener(new PointingBranchListener());
     }
 
-    public CommitData getCommit(){ return commit; }
+    public CommitData getCommitData(){ return commitData; }
 
     @Override
     public Region getGraphic(Graph graph) {
@@ -45,36 +46,18 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
 
             FXMLLoader fxmlLoader = new FXMLLoader();
 
-            File resourceFile = new File(Settings.getRunningPath().getAbsolutePath(), "commitNode.fxml");
-            System.out.println(String.format("resource file : %s", resourceFile.getAbsolutePath()));
             URL url = null;
             try{
-
-
                 url = getClass().getClassLoader().getResource("commitNode.fxml");
-                System.out.println("Resource path: "+url.getPath());
-
-
             }
             catch (NullPointerException e){
-                System.out.println("Cannot file resource ");
+                System.out.println("Cannot find resource ");
             }
 
             fxmlLoader.setLocation(url);
             GridPane root = fxmlLoader.load(url.openStream());
             commitNodeController = fxmlLoader.getController();
-
-
-            commit.getPointingBranches().addListener(new PointingBranchListener());
-
-            commitNodeController.setCommitMessage(commit.getMessage());
-            commitNodeController.setCommitter(commit.getCommitter());
-            commitNodeController.setCommitTimeStamp(commit.getCommitTime());
-            commitNodeController.setPointingBranches(commit.getPointingBranchNames());
-
-            commitNodeController.setContextMenu();
-            commitNodeController.setCommitSha1(commit.getSha1());
-            commitNodeController.setPrevCommitSha1(commit.getPreviousCommitSha1(), commit.getSecondPreviousCommitSha1());
+            commitNodeController.setCommitData(commitData);
 
             return root;
         } catch (IOException e) {
@@ -101,13 +84,13 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
         if (o == null || getClass() != o.getClass()) return false;
 
         CommitNode that = (CommitNode) o;
-        String commitTime = commit.getCommitTime();
-        return commitTime != null ? commitTime.equals(that.getCommit().getCommitTime()) : that.getCommit().getCommitTime() == null;
+        String commitTime = commitData.getCommitTime();
+        return commitTime != null ? commitTime.equals(that.getCommitData().getCommitTime()) : that.getCommitData().getCommitTime() == null;
     }
 
     @Override
     public int hashCode() {
-        return commit.getCommitTime() != null ? commit.getCommitTime().hashCode() : 0;
+        return commitData.getCommitTime() != null ? commitData.getCommitTime().hashCode() : 0;
     }
 
     @Override
@@ -117,15 +100,15 @@ public class CommitNode extends AbstractCell implements Comparable<CommitNode> {
         Date comTime = null, otherTime = null;
 
         try{
-            comTime = commitDateFormat.parse(commit.getCommitTime());
-            otherTime = commitDateFormat.parse(other.getCommit().getCommitTime());
+            comTime = commitDateFormat.parse(commitData.getCommitTime());
+            otherTime = commitDateFormat.parse(other.getCommitData().getCommitTime());
         }
         catch (Exception e) {/*cant be*/}
         return comTime.compareTo(otherTime);
     }
 
     public String toString(){
-        return commit.getSha1() + ", " + commit.getMessage();
+        return commitData.getSha1() + ", " + commitData.getMessage();
     }
 
 }

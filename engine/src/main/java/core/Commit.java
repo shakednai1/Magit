@@ -1,5 +1,6 @@
 package core;
 
+import models.CommitData;
 import org.apache.commons.codec.digest.DigestUtils;
 import puk.team.course.magit.ancestor.finder.CommitRepresentative;
 
@@ -49,6 +50,7 @@ public class Commit implements CommitRepresentative {
     public String getRootFolderSHA1(){ return rootSha1; }
     public String getUserLastModified() { return userLastModified; }
     public String getCommitTime() { return commitTime; }
+
     public String getMsg(){ return msg;}
     @Override
     public String getFirstPrecedingSha1() {
@@ -94,14 +96,25 @@ public class Commit implements CommitRepresentative {
         Map<String, Commit> commitMap = new HashMap<>();
 
         String currCommitSha1 = endCommitSha1;
-        commitMap.put(currCommitSha1, new Commit(currCommitSha1));
 
-        while (true){
-            if(!commitMap.get(currCommitSha1).hasPrecedingCommit()){
-                break;
-            }
-            currCommitSha1 = commitMap.get(currCommitSha1).getFirstPrecedingSha1();
-            commitMap.put(currCommitSha1, new Commit(currCommitSha1));
+        List<String> commitsToExplore = new LinkedList<>();
+        commitsToExplore.add(currCommitSha1);
+
+        while (!commitsToExplore.isEmpty()){
+
+            String commitToLoad= commitsToExplore.get(0);
+            commitMap.put(commitToLoad, new Commit(commitToLoad));
+
+
+            Commit loadedCommit = commitMap.get(commitToLoad);
+
+            if(loadedCommit.getFirstPrecedingSha1() != null && !loadedCommit.getFirstPrecedingSha1().equals(""))
+                commitsToExplore.add(loadedCommit.getFirstPrecedingSha1());
+
+            if(loadedCommit.getSecondPrecedingSha1() != null && !loadedCommit.getSecondPrecedingSha1().equals(""))
+                commitsToExplore.add(loadedCommit.getSecondPrecedingSha1());
+
+            commitsToExplore.remove(commitToLoad);
         }
 
         return commitMap;
@@ -110,8 +123,6 @@ public class Commit implements CommitRepresentative {
     private boolean hasPrecedingCommit(){
         return !firstPreviousCommitSHA1.equals("");
     }
-
-
 
     static protected Map<String, Blob> getAllFilesOfCommit(String commitSha1){
         Folder commitFolder = Commit.getCommitRootFolder(commitSha1);

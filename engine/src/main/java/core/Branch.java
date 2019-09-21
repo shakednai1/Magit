@@ -133,7 +133,7 @@ public class Branch {
 
     Commit commit(String msg, String secondCommit) throws NoChangesToCommitError{
         if (!haveChanges())
-            throw new NoChangesToCommitError("");
+            throw new NoChangesToCommitError();
 
         String commitTime = Settings.commitDateFormat.format(new Date());
         rootFolder.commit(Settings.getUser(), commitTime);
@@ -162,6 +162,14 @@ public class Branch {
     private void updateChangedFilesState(){ // TODO better name for function
         newStateOfFiles.clear();
         newStateOfFiles = rootFolder.getCurrentFilesState(false);
+    }
+
+    protected void setRootFolder(Folder folder, boolean rewriteFS){
+        rootFolder = folder;
+        currentStateOfFiles = rootFolder.getCommittedFilesState(false);
+
+        if(rewriteFS)
+            rootFolder.rewriteFS();
     }
 
     protected void setHead(Commit newHead) {

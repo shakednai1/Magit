@@ -1,5 +1,7 @@
 package core;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -129,7 +131,11 @@ public class FSUtils {
     }
 
     static void clearCurrentWC() {
-        File directory = new File(Settings.repositoryFullPath);
+        clearWC(Settings.repositoryFullPath);
+    }
+
+    static void clearWC(String path){
+        File directory = new File(path);
         File[] listOfItems = directory.listFiles();
         for(File item: listOfItems){
             if(item.isDirectory()){
@@ -156,4 +162,28 @@ public class FSUtils {
         }
         FSUtils.deleteFile(folder.getPath());
     }
+
+    static void copyCurrentWC(String destPath){
+        File destDir = new File(destPath);
+
+        File srcDir = new File(Settings.repositoryFullPath);
+        File[] listOfItems = srcDir.listFiles();
+        for(File item: listOfItems){
+            try{
+                if(item.isDirectory()){
+                    if(item.getName().equals(Settings.gitFolder))
+                        continue;
+
+                    FileUtils.copyDirectory(item, new File(destDir.getAbsolutePath(), item.getName()));
+                }
+                else{
+                    FileUtils.copyFile(item, new File(destDir.getAbsolutePath(), item.getName()));
+                }
+            }
+            catch (IOException e){
+                System.out.println(String.format("Cannot copy %s to %s", item.getAbsolutePath(), destDir.getAbsolutePath()));
+            }
+        }
+    }
+
 }

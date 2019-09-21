@@ -98,7 +98,8 @@ public class AppController extends BaseController {
         @Override
         public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
             commits.get(oldValue).removePointingBranch(branchData);
-            commits.get(newValue).addPointingBranch(branchData);
+            if(commits.get(newValue) != null)
+                commits.get(newValue).addPointingBranch(branchData);
         }
 
     }
@@ -208,11 +209,12 @@ public class AppController extends BaseController {
         }
     }
 
-    private void createNewBranch(String branchName, boolean checkout) throws InvalidBranchNameError, UncommittedChangesError, NoActiveRepositoryError{
+    private void createNewBranch(String branchName, boolean checkout)
+            throws InvalidBranchNameError, UncommittedChangesError, NoActiveRepositoryError
+    {
         BranchData branchData = engine.createNewBranch(branchName, checkout);
         branchData.getHeadSha1Property().addListener(new BranchHeadCommitChangedListener(branchData));
 
-        // TODO - make active branch as property
         if(checkout)
             updateBranch();
     }
@@ -240,6 +242,7 @@ public class AppController extends BaseController {
 
     private void deleteBranch(String branchName) throws NoActiveRepositoryError, InvalidBranchNameError, IllegalArgumentException {
         engine.deleteBranch(branchName);
+        commitTree.draw();
     }
 
     @FXML
@@ -301,7 +304,12 @@ public class AppController extends BaseController {
         File dir = directoryChooser.showDialog(MyApp.stage);
         String newRepoPath = dir.getPath() +"/" + repositoryFolderNameDialog();
         String newRepoName = repositoryNameDialog();
-        engine.createNewRepository(newRepoPath, newRepoName);
+        try{
+            engine.createNewRepository(newRepoPath, newRepoName);
+        }
+        catch (InvalidRepositoryPath e){
+            showErrorAlert(e);
+        }
     }
 
     @FXML
@@ -330,15 +338,6 @@ public class AppController extends BaseController {
             }
         }
         catch (NoActiveRepositoryError e){ showErrorAlert(e); }
-    }
-
-    @FXML
-    public void OnTemp(){
-        String sha1a = "f1d7620781290535490b8164d753e7a5052a944e";
-        String sha1b = "680ffa2139deeb70f91c2c007c2de0942ddb9818";
-        CommitsDelta diff = new CommitsDelta(sha1b, sha1a);
-        diff.calcFilesMergeState();
-
     }
 
     @FXML
@@ -506,13 +505,24 @@ public class AppController extends BaseController {
             };
 
             Merge merge = engine.getActiveRepository().getMerge(getBranchToMerge());
-            if(!merge.getFastForward())
+            if(merge.isFastForward()){
+                Dialog d =new Dialog();
+                d.setContentText("Fast Forward merge done");
+                ButtonType okBtn = new ButtonType("OK", ButtonBar.ButtonData.APPLY);
+                d.getDialogPane().getButtonTypes().addAll(okBtn);
+                d.showAndWait();
+                d.close();
+                engine.getActiveRepo().makeFFMerge(merge);
+            }
+            else {
                 handleConflicts(merge);
+            }
+            commitTree.draw();
+
         }
         catch(NoActiveRepositoryError e){
                 showErrorAlert(e);
             }
-
     }
 
     void handleConflicts(Merge merge) {
@@ -530,6 +540,7 @@ public class AppController extends BaseController {
             anchorPane.getChildren().add(listView);
             Stage stage = new Stage();
             stage.setScene(new Scene(anchorPane));
+            stage.setTitle("Merge Conflicts");
             stage.show();
             items.addListener(new ListChangeListener() {
 
@@ -549,8 +560,8 @@ public class AppController extends BaseController {
     public void showGetCommitMsgDialogAfterAndMerge(Merge merge){
         TextInputDialog d = new TextInputDialog();
 
-        d.setTitle("Commit getMerge");
-        d.setContentText("Enter getMerge commit message");
+        d.setTitle("Commit Merge");
+        d.setContentText("Enter Merge commit message");
         d.showAndWait();
         // TODO cannot be an empty getMerge msg
         merge.setCommitMsg(d.getResult());
@@ -559,9 +570,14 @@ public class AppController extends BaseController {
 
     @FXML
     void OnPull(ActionEvent event) {
-        if(!engine.getCanPull()) showErrorAlert(new Exception("You have commits that not pushed yet \n Please push first and then pull"));
+        if(!engine.getCanPull()){
+            showErrorAlert(new Exception("You have commits that not pushed yet \n Please push first and then pull"));
+            return;
+        }
+
         try{
             pull();
+            commitTree.draw();
         }
         catch (IllegalArgumentException e){
             showErrorAlert(e);
@@ -570,20 +586,33 @@ public class AppController extends BaseController {
 
     void pull(){
         try{
-            if(!canExecuteMerge()) showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));
             Merge merge = engine.pull();
-            if(merge != null) handleConflicts(merge);
+            if(merge != null){
+                if(merge.isFastForward())
+                    engine.getActiveRepo().makeFFMerge(merge);
+                else
+                    handleConflicts(merge);
             }
-            catch (IllegalArgumentException | NoActiveRepositoryError e) {
+        }
+        catch (IllegalArgumentException e) {
                 showErrorAlert(e);
-
         }
     }
 
     @FXML
     void OnPush(ActionEvent event) {
-        pull();
-        engine.push();
+        try {
+            if(!canExecuteMerge()) {
+                showErrorAlert(new Exception("You have open changes. \n Please commit/reset them before merge"));
+                return;
+            }
+
+            pull();
+            engine.push();
+            commitTree.draw();
+        } catch (NoActiveRepositoryError e) {
+            showErrorAlert(e);
+        }
     }
 
     private boolean canExecuteMerge() throws NoActiveRepositoryError {

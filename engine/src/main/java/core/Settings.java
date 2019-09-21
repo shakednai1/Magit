@@ -16,7 +16,7 @@ public class Settings {
     final public static String remoteBranchFolder = magitFolder + "/remote_branches/";
 
     final static String activeBranchFileName = "HEAD";
-    final private static String activeBranchFile = branchFolder + activeBranchFileName;
+    final public static String activeBranchFile = branchFolder + activeBranchFileName;
     final public static String repositoryDetailsFile = magitFolder + "/repo";
     final public static String repositoryRemoteDetailsFile = magitFolder + "/remote_repo";
 

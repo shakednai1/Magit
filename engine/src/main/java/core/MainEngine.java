@@ -117,10 +117,10 @@ public class MainEngine {
     }
 
 
-    public void createNewRepository(String newRepositoryPath, String name){
+    public void createNewRepository(String newRepositoryPath, String name) throws InvalidRepositoryPath{
         File directory = new File(newRepositoryPath);
         if(directory.exists()){
-            throw new IllegalArgumentException(newRepositoryPath + " is already exist");
+            throw new InvalidRepositoryPath(newRepositoryPath + " is already exist");
         }
         repositoryManager.createNewRepository(newRepositoryPath, name, false);
     }
@@ -173,7 +173,7 @@ public class MainEngine {
 
     public void createAndCheckoutToNewTrackingBranch(String newBranchName, String trackingAfter) {
         Branch branch = new Branch(newBranchName, trackingAfter);
-        repositoryManager.getActiveRepository().addNewBranch(branch);
+        repositoryManager.getActiveRepository().addNewBranchIfNotExist(branch);
     }
 
     public FolderChanges getDiffBetweenCommits(String commitSha1, String prevCommit){
@@ -216,7 +216,7 @@ public class MainEngine {
 
 
     public static String getBranchMergeName(){
-        return getActiveRepository().getCurrentMerge().getMergingBranch().getName();
+        return getActiveRepository().getCurrentMerge().getMergingBranchName();
     }
 
     public Merge pull(){

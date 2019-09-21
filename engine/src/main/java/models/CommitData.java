@@ -18,6 +18,7 @@ public class CommitData {
     private String secondPreviousCommitSha1 = null;
     // TODO property -  add label from commitNodeController
     private ObservableList<BranchData> pointingBranches = FXCollections.observableArrayList();
+    private ObservableList<BranchData> containingBranches = FXCollections.observableArrayList();
 
     private boolean isInMasterChain = false;
 
@@ -51,6 +52,16 @@ public class CommitData {
     }
 
     public void removePointingBranch(BranchData branch){ pointingBranches.remove(branch); }
+
+    public void addContainingBranch(BranchData branch){
+        if(containingBranches.contains(branch)) return;
+        containingBranches.add(branch);
+    }
+
+    public void removeContainingBranch(BranchData branch){ containingBranches.remove(branch); }
+
+    public ObservableList<BranchData> getContainingBranches(){ return containingBranches; }
+
 
     public void setInMasterChain(){ isInMasterChain = true; }
 

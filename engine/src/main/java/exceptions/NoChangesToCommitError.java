@@ -1,7 +1,7 @@
 package exceptions;
 
 public class NoChangesToCommitError extends Exception {
-    public NoChangesToCommitError(String errorMessage) {
-        super(errorMessage);
+    public NoChangesToCommitError() {
+        super("There are no changes to commit");
     }
 }

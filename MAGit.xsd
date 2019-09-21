@@ -30,7 +30,7 @@
 	<xs:element name="preceding-commits">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="preceding-commit" maxOccurs="2">
+				<xs:element name="preceding-commitData" maxOccurs="2">
 					<xs:complexType>
 						<xs:attribute name="id" type="xs:string" use="required"/>
 					</xs:complexType>
@@ -121,7 +121,7 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="name"/>
-				<xs:element name="pointed-commit">
+				<xs:element name="pointed-commitData">
 					<xs:complexType>
 						<xs:attribute name="id" type="xs:string" use="required"/>
 					</xs:complexType>

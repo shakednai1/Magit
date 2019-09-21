@@ -159,7 +159,7 @@ class XmlLoader {
         if (!pointingBranches.isEmpty()) {
             for (MagitSingleBranch pointingBranch : pointingBranches) {
                 Branch branch = new Branch(pointingBranch.getName(), commit, rootFolder);
-                repositoryManager.getActiveRepository().addNewBranch(branch);
+                repositoryManager.getActiveRepository().addNewBranchIfNotExist(branch);
                 if (magitBranches.getHead().equals(pointingBranch.getName())) {
                     repositoryManager.getActiveRepository().setActiveBranch(branch);
                 }

@@ -7,6 +7,7 @@ import com.fxgraph.graph.Model;
 import commitTree.layout.CommitTreeLayout;
 import commitTree.node.CommitNode;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Background;
 import models.CommitData;
 
 import java.util.Hashtable;
@@ -35,7 +36,6 @@ public class CommitTree {
 
     public void setCommitsTree(Map<String, CommitData> repoCommits) {
         final Model model = tree.getModel();
-//        resetTree();
 
         tree.beginUpdate();
 
@@ -45,8 +45,8 @@ public class CommitTree {
         }
 
         for(CommitNode commitCell: commitCells.values()){
-            String prevCommitSha1 = commitCell.getCommit().getPreviousCommitSha1();
-            String secondCommitSha1 = commitCell.getCommit().getSecondPreviousCommitSha1();
+            String prevCommitSha1 = commitCell.getCommitData().getPreviousCommitSha1();
+            String secondCommitSha1 = commitCell.getCommitData().getSecondPreviousCommitSha1();
 
             if(prevCommitSha1 != null && !prevCommitSha1.isEmpty()){
                 Edge edge = new Edge(commitCell, commitCells.get(prevCommitSha1));
@@ -60,7 +60,7 @@ public class CommitTree {
 
         tree.endUpdate();
 
-        tree.layout(new CommitTreeLayout());
+        draw();
     }
 
     private ICell __addCommitToTree(CommitData commitData){
@@ -78,8 +78,11 @@ public class CommitTree {
         ICell cell = __addCommitToTree(commitData);
         model.addCell(cell);
 
-        Edge edge = new Edge(cell, prevCommit);
-        model.addEdge(edge);
+        if(prevCommit != null){
+            Edge edge = new Edge(cell, prevCommit);
+            model.addEdge(edge);
+        }
+
         if(secondPrevCommit != null) {
             Edge edge2 = new Edge(cell, secondPrevCommit);
             model.addEdge(edge2);
@@ -87,24 +90,12 @@ public class CommitTree {
 
         tree.endUpdate();
 
+        draw();
+    }
+
+    public void draw(){
+        tree.getCanvas().setBackground(Background.EMPTY);
         tree.layout(new CommitTreeLayout());
     }
-//
-//    public void resetTree(){
-//
-////        tree = new Graph();
-//
-//        tree.getModel().clear();
-//
-//
-//
-//        tree.getUseViewportGestures().set(false);
-//        tree.getUseNodeGestures().set(false);
-//
-////        contentContainer.setContent(tree.getCanvas());
-//
-//        commitCells.clear();
-//
-//    }
 
 }
