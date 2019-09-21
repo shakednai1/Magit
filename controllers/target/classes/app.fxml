@@ -59,7 +59,7 @@
                 </MenuButton>
                 <Button fx:id="wcStatus" mnemonicParsing="false" onAction="#OnWCStatus" text="show WC statuc" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                 <Button fx:id="commitBtn" mnemonicParsing="false" onAction="#OnCommit" prefHeight="25.0" prefWidth="199.0" text="Commit" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                <Button fx:id="testBtn" mnemonicParsing="false" onAction="#OnTemp" prefHeight="25.0" prefWidth="199.0" text="Test Me" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <Label fx:id="remoteRepoPath" GridPane.rowIndex="1" />
 
                                                 </children>
         </GridPane>

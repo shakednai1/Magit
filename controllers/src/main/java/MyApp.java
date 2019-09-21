@@ -46,6 +46,7 @@ public class MyApp extends Application{
         primaryStage.show();
 
         stage = primaryStage;
+        stage.setTitle("Such M.A.Git, Such WOW");
     }
 
 }

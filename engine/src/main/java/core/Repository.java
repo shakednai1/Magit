@@ -438,6 +438,9 @@ public class Repository {
     public String getRemoteRepositoryName(){
         return remoteRepositoryName;
     }
+    public String getRemoteRepositoryPath(){
+        return remoteRepositoryPath;
+    }
 
 
     public void addRemoteBranch(RemoteBranch remoteBranch){

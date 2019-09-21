@@ -52,6 +52,9 @@ public class AppController extends BaseController {
         currentRepo.textProperty().bind(Bindings.format("%s > %s",
                 repositoryModel.getRepoNameProperty(),
                 repositoryModel.getRepoPathProperty()));
+
+        remoteRepoPath.textProperty().bind(Bindings.format("Remote path: %s",
+                repositoryModel.getRemoteRepoPathProperty()));
     }
 
     @FXML
@@ -65,6 +68,9 @@ public class AppController extends BaseController {
 
     @FXML
     private Label currentRepo;
+
+    @FXML
+    private Label remoteRepoPath;
 
     @FXML
     private Label currentUser;
@@ -367,6 +373,8 @@ public class AppController extends BaseController {
     private void updateCurrentRepo(String repoPath){
         try{
             repositoryModel.setRepo(engine.getCurrentRepoName(), repoPath);
+            repositoryModel.setRemoteRepo(engine.getActiveRepo().getRemoteRepositoryPath());
+
             updateBranch();
 
             branches = engine.getAllBranches();
