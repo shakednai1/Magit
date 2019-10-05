@@ -140,7 +140,7 @@ public class Branch {
 
         String prevCommitSha1 = (head==null)? null : head.getSha1();
         Commit com = new Commit(msg, rootFolder.getSha1(),
-                rootFolder.userLastModified, commitTime,
+                Settings.getUser(), commitTime,
                 prevCommitSha1, secondCommit);
         com.zipCommit();
 
