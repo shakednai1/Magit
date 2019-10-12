@@ -1,3 +1,6 @@
+import user.User;
+import user.UserManager;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -6,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@WebServlet(name = "CalcServlet", urlPatterns = "/calc")
+@WebServlet(name = "login", urlPatterns = "/login")
 public class Login extends HttpServlet {
 
     /**
@@ -19,26 +22,14 @@ public class Login extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        String x1ParamStr = request.getParameter("username");
-        if (x1ParamStr == null) {
-            x1ParamStr = "";
-        }
-        String x2ParamStr = request.getParameter("password");
-        if (x2ParamStr == null) {
-            x2ParamStr = "";
-        }
+//        response.setContentType("text/html;charset=UTF-8");
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
 
-        try (PrintWriter out = response.getWriter()) {
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>CalcServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println(String.format("<h1> User %s password %s </h1>", x1ParamStr, x2ParamStr));
-            out.println("</body>");
-            out.println("</html>");
-        }
+        User user = UserManager.addUser(username, password);
+
+        String userHTML= "http://localhost:8080/user.html";
+        response.sendRedirect(userHTML);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
