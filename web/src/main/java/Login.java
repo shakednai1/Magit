@@ -26,9 +26,11 @@ public class Login extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
+        request.getSession().setAttribute("user", username);
+
         User user = UserManager.addUser(username, password);
 
-        String userHTML= "http://localhost:8080/user.html";
+        String userHTML= "http://localhost:8080/user.jsp";
         response.sendRedirect(userHTML);
     }
 

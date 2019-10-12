@@ -11,6 +11,7 @@ public class User {
     String name;
     String password;
     ArrayList repos = new ArrayList();
+    ArrayList notifications = new ArrayList<Notification>();
 
     public ArrayList getRepos() {
         return repos;
@@ -25,4 +26,7 @@ public class User {
         repos.add(repoName);
     }
 
+    protected void addNotification(Notification notification){
+        notifications.add(notification);
+    }
 }

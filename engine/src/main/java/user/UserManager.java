@@ -2,6 +2,7 @@ package user;
 
 import javax.jws.soap.SOAPBinding;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -19,5 +20,8 @@ public class UserManager {
         return newUser;
     }
 
+    public List<User> getUsers(boolean onlyCreated){
+        return users.stream().filter(u -> !u.getRepos().isEmpty()).collect(Collectors.toList());
+    }
 
 }
