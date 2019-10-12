@@ -1,6 +1,7 @@
 import user.User;
 import user.UserManager;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -22,7 +23,6 @@ public class Login extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//        response.setContentType("text/html;charset=UTF-8");
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
@@ -30,8 +30,8 @@ public class Login extends HttpServlet {
 
         User user = UserManager.addUser(username, password);
 
-        String userHTML= "http://localhost:8080/user.jsp";
-        response.sendRedirect(userHTML);
+        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/user.jsp");
+        dispatcher.forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
