@@ -7,7 +7,7 @@
 <body>
 <h1 id="currUser" style="color: #5e9ca0;"><% out.print(request.getSession().getAttribute("user")); %></h1>
 
-<form align="right" action="/login"><input type="submit" value="Logout"/></form>
+<form align="right" action="/index.html"><input type="submit" value="Logout"/></form>
 <h2 style="color: #2e6c80;">My repositories</h2>
 <link rel="stylesheet" type="text/css" href="reposTable.css">
 <table id="myRepos" class="reposTable">
@@ -25,7 +25,7 @@
 <p style="color: #2e6c80; font-size: 90%;">Load new repository:</p>
 <form action="/login"><input accept="text/xml" name="xmlFile" type="file"/> <input type="submit" value="Load"/></form>
 <h2 style="color: #2e6c80;">Magit users</h2>
-<ul>
+<ul id="usersList">
     <li><a href="stam">user1</a></li>
     <li><a href="stam">user2</a></li>
 </ul>

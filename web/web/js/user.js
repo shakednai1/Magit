@@ -3,6 +3,7 @@
 
 $(document).ready(function() {
     addAllRepositoriesToTable();
+    addAllUsersToList();
 });
 
 
@@ -35,3 +36,15 @@ function addAllRepositoriesToTable() {
         addRepositoryToTable(repos[i]);
     }
 }
+
+function addAllUsersToList(){
+    // TODO : change onlyCreated=true
+    $.get("/users?onlyCreated=false", function(response){
+        for(i in response){
+                // TODO: fix href
+                $("#usersList").append('<li><a href="/stam">'+ response[i].username +'</a></li>');
+            }
+        }
+    );
+}
+

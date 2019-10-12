@@ -20,8 +20,8 @@ public class UserManager {
         return newUser;
     }
 
-    public List<User> getUsers(boolean onlyCreated){
-        return users.stream().filter(u -> !u.getRepos().isEmpty()).collect(Collectors.toList());
+    public static List<User> getUsers(boolean onlyCreated){
+        return onlyCreated? users.stream().filter(u -> !u.getRepos().isEmpty()).collect(Collectors.toList()): users.stream().filter(u -> u.getRepos().isEmpty()).collect(Collectors.toList());
     }
 
 }
