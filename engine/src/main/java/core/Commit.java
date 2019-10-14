@@ -1,5 +1,6 @@
 package core;
 
+import com.sun.xml.internal.ws.api.config.management.policy.ManagementAssertion;
 import models.CommitData;
 import org.apache.commons.codec.digest.DigestUtils;
 import puk.team.course.magit.ancestor.finder.CommitRepresentative;
@@ -16,10 +17,12 @@ public class Commit implements CommitRepresentative {
     private String firstPreviousCommitSHA1 = "";
     private String secondPreviousCommitSHA1 = ""; // The commit that was merged with prevCommit of the head branch
     private String userLastModified;
+    private Settings repoSettings;
 
     Commit(String msg, String rootFolderSha,
            String userLastModified, String commitTime,
-           String firstPreviousCommitSHA1, String secondPreviousCommitSHA1){
+           String firstPreviousCommitSHA1, String secondPreviousCommitSHA1,
+           Settings repoSettings){
         this.msg = msg;
         this.firstPreviousCommitSHA1 = firstPreviousCommitSHA1 == null ? "" : firstPreviousCommitSHA1;
         this.rootSha1 = rootFolderSha;
@@ -27,12 +30,14 @@ public class Commit implements CommitRepresentative {
         this.commitTime = commitTime;
         this.userLastModified = userLastModified;
         commitSha1 = calcCommitSha1();
+        this.repoSettings = repoSettings;
     }
 
-    public Commit(String commitSha1){
+    public Commit(String commitSha1, Settings repoSettings){
         this.commitSha1 = commitSha1;
+        this.repoSettings = repoSettings;
 
-        List<String> content = FSUtils.getZippedContent(commitSha1);
+        List<String> content = FSUtils.getZippedContent(repoSettings.objectsFolderPath, commitSha1);
         String[] commitData = content.get(0).split(Settings.delimiter);
 
         this.rootSha1 = commitData[0];
@@ -86,13 +91,13 @@ public class Commit implements CommitRepresentative {
     }
 
     void zipCommit(){
-        String fileNameWOExtension = Settings.objectsFolderPath + commitSha1;
+        String fileNameWOExtension = repoSettings.objectsFolderPath + commitSha1;
         FSUtils.createNewFile(fileNameWOExtension+".txt", getCommitTxt());
         FSUtils.zip(fileNameWOExtension + ".zip",fileNameWOExtension + ".txt");
         FSUtils.deleteFile(fileNameWOExtension + ".txt");
     }
 
-    static Map<String, Commit> loadAll(String endCommitSha1){
+    static Map<String, Commit> loadAll(String endCommitSha1, Settings repoSettings){
         Map<String, Commit> commitMap = new HashMap<>();
 
         String currCommitSha1 = endCommitSha1;
@@ -103,7 +108,7 @@ public class Commit implements CommitRepresentative {
         while (!commitsToExplore.isEmpty()){
 
             String commitToLoad= commitsToExplore.get(0);
-            commitMap.put(commitToLoad, new Commit(commitToLoad));
+            commitMap.put(commitToLoad, new Commit(commitToLoad, repoSettings));
 
 
             Commit loadedCommit = commitMap.get(commitToLoad);
@@ -124,18 +129,19 @@ public class Commit implements CommitRepresentative {
         return !firstPreviousCommitSHA1.equals("");
     }
 
-    static protected Map<String, Blob> getAllFilesOfCommit(String commitSha1){
-        Folder commitFolder = Commit.getCommitRootFolder(commitSha1);
+    static protected Map<String, Blob> getAllFilesOfCommit(String commitSha1, Settings repoSettings){
+        Folder commitFolder = Commit.getCommitRootFolder(commitSha1, repoSettings);
         return commitFolder.getCommittedFilesState(false);
     }
 
-    static Folder getCommitRootFolder(String commitSha1){
-        Commit commit = new Commit(commitSha1);
+    static Folder getCommitRootFolder(String commitSha1, Settings repoSettings){
+        Commit commit = new Commit(commitSha1, repoSettings);
 
-        return new Folder(new File(Settings.repositoryFullPath),
-                new ItemSha1(commit.getRootFolderSHA1(), false, false),
+        return new Folder(new File(repoSettings.repositoryFullPath),
+                new ItemSha1(commit.getRootFolderSHA1(), false, false, repoSettings),
                 commit.getUserLastModified(),
-                commit.getCommitTime());
+                commit.getCommitTime(),
+                repoSettings);
 
     }
 

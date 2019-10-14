@@ -18,21 +18,24 @@ public class Merge {
     String mergeTime;
     List<FileChanges> conflicts = new LinkedList<>();
     FolderChanges folderChanges;
+    Branch activeBranch;
     String mergingBranchName;
     String fastForward = null;
+    Settings repoSettings;
 
     private String commitMsg = "";
 
 
-    public Merge(String firstCommitSha1, String secondCommitSha1, String branchToMerge){
-        MainEngine engine = new MainEngine();
+    public Merge(String firstCommitSha1, String secondCommitSha1, Branch activeBranch, String branchToMerge){
         this.mergingBranchName = branchToMerge;
         this.firstCommitSha1 = firstCommitSha1;
         this.secondCommitSha1 = secondCommitSha1;
+        this.activeBranch = activeBranch;
+        this.repoSettings = activeBranch.getRepoSettings();
 
         setFastForward();
         if (fastForward == null) {
-            folderChanges = engine.getDiffBetweenCommits(firstCommitSha1, secondCommitSha1);
+            folderChanges = CommitsDelta.getDiffBetweenCommits(firstCommitSha1, secondCommitSha1, repoSettings);
             if (folderChanges.getHasConflicts()) {
                 setConflictFiles();
             }
@@ -69,15 +72,13 @@ public class Merge {
     }
 
     public Commit commit(){
-        RepositoryManager repositoryManager = MainEngine.getRepositoryManager();
-        Branch activeBranch = repositoryManager.getActiveRepository().getActiveBranch();
-
         mergeTime = Settings.commitDateFormat.format(new Date());
         activeBranch.mergeCommit(this);
 
         Commit com = new Commit(getCommitMsg(), folderChanges.getSha1(),
                 folderChanges.userLastModified, mergeTime,
-                getFirstCommitSha1(), getSecondCommitSha1());
+                getFirstCommitSha1(), getSecondCommitSha1(),
+                repoSettings);
         com.zipCommit();
 
         activeBranch.setHead(com);
@@ -90,8 +91,8 @@ public class Merge {
 
     void setFastForward() {
 
-        Commit firstCommit = new Commit(firstCommitSha1);
-        Commit secondCommit = new Commit(secondCommitSha1);
+        Commit firstCommit = new Commit(firstCommitSha1, repoSettings);
+        Commit secondCommit = new Commit(secondCommitSha1, repoSettings);
 
         Date firstCommitTime = null;
         Date secondCommitTime = null;
@@ -103,13 +104,13 @@ public class Merge {
 
         Map<String, Commit> commitParents;
         if(firstCommitTime.after(secondCommitTime) || firstCommitTime.equals(secondCommitTime)){
-            commitParents = Commit.loadAll(firstCommit.getSha1());
+            commitParents = Commit.loadAll(firstCommit.getSha1(), repoSettings);
             if(commitParents.containsKey(secondCommitSha1)){
                 fastForward = firstCommitSha1;
             }
         }
         else if(firstCommitTime.before(secondCommitTime)){
-            commitParents = Commit.loadAll(secondCommit.getSha1());
+            commitParents = Commit.loadAll(secondCommit.getSha1(), repoSettings);
             if(commitParents.containsKey(firstCommitSha1)){
                 fastForward = secondCommitSha1;
             }

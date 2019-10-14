@@ -75,6 +75,7 @@ public class FileChanges extends Blob{
 
         this.fullPath = dataElement.fullPath;
         this.name = dataElement.name;
+        this.repoSettings = baseElement.repoSettings;
     }
 
 
@@ -126,17 +127,17 @@ public class FileChanges extends Blob{
     public void zip(){
         if(state == Common.FilesStatus.RESOLVED){
             ItemSha1 sha1 = resElement.currentSHA1;
-            File resolvedFile = new File(Settings.objectsFolderPath, sha1.sha1 + ".txt");
+            File resolvedFile = new File(repoSettings.objectsFolderPath, sha1.sha1 + ".txt");
             FSUtils.writeFile(resolvedFile.getAbsolutePath(), sha1.content, false);
-            FSUtils.zip(FSUtils.getZippedPath(sha1.sha1),  resolvedFile.getAbsolutePath());
+            FSUtils.zip(FSUtils.getZippedPath(repoSettings.objectsFolderPath, sha1.sha1),  resolvedFile.getAbsolutePath());
         }
     }
 
     public void setContent(String text) {
-        currentSHA1 = new ItemSha1(text, true, true);
+        currentSHA1 = new ItemSha1(text, true, true, repoSettings);
         state = Common.FilesStatus.RESOLVED;
 
-        resElement = new Blob(new File(fullPath), currentSHA1, "", "");
+        resElement = new Blob(new File(fullPath), currentSHA1, "", "", repoSettings);
     }
 
     public void markDeleted() {

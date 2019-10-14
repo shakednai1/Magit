@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 public class Branch {
 
+    private Settings repoSettings;
+
     private Commit head = null;
     private String name;
     private Folder rootFolder;
@@ -21,62 +23,68 @@ public class Branch {
     public Map<String, Blob> currentStateOfFiles = new HashMap<>();
     public Map<String, Blob> newStateOfFiles = new HashMap<>();
 
-    Branch(String name){
+    Branch(String name, Settings repoSettings){
         // constractor for master branch
         this.name = name;
+        this.repoSettings = repoSettings;
 
-        rootFolder = createRootFolder();
+        rootFolder = createRootFolder(repoSettings.repositoryFullPath);
         rootFolder.updateState();
         writeBranchInfoFile();
     }
 
-    Branch(String name, Commit head, Folder rootFolder){
+    Branch(String name, Commit head, Folder rootFolder, Settings repoSettings){
         // constractor for new branch
         this.name = name;
         this.rootFolder = rootFolder;
+        this.repoSettings = repoSettings;
 
         setHead(head);
         currentStateOfFiles = rootFolder.getCommittedFilesState(false);
     }
 
-     Branch(String name, String headCommitSha1, String trackingAfter, boolean rewriteFS){
+     Branch(String name, String headCommitSha1, String trackingAfter, boolean rewriteFS, Settings repoSettings){
         // constractor for loading an existing branch
         this.name = name;
         this.trackingAfter = trackingAfter;
+        this.repoSettings = repoSettings;
 
-        commitData = Commit.loadAll(headCommitSha1);
+        commitData = Commit.loadAll(headCommitSha1, repoSettings);
         setHead(commitData.get(headCommitSha1));
 
-        File  rootFolderPath = new File(Settings.repositoryFullPath);
+        File  rootFolderPath = new File(repoSettings.repositoryFullPath);
         rootFolder = new Folder(rootFolderPath,
-                new ItemSha1(this.head.getRootFolderSHA1(), false, false),
+                new ItemSha1(this.head.getRootFolderSHA1(), false, false, repoSettings),
                 head.getUserLastModified(),
-                head.getCommitTime());
+                head.getCommitTime(),
+                repoSettings);
         if(rewriteFS)
             rootFolder.rewriteFS();
 
         currentStateOfFiles = rootFolder.getCommittedFilesState(false);
     }
 
-    Branch(String name, String trackingAfter){
-        String branchData = FSUtils.getFileLines(Settings.remoteBranchesPath + trackingAfter + ".txt").get(0);
+    Branch(String name, String trackingAfter, Settings repoSettings){
+        String branchData = FSUtils.getFileLines(repoSettings.remoteBranchesPath + trackingAfter + ".txt").get(0);
         this.name=  name;
         this.trackingAfter = trackingAfter;
-        this.head = new Commit(branchData.split(Settings.delimiter)[0]);
+        this.head = new Commit(branchData.split(Settings.delimiter)[0], repoSettings);
+        this.repoSettings = repoSettings;
 
         writeBranchInfoFile();
     }
 
     public String getTrackingAfter(){ return trackingAfter; }
 
+    protected Settings getRepoSettings(){ return repoSettings;}
+
     private void addCommitToHistory(Commit commit){
         commitData.put(commit.getSha1(), commit);
     }
 
-    private Folder createRootFolder(){
-        String repoLocation = Settings.repositoryFullPath;
+    private Folder createRootFolder(String repoLocation){
         File path = new File(repoLocation);
-        return new Folder(path);
+        return new Folder(path, repoSettings);
     }
 
     public Commit getHead(){ return head; }
@@ -85,24 +93,24 @@ public class Branch {
 
     Folder getRootFolder(){ return rootFolder; }
 
-    static Branch load(String branchName, boolean rewriteWC){
+    static Branch load(Settings repoSettings, String branchName, boolean rewriteWC){
         // TODO deprecate load function and build constractor that knows how to handle only branch name
 
-        List<String> branchData = FSUtils.getFileLines(getBranchFilePath(branchName));
+        List<String> branchData = FSUtils.getFileLines(repoSettings.getBranchFilePath(branchName));
         String headCommitSha1 = branchData.get(0).split(Settings.delimiter)[0];
         String trackingAfterRemote = branchData.get(0).split(Settings.delimiter)[1];
 
         if(headCommitSha1.equals("null")){
             // loading empty repo
-            if (rewriteWC) FSUtils.clearCurrentWC();
-            return new Branch(branchName);
+            if (rewriteWC) FSUtils.clearWC(repoSettings.repositoryFullPath);
+            return new Branch(branchName, repoSettings);
         }
 
-        return new Branch(branchName, headCommitSha1, trackingAfterRemote, rewriteWC);
+        return new Branch(branchName, headCommitSha1, trackingAfterRemote, rewriteWC, repoSettings);
     }
 
     static BranchData getBranchDisplayData(String branchName, Repository repository){
-        List<String> branchData = FSUtils.getFileLines(getBranchFilePath(branchName));
+        List<String> branchData = FSUtils.getFileLines(repository.getSettings().getBranchFilePath(branchName));
         String headCommitSha1 = branchData.get(0).split(Settings.delimiter)[0];
         String trackingAfter = branchData.get(0).split(Settings.delimiter)[1];
         String headCommitMsg;
@@ -112,7 +120,7 @@ public class Branch {
             headCommitMsg = "";
         }
         else{
-            Commit headCommit = new Commit(headCommitSha1);
+            Commit headCommit = new Commit(headCommitSha1, repository.getSettings());
             headCommitSha1 = headCommit.getSha1();
             headCommitMsg = headCommit.getMsg();
         }
@@ -136,12 +144,13 @@ public class Branch {
             throw new NoChangesToCommitError();
 
         String commitTime = Settings.commitDateFormat.format(new Date());
-        rootFolder.commit(Settings.getUser(), commitTime);
+        rootFolder.commit(repoSettings.getUser(), commitTime);
 
         String prevCommitSha1 = (head==null)? null : head.getSha1();
         Commit com = new Commit(msg, rootFolder.getSha1(),
-                Settings.getUser(), commitTime,
-                prevCommitSha1, secondCommit);
+                repoSettings.getUser(), commitTime,
+                prevCommitSha1, secondCommit,
+                repoSettings);
         com.zipCommit();
 
         setHead(com);
@@ -151,7 +160,7 @@ public class Branch {
     }
 
     void mergeCommit(Merge merge){
-        merge.folderChanges.commit(Settings.getUser(), merge.mergeTime);
+        merge.folderChanges.commit(repoSettings.getUser(), merge.mergeTime);
 
         rootFolder = merge.folderChanges.getResFolder();
         rootFolder.rewriteFS();
@@ -183,11 +192,7 @@ public class Branch {
         String branchFileContentCommit =  (head == null)? "null": head.getSha1();
         String branchFileContentTracking = (trackingAfter == null) ? "null" : trackingAfter;
         String content = String.join(Settings.delimiter, branchFileContentCommit, branchFileContentTracking);
-        FSUtils.writeFile(getBranchFilePath(name), content, false);
-    }
-
-    private static String getBranchFilePath(String branchName){
-        return Settings.branchFolderPath + branchName + ".txt";
+        FSUtils.writeFile(repoSettings.getBranchFilePath(name), content, false);
     }
 
     public List<String> getCommitHistory(){
@@ -227,10 +232,6 @@ public class Branch {
         changes.setDeletedFiles(deletedFilesPaths.stream().map(currentStateOfFiles::get).collect(Collectors.toList()));
 
         return changes;
-    }
-
-    static boolean deleteBranch(String branchName){
-        return FSUtils.deleteFile(getBranchFilePath(branchName));
     }
 
     public boolean isTracking(){

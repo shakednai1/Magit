@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class WorkingCopyController {
 
-    private MainEngine engine = new MainEngine();
+    private MainEngine engine;
     private FilesDelta filesDelta;
 
     @FXML ListView<Blob> filesListView;
@@ -43,7 +43,7 @@ public class WorkingCopyController {
     }
 
     public void setFilesDeltaCommit(String commitSha1, String prevCommit){
-        FolderChanges folderChanges = engine.getDiffBetweenCommits(commitSha1, prevCommit);
+        FolderChanges folderChanges = CommitsDelta.getDiffBetweenCommits(commitSha1, prevCommit, null);
         List<Blob> deletedFiles = new LinkedList<>();
         List<Blob> updatedFiles = new LinkedList<>();
         List<Blob> newFiles = new LinkedList<>();

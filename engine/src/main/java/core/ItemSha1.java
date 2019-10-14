@@ -9,10 +9,13 @@ public class ItemSha1{
     String sha1;
     String content;
 
-    ItemSha1(String strForSha1, boolean isContent, boolean saveContent){
+    Settings repoSettings;
+
+    ItemSha1(String strForSha1, boolean isContent, boolean saveContent, Settings repoSettings){
         sha1 = (isContent) ? getSha1FromContent(strForSha1): strForSha1;
         if(saveContent)
             content = strForSha1;
+        this.repoSettings = repoSettings;
     }
 
     private static String getSha1FromContent(String content){
@@ -22,7 +25,7 @@ public class ItemSha1{
     String getContent(){
         if (content != null)
             return content;
-        return String.join("\n", FSUtils.getZippedContent(sha1));
+        return String.join("\n", FSUtils.getZippedContent(repoSettings.objectsFolderPath, sha1));
     }
 
     @Override

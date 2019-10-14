@@ -68,19 +68,19 @@ public class FSUtils {
         }
     }
 
-    public static String getZippedPath(String fileName){
-        return new File(Settings.objectsFolderPath , fileName+".zip").getAbsolutePath();
+    public static String getZippedPath(String directory, String fileName){
+        return new File(directory , fileName+".zip").getAbsolutePath();
     }
 
-    static List<String> getZippedContent(String sha1){
-        FSUtils.unzip(getZippedPath(sha1), Settings.objectsFolderPath , sha1 + ".txt");
-        List<String > content = FSUtils.getFileLines(Settings.objectsFolderPath + sha1+ ".txt");
-        FSUtils.deleteFile(Settings.objectsFolderPath + sha1 + ".txt");
+    static List<String> getZippedContent(String directory, String sha1){
+        FSUtils.unzip(getZippedPath(directory, sha1), directory , sha1 + ".txt");
+        List<String > content = FSUtils.getFileLines(directory + sha1+ ".txt");
+        FSUtils.deleteFile(directory + sha1 + ".txt");
         return content;
     }
 
-    static String getTxtPath(String fileName){
-        return new File(Settings.objectsFolderPath , fileName+".txt").getAbsolutePath();
+    static String getTxtPath(String directory, String fileName){
+        return new File(directory, fileName+".txt").getAbsolutePath();
     }
 
     static void createNewFile(String fileName, String content){
@@ -130,10 +130,6 @@ public class FSUtils {
         return null;
     }
 
-    static void clearCurrentWC() {
-        clearWC(Settings.repositoryFullPath);
-    }
-
     static void clearWC(String path){
         File directory = new File(path);
         File[] listOfItems = directory.listFiles();
@@ -163,10 +159,10 @@ public class FSUtils {
         FSUtils.deleteFile(folder.getPath());
     }
 
-    static void copyCurrentWC(String destPath){
+    static void copyWC(String srcPath, String destPath){
         File destDir = new File(destPath);
 
-        File srcDir = new File(Settings.repositoryFullPath);
+        File srcDir = new File(srcPath);
         File[] listOfItems = srcDir.listFiles();
         for(File item: listOfItems){
             try{

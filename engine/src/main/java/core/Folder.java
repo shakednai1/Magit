@@ -16,17 +16,19 @@ public class Folder extends Item {
 
     Folder(){}
 
-    Folder(File folderPath) {
+    Folder(File folderPath, Settings repoSettings) {
         fullPath = folderPath.getAbsolutePath();
         name = folderPath.getName();
+        this.repoSettings = repoSettings;
     }
 
-    Folder(File folderPath, ItemSha1 folderSha1, String lastUser, String lastModified ){
+    Folder(File folderPath, ItemSha1 folderSha1, String lastUser, String lastModified, Settings repoSettings ){
         this.fullPath = folderPath.getAbsolutePath();
         this.name = folderPath.getName();
         this.userLastModified = lastUser;
         this.lastModified = lastModified;
         this.currentSHA1 = folderSha1;
+        this.repoSettings = repoSettings;
 
         for (String itemData: this.currentSHA1.getContent().split("\\n")){
             String[] item = itemData.split(Settings.delimiter);
@@ -39,11 +41,18 @@ public class Folder extends Item {
             String itemLastModified = item[4];
 
             if (itemType.equals("File")){
-                subFiles.put(itemFullPath, new Blob(new File(itemFullPath), new ItemSha1(itemSha1, false, false), itemLastUser, itemLastModified));
+                subFiles.put(itemFullPath, new Blob(new File(itemFullPath),
+                        new ItemSha1(itemSha1, false, false, repoSettings),
+                        itemLastUser,
+                        itemLastModified,
+                        repoSettings));
             }
             else{
                 subFolders.put(itemFullPath, new Folder(new File(itemFullPath),
-                        new ItemSha1(itemSha1, false, false), itemLastUser, itemLastModified));
+                        new ItemSha1(itemSha1, false, false, repoSettings),
+                        itemLastUser,
+                        itemLastModified,
+                        repoSettings));
             }
         }
     }
@@ -100,7 +109,7 @@ public class Folder extends Item {
 
     void setSHA1(){
         String sha1Str = getStringToCalcSHA1();
-        currentSHA1 = new ItemSha1(sha1Str, true, false);
+        currentSHA1 = new ItemSha1(sha1Str, true, false, repoSettings);
     }
 
     void zipRec(){
@@ -123,14 +132,14 @@ public class Folder extends Item {
                 Folder folder = subFolders.get(item.getPath());
 
                 if (folder == null) {
-                    folder = new Folder(item);
+                    folder = new Folder(item, repoSettings);
                 }
                 folder.updateState();
                 if(!folder.isEmptyCurrentState())
                     curSubFolders.put(folder.fullPath, folder);
             }
             else if(item.isFile()){
-                Blob file = new Blob(item.getPath());
+                Blob file = new Blob(item.getPath(), repoSettings);
                 file.updateState();
 
                 Blob prevFile = subFiles.get(file.fullPath);
@@ -146,7 +155,7 @@ public class Folder extends Item {
     }
 
     void rewriteFS(){
-        FSUtils.clearCurrentWC();
+        FSUtils.clearWC(fullPath);
         _rewriteFS();
     }
 
@@ -211,7 +220,7 @@ public class Folder extends Item {
 
     private String getTxtFilePath(){
         // returns the txt file path (we create this file -> zip it -> delete)
-        return Settings.objectsFolderPath + getSha1() + ".txt";
+        return repoSettings.objectsFolderPath + getSha1() + ".txt";
     }
 
     List<String> getItemsData() {

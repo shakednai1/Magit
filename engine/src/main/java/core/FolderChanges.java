@@ -210,7 +210,7 @@ public class FolderChanges extends Folder {
 
 
     Folder getResFolder(){
-        return new Folder(new File(fullPath), currentSHA1, userLastModified, lastModified);
+        return new Folder(new File(fullPath), currentSHA1, userLastModified, lastModified, repoSettings);
     }
 
 }

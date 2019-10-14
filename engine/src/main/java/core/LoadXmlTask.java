@@ -14,7 +14,7 @@ public class LoadXmlTask extends Task {
 
     @Override
     protected Object call() throws Exception {
-        engine.loadRepositoyFromXML();
+        engine.loadRepositoryFromXML();
         return null;
     }
 }

@@ -13,17 +13,19 @@ public class Blob extends Item {
 
     Blob(){}
 
-    Blob(String fullPath){
+    Blob(String fullPath, Settings repoSettings){
         this.fullPath = fullPath;
         this.name = new File(fullPath).getName();
+        this.repoSettings = repoSettings;
     }
 
-    Blob(File itemPath, ItemSha1 sha1, String lastUser, String lastModified){
+    Blob(File itemPath, ItemSha1 sha1, String lastUser, String lastModified, Settings repoSettings){
         this.fullPath = itemPath.getAbsolutePath();
         this.name = itemPath.getName();
         this.currentSHA1 = sha1;
         this.userLastModified = lastUser;
         this.lastModified = lastModified;
+        this.repoSettings = repoSettings;
     }
 
     String getUser(){ return userLastModified; }
@@ -44,7 +46,7 @@ public class Blob extends Item {
     public void updateState(){
         try {
             String content = new String(Files.readAllBytes(Paths.get(fullPath)));
-            currentSHA1 = new ItemSha1(content, true, false);
+            currentSHA1 = new ItemSha1(content, true, false, repoSettings);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -55,7 +57,7 @@ public class Blob extends Item {
     }
 
     void rewriteFS(){
-       FSUtils.unzip(Settings.objectsFolderPath + this.currentSHA1 + ".zip",
+       FSUtils.unzip(repoSettings.objectsFolderPath + this.currentSHA1 + ".zip",
                 new File(fullPath).getParent(), name);
 
     }

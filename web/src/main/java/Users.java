@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 
 @WebServlet(name = "users", urlPatterns = "/users")
@@ -21,9 +22,9 @@ public class Users extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter out = resp.getWriter();
-        List<User> users = UserManager.getUsers(req.getParameter("onlyCreated").equals("true"));
+        Map<String, User> users = UserManager.getUsers(req.getParameter("onlyCreated").equals("true"));
         ArrayList<JSONObject> response = new ArrayList<JSONObject>();
-        for(User user : users){
+        for(User user : users.values()){
             JSONObject userData = new JSONObject();
             userData.put("username", user.getName());
             ArrayList<JSONObject> usersRepos = new ArrayList<>();

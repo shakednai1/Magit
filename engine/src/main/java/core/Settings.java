@@ -1,12 +1,18 @@
 package core;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 public class Settings {
 
+    static boolean webMode = true;
     static File runningPath;
+
+    final public static File baseLocation = new File("c:", "magit-ex3");
 
     final public static DateFormat commitDateFormat = new SimpleDateFormat("dd.MM.yyyy-HH:mm:ss:SSS");
 
@@ -23,21 +29,43 @@ public class Settings {
     final static String delimiter = ",";
     final public static String YNquestion = "Y/N";
 
-    static String repositoryFullPath = "";
-    static String objectsFolderPath = "";
-    static String branchFolderPath = "";
-    static String activeBranchFilePath = "";
-    static String repositoryDetailsFilePath = "";
-    static String remoteBranchesPath = "";
-    static  String repositoryRemoteDetailsFilePath = "";
+    String userName;
+    String repositoryFullPath = "";
+    String objectsFolderPath = "";
+    String branchFolderPath = "";
+    String activeBranchFilePath = "";
+    String repositoryDetailsFilePath = "";
+    String remoteBranchesPath = "";
+    String repositoryRemoteDetailsFilePath = "";
 
     final static String gitFolder = ".magit";
 
-    private static String currentUser = "Administrator";
+    Settings(String userName){
+        this.userName = userName;
+    }
 
-    static void setNewRepository(String repositoryPath ){
-        repositoryFullPath = repositoryPath ;
-        objectsFolderPath = repositoryFullPath+objectsFolder;
+    String getUser(){ return userName; }
+    void setUser(String userName){
+        // DO NOT USE IN WEB MODE
+        this.userName = userName;
+    }
+
+
+    void setNewRepository(String repository ){
+        // repository param : in web mode , repository = repositoryName
+        // else: repository = repositoryPath
+        if(webMode){
+            File repoFile =  new File(baseLocation, userName);
+            repoFile = new File(repoFile, repository);
+            repoFile.mkdirs();
+
+            repositoryFullPath = repoFile.getAbsolutePath();
+        }
+        else {
+            repositoryFullPath = repository ;
+        }
+
+        objectsFolderPath = repositoryFullPath + objectsFolder;
         branchFolderPath = repositoryFullPath + branchFolder;
         activeBranchFilePath = repositoryFullPath + activeBranchFile;
         repositoryDetailsFilePath = repositoryFullPath + repositoryDetailsFile;
@@ -45,15 +73,11 @@ public class Settings {
         repositoryRemoteDetailsFilePath = repositoryFullPath + repositoryRemoteDetailsFile;
     }
 
-    public static String getUser(){return currentUser;}
-
-    public static void setUser(String user){
-        currentUser = user;
-    }
-
     public static void setRunningPath(File path){
         runningPath = path;
     }
 
-    public static File getRunningPath(){ return runningPath; }
+    String getBranchFilePath(String branchName){
+        return branchFolderPath + branchName + ".txt";
+    }
 }

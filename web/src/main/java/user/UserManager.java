@@ -1,27 +1,32 @@
 package user;
 
-import javax.jws.soap.SOAPBinding;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class UserManager {
 
-    static ArrayList<User> users = new ArrayList<User>();
+    static Map<String, User> users = new HashMap<>();
 
     public static User addUser(String name, String password){
-        Predicate<User>  nameExists = s -> s.getName().equals(name);
-        if (users.stream().anyMatch(nameExists)){
-            return users.stream().filter(nameExists).collect(Collectors.toList()).get(0);
+
+        if (users.get(name) == null) {
+            users.put(name, new User(name, password));
         }
-        User newUser = new User(name, password);
-        users.add(newUser);
-        return newUser;
+        return users.get(name);
     }
 
-    public static List<User> getUsers(boolean onlyCreated){
-        return onlyCreated? users.stream().filter(u -> !u.getRepos().isEmpty()).collect(Collectors.toList()): users.stream().filter(u -> u.getRepos().isEmpty()).collect(Collectors.toList());
+    public static Map<String, User> getUsers(boolean onlyCreated){
+        if (!onlyCreated)
+            return new HashMap<>(users);
+
+        Map<String, User> res = new HashMap<>();
+        for(User user: users.values()){
+            if (!user.getRepos().isEmpty())
+                res.put(user.name, user);
+        }
+        return res;
     }
 
 }

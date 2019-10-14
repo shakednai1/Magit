@@ -1,5 +1,6 @@
 package core;
 
+import com.sun.xml.internal.ws.api.config.management.policy.ManagementAssertion;
 import exceptions.*;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -12,17 +13,19 @@ import java.util.stream.Collectors;
 
 public class MainEngine {
 
-    private static RepositoryManager repositoryManager = new RepositoryManager();
-    private static XmlLoader xmlLoader;
-    private static boolean canPull = true;
+    private RepositoryManager repositoryManager;
+    private XmlLoader xmlLoader;
+    private boolean canPull = true;
 
-    public MainEngine(){ }
+    public MainEngine(String user){
+        repositoryManager  = new RepositoryManager(user);
+    }
 
-    public static RepositoryManager getRepositoryManager(){
+    public RepositoryManager getRepositoryManager(){
         return repositoryManager;
     }
 
-    public static Repository getActiveRepository(){
+    public Repository getActiveRepository(){
         return repositoryManager.getActiveRepository();
     }
 
@@ -41,11 +44,11 @@ public class MainEngine {
     }
 
     public String getUser(){
-        return Settings.getUser();
+        return repositoryManager.getSettings().getUser();
     }
 
     public void changeCurrentUser(String user){
-        Settings.setUser(user);
+        repositoryManager.getSettings().setUser(user);
     }
 
     public boolean changeActiveRepository(String fullPath){
@@ -106,13 +109,13 @@ public class MainEngine {
         return repositoryManager.getActiveRepository() != null ? repositoryManager.getActiveRepository().getName() : "";
     }
 
-    public String isXmlValid(String xmlPath) throws XmlException {
-        xmlLoader = new XmlLoader(xmlPath);
+    public String isXmlValid(String xml) throws XmlException {
+        xmlLoader = new XmlLoader(xml, repositoryManager);
         xmlLoader.checkValidXml();
         return xmlLoader.checkRepoLocation();
     }
 
-    public void loadRepositoyFromXML() throws UncommittedChangesError, InvalidBranchNameError{
+    public void loadRepositoryFromXML() throws UncommittedChangesError, InvalidBranchNameError{
         xmlLoader.loadRepo();
     }
 
@@ -122,18 +125,17 @@ public class MainEngine {
         if(directory.exists()){
             throw new InvalidRepositoryPath(newRepositoryPath + " is already exist");
         }
+
         repositoryManager.createNewRepository(newRepositoryPath, name, false);
     }
 
-    public static String getCurrentBranchName(){
+    public String getCurrentBranchName(){
         return repositoryManager.getActiveRepository().getActiveBranch().getName();
     }
 
     public ObservableMap<String, CommitData> getAllCommitsData(){ return repositoryManager.getActiveRepository().getAllCommitsData();}
 
     public void resetBranch(String commitSha1){
-        FSUtils.clearCurrentWC();
-
         try{
             repositoryManager.getActiveRepository().resetActiveBranch(commitSha1);
         }
@@ -171,19 +173,8 @@ public class MainEngine {
         return repositoryManager.getActiveRepository().getAllRemoteBranches().stream().map((branch) -> remoteRepoName + "/" + branch.getName()).collect(Collectors.toList());
     }
 
-    public void createAndCheckoutToNewTrackingBranch(String newBranchName, String trackingAfter) {
-        Branch branch = new Branch(newBranchName, trackingAfter);
-        repositoryManager.getActiveRepository().addNewBranchIfNotExist(branch);
-    }
-
-    public FolderChanges getDiffBetweenCommits(String commitSha1, String prevCommit){
-        CommitsDelta commitsDelta= new CommitsDelta(commitSha1, prevCommit);
-        commitsDelta.calcFilesMergeState();
-        return commitsDelta.getRootFolderChanges();
-    }
-
     public Folder getFileSystemOfCommit(String commitSha1){
-        return Commit.getCommitRootFolder(commitSha1);
+        return Commit.getCommitRootFolder(commitSha1, repositoryManager.getSettings());
     }
 
     public BranchData createNewBranchFromSha1(String name, String sha1, boolean track){
@@ -197,7 +188,7 @@ public class MainEngine {
     }
 
     public String findTrackingAfterBySha1(String sha1){
-        File rbDir = new File(Settings.remoteBranchesPath);
+        File rbDir = new File(repositoryManager.getSettings().remoteBranchesPath);
         for (File rb : rbDir.listFiles()){
             if(FSUtils.getFileLines(rb.getPath()).get(0).split(Settings.delimiter)[0].equals(sha1)){
                 return rb.getName().split(".txt")[0];
@@ -207,15 +198,15 @@ public class MainEngine {
     }
 
     public String getSha1FromRemoteBranch(String remote){
-        return FSUtils.getFileLines(Settings.remoteBranchesPath + remote + ".txt").get(0).split(Settings.delimiter)[0];
+        return FSUtils.getFileLines(repositoryManager.getSettings().remoteBranchesPath + remote + ".txt").get(0).split(Settings.delimiter)[0];
     }
 
     public List<String> getFileLines(String fileSha1){
-        return FSUtils.getZippedContent(fileSha1);
+        return FSUtils.getZippedContent(repositoryManager.settings.objectsFolderPath, fileSha1);
     }
 
 
-    public static String getBranchMergeName(){
+    public String getBranchMergeName(){
         return getActiveRepository().getCurrentMerge().getMergingBranchName();
     }
 

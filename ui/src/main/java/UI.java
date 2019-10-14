@@ -1,4 +1,3 @@
-import core.Blob;
 import core.FilesDelta;
 import core.MainEngine;
 import core.Settings;
@@ -6,7 +5,6 @@ import exceptions.*;
 import models.BranchData;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class UI {
 
@@ -14,7 +12,7 @@ public class UI {
 
     public static void main(String args[]){
         Scanner input = new Scanner(System.in);
-        engine = new MainEngine();
+        engine = new MainEngine("Administrator");
         boolean toContinue = true;
 
         while(toContinue){
@@ -316,11 +314,11 @@ public class UI {
                 System.out.println(overrideMsg);
                 String toOverride = input.next();
                 if (toOverride.equals("Y")){
-                    engine.loadRepositoyFromXML();
+                    engine.loadRepositoryFromXML();
                 }
             }
             else {
-                engine.loadRepositoyFromXML();
+                engine.loadRepositoryFromXML();
             }
         }
         catch (XmlException | UncommittedChangesError | InvalidBranchNameError e){

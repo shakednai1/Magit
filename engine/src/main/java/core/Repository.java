@@ -5,7 +5,6 @@ import exceptions.NoActiveRepositoryError;
 import exceptions.NoChangesToCommitError;
 import exceptions.UncommittedChangesError;
 
-import fromXml.RootFolder;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.*;
@@ -22,6 +21,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Repository {
+
+    private Settings settings;
 
     private String name;
     private String fullPath;
@@ -134,9 +135,10 @@ public class Repository {
     }
 
 
-    Repository(String fullPath, String name, boolean empty) {
+    Repository(String fullPath, String name, boolean empty, Settings settings) {
         this.fullPath = fullPath;
         this.name = name;
+        this.settings = settings;
 
         commits.addListener(new CommitsListener());
         branches.addListener(new BranchesListener());
@@ -150,10 +152,11 @@ public class Repository {
         }
     }
 
-    private Repository(String fullPath, Branch activeBranch){
+    private Repository(String fullPath, Branch activeBranch, Settings settings){
         this.fullPath = fullPath;
         this.name = loadRepositoryName();
         this.activeBranch = activeBranch;
+        this.settings = settings;
 
         commits.addListener(new CommitsListener());
         branches.addListener(new BranchesListener());
@@ -169,9 +172,11 @@ public class Repository {
         saveRepositoryActiveBranch();
     }
 
+    Settings getSettings(){ return settings; }
+
     private void loadRemoteRepoDetails(){
         if(isRemote()){
-            List<String> remoteData = FSUtils.getFileLines(Settings.repositoryRemoteDetailsFilePath);
+            List<String> remoteData = FSUtils.getFileLines(settings.repositoryRemoteDetailsFilePath);
             String[] remoteDetails = remoteData.get(0).split(Settings.delimiter);
             this.remoteRepositoryName = remoteDetails[1];
             this.remoteRepositoryPath = remoteDetails[0];
@@ -179,14 +184,14 @@ public class Repository {
     }
 
     public boolean isRemote(){
-        File remoteFile = new File(Settings.repositoryRemoteDetailsFilePath);
+        File remoteFile = new File(settings.repositoryRemoteDetailsFilePath);
         return remoteFile.exists();
     }
 
     private void loadRemoteBranches(){
         if(remoteRepositoryName != null){
             remoteBranches = new LinkedList<>();
-            File remoteBranchesFolder = new File(Settings.remoteBranchesPath);
+            File remoteBranchesFolder = new File(settings.remoteBranchesPath);
             for(File branch : remoteBranchesFolder.listFiles()){
                 if(!branch.getName().equals("HEAD")){
                     String pointedCommit = FSUtils.getFileLines(branch.getPath()).get(0).split(Settings.delimiter)[0];
@@ -198,7 +203,7 @@ public class Repository {
     }
 
     private String loadRepositoryName(){
-        List<String> repoDetails = FSUtils.getFileLines(Settings.repositoryDetailsFilePath);
+        List<String> repoDetails = FSUtils.getFileLines(settings.repositoryDetailsFilePath);
         return repoDetails.get(0);
     }
 
@@ -209,22 +214,20 @@ public class Repository {
     Merge getCurrentMerge(){ return currentMerge; }
 
 
-    static Repository load(String repositoryPath){
+    static Repository load(Settings settings){
         // we know that the repo exists and valid
 
-        Settings.setNewRepository(repositoryPath);
-
-        List<String> contentByLines = FSUtils.getFileLines(Settings.activeBranchFilePath);
+        List<String> contentByLines = FSUtils.getFileLines(settings.activeBranchFilePath);
         String activeBranchName = contentByLines.get(0);
 
-        Branch activeBranch = Branch.load(activeBranchName, false);
-        return new Repository(Settings.repositoryFullPath, activeBranch);
+        Branch activeBranch = Branch.load(settings, activeBranchName, false);
+        return new Repository(settings.repositoryFullPath, activeBranch, settings);
     }
 
     private void loadBranchesData(){
         branches.clear();
 
-        File directory = new File(Settings.branchFolderPath);
+        File directory = new File(settings.branchFolderPath);
         File[] listOfItems = directory.listFiles();
         for(File item: listOfItems){
             if(!item.getName().equals(Settings.activeBranchFileName)){
@@ -254,7 +257,7 @@ public class Repository {
     }
 
     private void __addBranchCommitsToAllCommits(BranchData branch){
-        for(Map.Entry<String, Commit> c: Commit.loadAll(branch.getHeadSha1()).entrySet()){
+        for(Map.Entry<String, Commit> c: Commit.loadAll(branch.getHeadSha1(), settings).entrySet()){
             if(commits.get(c.getKey()) == null){
                 Commit commit = c.getValue();
                 CommitData commitData = new CommitData(commit);
@@ -307,10 +310,12 @@ public class Repository {
     }
 
     public void resetActiveBranch(String commitSha1) throws NoActiveRepositoryError {
+        FSUtils.clearWC(settings.repositoryFullPath);
+
         String branchName = activeBranch.getName();
         String trackingAfter = activeBranch.getTrackingAfter();
 
-        Branch branch = new Branch(branchName, commitSha1, trackingAfter, true);
+        Branch branch = new Branch(branchName, commitSha1, trackingAfter, true, settings);
         setActiveBranch(branch);
 
         activeBranch.getRootFolder().updateState();
@@ -333,11 +338,11 @@ public class Repository {
 
         Branch newBranch;
         if (activeBranch == null){
-            newBranch = new Branch(branchName);
+            newBranch = new Branch(branchName, settings);
         }
         else{
             newBranch = new Branch(branchName, activeBranch.getHead(),
-                    activeBranch.getRootFolder());
+                    activeBranch.getRootFolder(), settings);
         }
         BranchData branchData = addNewBranchIfNotExist(newBranch);
 
@@ -364,9 +369,9 @@ public class Repository {
         if(activeBranch.haveChanges() && !force)
             throw new UncommittedChangesError("UncommittedChangesError");
 
-        FSUtils.clearCurrentWC();
+        FSUtils.clearWC(settings.repositoryFullPath);
 
-        Branch checkedoutBranch = Branch.load(name, true);
+        Branch checkedoutBranch = Branch.load(settings, name, true);
         BranchData branchData = addNewBranchIfNotExist(checkedoutBranch);
 
         __addBranchCommitsToAllCommits(branchData);
@@ -382,7 +387,7 @@ public class Repository {
         }
 
         deleteBranchFromHistory(branchName);
-        Branch.deleteBranch(branchName);
+        _deleteBranch(branchName);
     }
 
     private void deleteBranchFromHistory(String branchName){
@@ -395,14 +400,18 @@ public class Repository {
         branches.remove(i);
     }
 
+    private boolean _deleteBranch(String branchName){
+        return FSUtils.deleteFile(settings.getBranchFilePath(branchName));
+    }
+
     boolean haveOpenChanges(){ return activeBranch.haveChanges();}
 
     private void saveRepositoryDetails(){
-        FSUtils.writeFile(Settings.repositoryDetailsFilePath, name, false);
+        FSUtils.writeFile(settings.repositoryDetailsFilePath, name, false);
     }
 
     private void saveRepositoryActiveBranch(){
-        FSUtils.writeFile(Settings.activeBranchFilePath, activeBranch.getName(), false);
+        FSUtils.writeFile(settings.activeBranchFilePath, activeBranch.getName(), false);
     }
 
     boolean validBranchName(String branchName) {
@@ -445,7 +454,7 @@ public class Repository {
 
     public void addRemoteBranch(RemoteBranch remoteBranch){
         remoteBranches.add(remoteBranch);
-        FSUtils.createNewFile(Settings.remoteBranchesPath + remoteBranch.name + ".txt",
+        FSUtils.createNewFile(settings.remoteBranchesPath + remoteBranch.name + ".txt",
                 remoteBranch.pointedCommitSha1);
     }
 
@@ -459,7 +468,7 @@ public class Repository {
 
     public void fetch(){
         File branchesDir = new File(remoteRepositoryPath + Settings.branchFolder);
-        File remoteBranchesDir = new File(Settings.remoteBranchesPath);
+        File remoteBranchesDir = new File(settings.remoteBranchesPath);
         try {
             FileUtils.copyDirectory(branchesDir,remoteBranchesDir);
         }
@@ -470,7 +479,7 @@ public class Repository {
 
         File sourceObjectsDir = new File(remoteRepositoryPath + Settings.objectsFolder);
         for(File file : sourceObjectsDir.listFiles()){
-            File destFile = new File(Settings.objectsFolderPath + "/" + file.getName());
+            File destFile = new File(settings.objectsFolderPath + "/" + file.getName());
             try {
                 FileUtils.copyFile(file, destFile);
             } catch (IOException e) {
@@ -479,7 +488,7 @@ public class Repository {
     }
 
     BranchData createNewBranchFromSha1(String branchName, String sha1, String trackingAfter){
-        Branch newBranch = new Branch(branchName, sha1, trackingAfter, false);
+        Branch newBranch = new Branch(branchName, sha1, trackingAfter, false, settings);
         return addNewBranchIfNotExist(newBranch);
 
     }
@@ -507,18 +516,18 @@ public class Repository {
 
         if (mergeBranch == null) throw new ValueException("Invalid branch name");
 
-        currentMerge = new Merge(getActiveBranch().getHead().getSha1(), commitSha1, mergeBranch.getName());
+        currentMerge = new Merge(getActiveBranch().getHead().getSha1(), commitSha1, activeBranch, mergeBranch.getName());
         return currentMerge;
     }
 
     public void makeFFMerge(Merge merge){
 
         if(merge.getFastForward() != null){
-            Commit commit = new Commit(merge.getFastForward());
+            Commit commit = new Commit(merge.getFastForward(), settings);
 
             if (!activeBranch.getHead().getSha1().equals(merge.getFastForward())){
                 activeBranch.setHead(commit);
-                activeBranch.setRootFolder(Commit.getCommitRootFolder(merge.getFastForward()), true);
+                activeBranch.setRootFolder(Commit.getCommitRootFolder(merge.getFastForward(), settings), true);
 
                 updateActiveBranchDataInHistory();
             }
@@ -548,13 +557,13 @@ public class Repository {
             getObjectsFromRemote();
 
             // load all new commits to repo
-            for(Commit commit: Commit.loadAll(pointingCommitOfRemoteBranch).values()){
+            for(Commit commit: Commit.loadAll(pointingCommitOfRemoteBranch, settings).values()){
                 if (commits.get(commit.getSha1()) == null){
                     commits.put(commit.getSha1(), __createCommitData(commit));
                 }
             }
 
-            currentMerge = new Merge(getActiveBranch().getHead().getSha1(), pointingCommitOfRemoteBranch, trackingAfterBranchName);
+            currentMerge = new Merge(getActiveBranch().getHead().getSha1(), pointingCommitOfRemoteBranch, activeBranch, trackingAfterBranchName);
             return currentMerge;
         }
         return null;
@@ -562,7 +571,7 @@ public class Repository {
 
     public void push(){
         if(!getActiveBranch().isTracking()){
-            String branchFilePath = Settings.branchFolderPath + getActiveBranch().getName() + ".txt";
+            String branchFilePath = settings.branchFolderPath + getActiveBranch().getName() + ".txt";
             FSUtils.writeFile(branchFilePath, getActiveBranch().getHead().getSha1() + Settings.delimiter + getActiveBranch().getName(), false);
             RemoteBranch remoteBranch = new RemoteBranch(getActiveBranch().getName(), getActiveBranch().getHead().getSha1());
             getActiveBranch().trackingAfter = remoteBranch.name;
@@ -577,7 +586,7 @@ public class Repository {
     private void rewriteRemoteFSIfNeeded(){
         if(activeBranch.getName().equals(getRemoteRepoBranchHeadName())){
             FSUtils.clearWC(remoteRepositoryPath);
-            FSUtils.copyCurrentWC(remoteRepositoryPath);
+            FSUtils.copyWC(settings.repositoryFullPath, remoteRepositoryPath);
         }
     }
 
@@ -587,7 +596,7 @@ public class Repository {
     }
 
     private void updateRBDataFromLocal(String remoteBranchName){
-        String rbPath = Settings.remoteBranchesPath + remoteBranchName + ".txt";
+        String rbPath = settings.remoteBranchesPath + remoteBranchName + ".txt";
         File branchFile= new File(rbPath);
         File destBranchFileRemote= new File(remoteRepositoryPath + Settings.branchFolder + remoteBranchName + ".txt");
         try {
@@ -600,7 +609,7 @@ public class Repository {
     }
 
     private void pushObjectsToRemote(){
-        File sourceObjFolder = new File(Settings.objectsFolderPath);
+        File sourceObjFolder = new File(settings.objectsFolderPath);
         try {
             for (File file : sourceObjFolder.listFiles()) {
                 File destFile = new File(remoteRepositoryPath + Settings.objectsFolder + "/" + file.getName());
@@ -616,7 +625,7 @@ public class Repository {
         File sourceObjFolder = new File(remoteRepositoryPath + Settings.objectsFolder);
         try {
             for (File file : sourceObjFolder.listFiles()) {
-                File destFile = new File(Settings.objectsFolderPath + "/" + file.getName());
+                File destFile = new File(settings.objectsFolderPath + "/" + file.getName());
                 FileUtils.copyFile(file, destFile);
             }
         }

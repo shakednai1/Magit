@@ -1,17 +1,21 @@
 package user;
 
+import core.MainEngine;
+
 import java.util.ArrayList;
 
 public class User {
 
+    String name;
+    String password;
+
+    MainEngine engine;
+
+    ArrayList repos = new ArrayList();
+
     public String getName() {
         return name;
     }
-
-    String name;
-    String password;
-    ArrayList repos = new ArrayList();
-    ArrayList notifications = new ArrayList<Notification>();
 
     public ArrayList getRepos() {
         return repos;
@@ -20,13 +24,16 @@ public class User {
     User(String name, String password){
         this.name = name;
         this.password = password;
+
+        this.engine = new MainEngine(this.name);
     }
 
     protected void addRepo(String repoName){
         repos.add(repoName);
     }
 
-    protected void addNotification(Notification notification){
-        notifications.add(notification);
+    public MainEngine getEngine(){
+        return engine;
     }
+
 }

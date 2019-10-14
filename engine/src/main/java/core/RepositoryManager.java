@@ -4,38 +4,47 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class RepositoryManager {
 
-    private static Repository activeRepository = null;
+    Settings settings;
+    private Repository activeRepository = null;
 
+    RepositoryManager(String userName){
+        settings = new Settings(userName);
+    }
 
     Repository getActiveRepository(){
         return activeRepository;
     }
 
-    void createNewRepository(String repositoryFullPath, String name, boolean empty){
-        Settings.setNewRepository(repositoryFullPath);
+    Settings getSettings() {return settings;}
 
-        File objectsPath = new File(Settings.objectsFolderPath);
+    void createNewRepository(String repositoryFullPath, String name, boolean empty){
+        settings.setNewRepository(settings.webMode? name: repositoryFullPath);
+
+        File objectsPath = new File(settings.objectsFolderPath);
         if(!objectsPath.exists())
             objectsPath.mkdirs();
 
-        File branchesPath = new File(Settings.branchFolderPath);
+        File branchesPath = new File(settings.branchFolderPath);
         if(!branchesPath.exists())
             branchesPath.mkdirs();
 
-        Repository repo = new Repository(repositoryFullPath, name, empty);
+        Repository repo = new Repository(settings.repositoryFullPath, name, empty, settings);
         activeRepository = repo;
     }
 
-    void switchActiveRepository(String fullPath){
-        if(!verifyRepoPath(fullPath)){
-            throw new IllegalArgumentException();
+    void switchActiveRepository(String repository){
+        if(!Settings.webMode){
+            if(!verifyRepoPath(repository)){
+                throw new IllegalArgumentException();
+            }
         }
 
-        Settings.setNewRepository(fullPath);
-        activeRepository = Repository.load(fullPath);
+        settings.setNewRepository(repository);
+        activeRepository = Repository.load(settings);
     }
 
     private boolean verifyRepoPath(String fullPath) {

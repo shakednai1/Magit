@@ -102,7 +102,6 @@ public class CommitNodeController extends BaseController {
     CommitData commitData;
 
     public CommitNodeController(){
-        engine = new MainEngine();
     }
 
     public void setCommitData(CommitData commitData){

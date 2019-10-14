@@ -44,7 +44,7 @@ public class AppController extends BaseController {
 
 
     public AppController(){
-        engine = new MainEngine();
+//        engine = new MainEngine();
         repositoryModel = new RepositoryModel();
     }
 

@@ -16,6 +16,7 @@ abstract public class Item implements Zipable {
     String fullPath;
     String name;
 
+    Settings repoSettings;
 
     abstract String getTypeItem();
     abstract public void updateState();
@@ -27,13 +28,13 @@ abstract public class Item implements Zipable {
 
 
     boolean isExistInObjects() { // TODO get the specific file we look for
-        File directory = new File(Settings.objectsFolderPath);
+        File directory = new File(repoSettings.objectsFolderPath);
         File[] listOfItems = directory.listFiles();
         return Arrays.stream(listOfItems).anyMatch(f -> f.getName().equals(currentSHA1 + ".zip"));
     }
 
     String getZipPath() {
-        return Settings.objectsFolderPath + currentSHA1 + ".zip";
+        return repoSettings.objectsFolderPath + currentSHA1 + ".zip";
     }
 
     void updateUserAndDate(String user, String commitTime) {

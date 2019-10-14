@@ -3,8 +3,10 @@ package core;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 import exceptions.InvalidBranchNameError;
@@ -16,14 +18,12 @@ import org.apache.commons.io.FileUtils;
 
 class XmlLoader {
 
-    private String XMLPath;
     private MagitRepository magitRepository;
     private MagitBlobs magitBlobs;
     private MagitBranches magitBranches;
     private MagitFolders magitFolders;
     private MagitCommits magitCommits;
     private String repositoryPath;
-    private MagitRepository.MagitRemoteReference remoteReference;
 
     private Map<String, MagitBlob> blobMap = new HashMap<>();
     private Map<String, MagitSingleFolder> folderMap = new HashMap<>();
@@ -35,22 +35,32 @@ class XmlLoader {
 
     private Map<String, RemoteBranch> remoteBranchMap = new HashMap<>();
 
-    RepositoryManager repositoryManager = MainEngine.getRepositoryManager();
+    RepositoryManager repositoryManager;
 
 
-    XmlLoader(String XmlPath) throws XmlException {
-        this.XMLPath = XmlPath;
-        File file = new File(XmlPath);
+    XmlLoader(String xml, RepositoryManager repositoryManager) throws XmlException {
+        this.repositoryManager = repositoryManager;
+
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(MagitRepository.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            magitRepository = (MagitRepository) jaxbUnmarshaller.unmarshal(file);
+            if(Settings.webMode) {
+                magitRepository = (MagitRepository) jaxbUnmarshaller.unmarshal(new File(xml));
+            }
+            else{
+                magitRepository = (MagitRepository) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
+            }
             magitBranches = magitRepository.getMagitBranches();
             magitCommits = magitRepository.getMagitCommits();
             magitFolders = magitRepository.getMagitFolders();
             magitBlobs = magitRepository.getMagitBlobs();
-            repositoryPath = magitRepository.getLocation();
-            FileUtils.deleteDirectory(new File(repositoryPath));
+            if(!Settings.webMode) {
+                repositoryPath = magitRepository.getLocation();
+                FileUtils.deleteDirectory(new File(repositoryPath));
+            }
+            else{
+                repositoryPath = ""; // Does not consider this param in webMode
+            }
         } catch (JAXBException e) {
             throw new XmlException("Given file has no XML extension OR XML file not exist");
         } catch (IOException e) {
@@ -74,7 +84,7 @@ class XmlLoader {
         //create empty repository
         repositoryManager.createNewRepository(repositoryPath, magitRepository.getName(), true);
 
-        FSUtils.clearCurrentWC();
+        FSUtils.clearWC(repositoryManager.settings.repositoryFullPath);
 
         setFirstCommit();
         if (firstCommit == null) {
@@ -92,7 +102,7 @@ class XmlLoader {
                     magitRepository.getMagitRemoteReference().getLocation());
         }
 
-        repositoryManager.switchActiveRepository(repositoryPath);
+        repositoryManager.switchActiveRepository(Settings.webMode? magitRepository.getName() :repositoryPath);
     }
 
     private void setFirstCommit() {
@@ -141,10 +151,14 @@ class XmlLoader {
     Commit openCommit(String commitID, String prevCommit) {
         MagitSingleCommit magitCommit = commitMap.get(commitID);
         MagitSingleFolder magitRootFolder = folderMap.get(magitCommit.getRootFolder().getId());
-        Folder rootFolder = createFilesTree(magitRootFolder, Settings.repositoryFullPath);
-        Commit commit = new Commit(magitCommit.getMessage(), rootFolder.getSha1(),
-                magitCommit.getAuthor(), magitCommit.getDateOfCreation(), prevCommit, null);
-//        commit.zipCommit();
+        Folder rootFolder = createFilesTree(magitRootFolder, repositoryManager.getSettings().repositoryFullPath);
+        Commit commit = new Commit(magitCommit.getMessage(),
+                rootFolder.getSha1(),
+                magitCommit.getAuthor(),
+                magitCommit.getDateOfCreation(),
+                prevCommit,
+                null,
+                repositoryManager.getSettings());
 
         List<MagitSingleBranch> pointingBranches = getPointedMagitBranch(magitCommit.getId(), false);
         List<MagitSingleBranch> pointingRemoteBranches = getPointedMagitBranch(magitCommit.getId(), true);
@@ -158,7 +172,7 @@ class XmlLoader {
 
         if (!pointingBranches.isEmpty()) {
             for (MagitSingleBranch pointingBranch : pointingBranches) {
-                Branch branch = new Branch(pointingBranch.getName(), commit, rootFolder);
+                Branch branch = new Branch(pointingBranch.getName(), commit, rootFolder, repositoryManager.getSettings());
                 repositoryManager.getActiveRepository().addNewBranchIfNotExist(branch);
                 if (magitBranches.getHead().equals(pointingBranch.getName())) {
                     repositoryManager.getActiveRepository().setActiveBranch(branch);
@@ -171,10 +185,9 @@ class XmlLoader {
             }
         } else {
             rootFolder.zipRec();
-//            commit.zipCommit();
         }
 
-        FSUtils.clearCurrentWC();
+        FSUtils.clearWC(repositoryManager.settings.repositoryFullPath);
         return commit;
     }
 
@@ -221,8 +234,11 @@ class XmlLoader {
                 case "blob":
                     MagitBlob magitBlob = blobMap.get(itemId);
 
-                    Blob blob = new Blob(new File(path, magitBlob.getName()), new ItemSha1(magitBlob.getContent(), true, false),
-                            magitBlob.getLastUpdater(), magitBlob.getLastUpdateDate());
+                    Blob blob = new Blob(new File(path, magitBlob.getName()),
+                            new ItemSha1(magitBlob.getContent(), true, false, repositoryManager.getSettings()),
+                            magitBlob.getLastUpdater(),
+                            magitBlob.getLastUpdateDate(),
+                            repositoryManager.getSettings());
 
                     FSUtils.createNewFile(path + "/" + magitBlob.getName(), magitBlob.getContent());
                     subBlobs.put(blob.fullPath, blob);
