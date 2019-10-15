@@ -1,3 +1,7 @@
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.json.simple.JSONArray;
 import user.User;
 import user.UserManager;
@@ -11,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
@@ -23,21 +28,25 @@ public class Users extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter out = resp.getWriter();
         Map<String, User> users = UserManager.getUsers(req.getParameter("onlyCreated").equals("true"));
-        ArrayList<JSONObject> response = new ArrayList<JSONObject>();
+        ArrayList<Map> response = new ArrayList<>();
         for(User user : users.values()){
-            JSONObject userData = new JSONObject();
+            Map userData = new HashMap();
             userData.put("username", user.getName());
-            ArrayList<JSONObject> usersRepos = new ArrayList<>();
+            ArrayList<Map> usersRepos = new ArrayList<>();
             userData.put("repositories", usersRepos);
             List<String> repos = user.getRepos();
             for(String repo: repos){
-                JSONObject repoDetails = new JSONObject();
+                Map repoDetails = new HashMap();
                 repoDetails.put("name", repo);
                 usersRepos.add(repoDetails);
             }
             response.add(userData);
         }
-        out.println(response);
+        Gson gson = new GsonBuilder().create();
+        JsonArray jarray = gson.toJsonTree(response).getAsJsonArray();
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.add("response", jarray);
+        out.println(jsonObject.toString());
 
     }
 }
