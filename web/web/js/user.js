@@ -39,10 +39,11 @@ function addAllRepositoriesToTable() {
 
 function addAllUsersToList(){
     // TODO : change onlyCreated=true
+    // TODO: fix href
     $.get("/users?onlyCreated=false", function(response){
-        for(i in response){
-                // TODO: fix href
-                $("#usersList").append('<li><a href="/stam">'+ response[i].username +'</a></li>');
+        var jsonRes = JSON.parse(response)["response"];
+        for(i in jsonRes){
+                $("#usersList").append('<li><a href="/stam">'+ jsonRes[i]["username"] +'</a></li>');
             }
         }
     );

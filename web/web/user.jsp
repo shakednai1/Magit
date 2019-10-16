@@ -25,10 +25,7 @@
 <p style="color: #2e6c80; font-size: 90%;">Load new repository:</p>
 <form action="/login"><input accept="text/xml" name="xmlFile" type="file"/> <input type="submit" value="Load"/></form>
 <h2 style="color: #2e6c80;">Magit users</h2>
-<ul id="usersList">
-    <li><a href="stam">user1</a></li>
-    <li><a href="stam">user2</a></li>
-</ul>
+<ul id="usersList"></ul>
 <h2 style="color: #2e6c80;">Notifications</h2>
 <div style="height: 500px; width: 1200px; border: 1px solid #ccc; font: 16px/26px Georgia, Garamond, Serif; overflow: auto;">
     text here.... slkdfjsdgdhhhhhhhhh slkdfjsdgdhhhhhhhhh slkdfjsdgdhhhhhhhhh slkdfjsdgdhhhhhhhhh slkdfjsdgdhhhhhhhhh
