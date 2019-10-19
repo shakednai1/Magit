@@ -19,6 +19,7 @@
         <td>num of branches</td>
         <td>last commit time</td>
         <td>last commit massage</td>
+        <td>action</td>
     </tr>
     </thead>
 </table>
@@ -31,6 +32,7 @@
 <h2 style="color: #2e6c80;">Magit users</h2>
 <ul id="usersList"></ul>
 <table id="othersRepos" class="reposTable">
+    <caption>Others repositories</caption>
     <thead>
     <tr>
         <td>repository name</td>

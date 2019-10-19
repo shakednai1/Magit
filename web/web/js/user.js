@@ -5,8 +5,6 @@ $(document).ready(function() {
     var currentUser = getCurrUser();
     updateUserNameInPageTitle(currentUser);
     addAllUsersToList();
-    document.getElementById('load-xml').onsubmit = loadXml;
-
 });
 
 function getCurrUser() {
@@ -22,55 +20,30 @@ function addRepositoryToUserTable(repo){
             repo.activeBranch +"</td><td>" +
             repo.numOfBranches +"</td><td>" +
             repo.lastCommitTime +"</td><td>"+
-            repo.lastCommitMessage +"</td></tr>";
+            repo.lastCommitMessage +"</td>" +
+            "<td><button onClick='openRepoPage(\"" + repo.name +  "\")'>open repo</button></td></tr>";
         $("#myRepos").append(markup);
 }
 
-function addRepositoryToOthersTable(repo) {
+function openRepoPage(repoName) {
+    //TODO servlet to get repo page jsp
+}
+
+function addRepositoryToOthersTable(repo, username) {
     var markup = "<tr><td>"+repo.name+"</td><td>"+
         repo.activeBranch +"</td><td>" +
         repo.numOfBranches +"</td><td>" +
         repo.lastCommitTime +"</td><td>"+
         repo.lastCommitMessage +"</td>" +
-        "<td><button onClick='fork(\"" + repo.name + "," + username + "," + getCurrUser() + "\")'>fork</button></td>" +
-        "</tr>";
+        "<td><button onClick='fork(\"" + repo.name +  "\",\"" + username + "\")'>fork</button></td></tr>";
     $("#othersRepos").append(markup);
 }
 
-// TODO update to take from real data
 function addAllRepositoriesToOtherUserTable(username){
-    $.get("/usersRepos?username=" + username, function(response) {
-        $("#othersRepos").append('<caption>'+ username + ' repositories' + '</caption>');
-        var jsonRes = JSON.parse(response)["response"];
-        var repos = [{
-            "name": "repo1",
-            "activeBranch": "branch1",
-            "numOfBranches": 4,
-            "lastCommitTime": "12.10.2019 34:56:34",
-            "lastCommitMessage": "this is the last"
-        },
-            {
-                "name": "repo2",
-                "activeBranch": "branch2",
-                "numOfBranches": 7,
-                "lastCommitTime": "13.14.2019 35:23:33",
-                "lastCommitMessage": "this is the last second repo"
-            }];
-        for (i in repos) {
-            addRepositoryToOthersTable(repos[i]);
-        }
-    });
-}
-
-
-
-function fork(repoName, fromUser, toUser) {
- //TODO add servlet
-}
-
-// TODO update to take from real data
-function addAllRepositoriesToTable(){
-    var username =  getCurrUser();
+    var table = document.getElementById("othersRepos");
+    clearTable("othersRepos");
+    table.deleteCaption();
+    table.createCaption().innerHTML = username + " repositories";
     $.get("/usersRepos?username=" + username, function(response) {
         var jsonRes = JSON.parse(response)["response"];
         var repos = [{
@@ -88,9 +61,47 @@ function addAllRepositoriesToTable(){
                 "lastCommitMessage": "this is the last second repo"
             }];
         for (i in jsonRes) {
-            addRepositoryToUserTable(repos[i]);
+            addRepositoryToOthersTable(jsonRes[i], username);
         }
     });
+}
+
+function fork(repoName, fromUser) {
+    $.post('/fork', {fromUser: fromUser, repoName: repoName});
+    addAllRepositoriesToTable();
+}
+
+function addAllRepositoriesToTable(){
+    var username =  getCurrUser();
+    clearTable("myRepos");
+    $.get("/usersRepos?username=" + username, function(response) {
+        var jsonRes = JSON.parse(response)["response"];
+        var repos = [{
+            "name": "repo1",
+            "activeBranch": "branch1",
+            "numOfBranches": 4,
+            "lastCommitTime": "12.10.2019 34:56:34",
+            "lastCommitMessage": "this is the last"
+        },
+            {
+                "name": "repo2",
+                "activeBranch": "branch2",
+                "numOfBranches": 7,
+                "lastCommitTime": "13.14.2019 35:23:33",
+                "lastCommitMessage": "this is the last second repo"
+            }];
+        for (i in jsonRes) {
+            addRepositoryToUserTable(jsonRes[i]);
+        }
+    });
+}
+
+function clearTable(tableId){
+    var table = document.getElementById(tableId);
+    for(var i = table.rows.length - 1; i > 0; i--)
+    {
+        table.deleteRow(i);
+    }
 }
 
 function addAllUsersToList(){
