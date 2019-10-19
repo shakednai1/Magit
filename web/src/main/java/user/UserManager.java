@@ -29,4 +29,8 @@ public class UserManager {
         return res;
     }
 
+    public static User getUserByName(String username){
+        return users.get(username);
+    }
+
 }

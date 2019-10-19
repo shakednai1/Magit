@@ -11,6 +11,7 @@
 <h2 style="color: #2e6c80;">My repositories</h2>
 <link rel="stylesheet" type="text/css" href="reposTable.css">
 <table id="myRepos" class="reposTable">
+    <script>addAllRepositoriesToTable(request.getSession().getAttribute("user"))</script>
     <thead>
     <tr>
         <td>repository name</td>

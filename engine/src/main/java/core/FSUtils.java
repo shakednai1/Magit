@@ -119,7 +119,7 @@ public class FSUtils {
         catch (IOException e){e.printStackTrace(); }
     }
 
-    static List<String> getFileLines(String filePath){
+    public static List<String> getFileLines(String filePath){
         try{
             BufferedReader br = new BufferedReader(new FileReader(filePath));
             List<String> lines = br.lines().collect(Collectors.toList());
