@@ -153,10 +153,10 @@ public class Repository {
     }
 
     private Repository(String fullPath, Branch activeBranch, Settings settings){
+        this.settings = settings;
         this.fullPath = fullPath;
         this.name = loadRepositoryName();
         this.activeBranch = activeBranch;
-        this.settings = settings;
 
         commits.addListener(new CommitsListener());
         branches.addListener(new BranchesListener());

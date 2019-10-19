@@ -48,20 +48,16 @@ public class loadXml extends HttpServlet {
             // TODO handle
             e.printStackTrace();
         }
-//        new MainEngine().isXmlValid();
+
+//        response.sendRedirect(request.getRequestURL().toString().);
     }
 
     private StringBuilder loadXml(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException{
 
         Collection<Part> parts = request.getParts();
-
         StringBuilder fileContent = new StringBuilder();
 
         for (Part part : parts) {
-            // TODO(ALONA) valid by document requierments?
-            //to write the content of the file to an actual file in the system (will be created at c:\samplefile)
-            part.write(new File(Settings.baseLocation, "loaded.xml").getAbsolutePath()); // TODO support multople users
-
             //to write the content of the file to a string
             fileContent.append(readFromInputStream(part.getInputStream()));
         }

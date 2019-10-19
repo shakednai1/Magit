@@ -57,11 +57,12 @@ public class Folder extends Item {
         }
     }
 
-    Folder(File fullPath,  String lastUser, String lastModified) {
+    Folder(File fullPath,  String lastUser, String lastModified, Settings repoSettings) {
         this.fullPath = fullPath.getAbsolutePath();
         this.name = fullPath.getName();
         this.lastModified = lastModified;
         this.userLastModified = lastUser;
+        this.repoSettings = repoSettings;
     }
 
     boolean isEmptyCurrentState(){

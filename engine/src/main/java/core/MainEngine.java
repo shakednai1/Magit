@@ -116,6 +116,7 @@ public class MainEngine {
     }
 
     public void loadRepositoryFromXML() throws UncommittedChangesError, InvalidBranchNameError{
+        // TODO set repo at settings
         xmlLoader.loadRepo();
     }
 

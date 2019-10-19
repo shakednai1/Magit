@@ -23,7 +23,10 @@
 </table>
 <p><strong>&nbsp;</strong></p>
 <p style="color: #2e6c80; font-size: 90%;">Load new repository:</p>
-<form action="/login"><input accept="text/xml" name="xmlFile" type="file"/> <input type="submit" value="Load"/></form>
+<form action="upload" method="post" enctype='multipart/form-data'>
+    <input accept="text/xml" name="xmlFile" type="file"/>
+    <input type="submit" value="Load"/>
+</form>
 <h2 style="color: #2e6c80;">Magit users</h2>
 <ul id="usersList"></ul>
 <h2 style="color: #2e6c80;">Notifications</h2>

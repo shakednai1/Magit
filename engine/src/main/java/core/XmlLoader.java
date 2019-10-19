@@ -24,6 +24,7 @@ class XmlLoader {
     private MagitFolders magitFolders;
     private MagitCommits magitCommits;
     private String repositoryPath;
+    private String magitRepoName;
 
     private Map<String, MagitBlob> blobMap = new HashMap<>();
     private Map<String, MagitSingleFolder> folderMap = new HashMap<>();
@@ -45,11 +46,13 @@ class XmlLoader {
             JAXBContext jaxbContext = JAXBContext.newInstance(MagitRepository.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             if(Settings.webMode) {
-                magitRepository = (MagitRepository) jaxbUnmarshaller.unmarshal(new File(xml));
-            }
-            else{
                 magitRepository = (MagitRepository) jaxbUnmarshaller.unmarshal(new ByteArrayInputStream(xml.getBytes()));
             }
+            else{
+                magitRepository = (MagitRepository) jaxbUnmarshaller.unmarshal(new File(xml));
+            }
+
+            magitRepoName = magitRepository.getName();
             magitBranches = magitRepository.getMagitBranches();
             magitCommits = magitRepository.getMagitCommits();
             magitFolders = magitRepository.getMagitFolders();
@@ -59,7 +62,7 @@ class XmlLoader {
                 FileUtils.deleteDirectory(new File(repositoryPath));
             }
             else{
-                repositoryPath = ""; // Does not consider this param in webMode
+                repositoryPath = this.repositoryManager.getSettings().getRepoPathByCurrentUser(magitRepoName); // Does not consider this param in webMode
             }
         } catch (JAXBException e) {
             throw new XmlException("Given file has no XML extension OR XML file not exist");
@@ -224,7 +227,8 @@ class XmlLoader {
         Map<String, Folder> subFolders = new HashMap<>();
 
         Folder rootFolder = new Folder(new File(path), magitRootFolder.getLastUpdater(),
-                magitRootFolder.getLastUpdateDate());
+                magitRootFolder.getLastUpdateDate(),
+                repositoryManager.getSettings());
         File directory = new File(path);
         directory.mkdir();
 

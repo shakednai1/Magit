@@ -77,6 +77,12 @@ public class Settings {
         runningPath = path;
     }
 
+    public String getRepoPathByCurrentUser(String repoName){
+        File repoFile =  new File(baseLocation, userName);
+        repoFile = new File(repoFile, repoName);
+        return repoFile.getAbsolutePath();
+    }
+
     String getBranchFilePath(String branchName){
         return branchFolderPath + branchName + ".txt";
     }
