@@ -2,11 +2,20 @@
 //function() getCurrUser{$("h1").text('<%= Session["user"] %>')}
 
 $(document).ready(function() {
+    var currentUser = getCurrUser();
+    updateUserNameInPageTitle(currentUser);
     addAllUsersToList();
 });
 
+function getCurrUser() {
+    return document.cookie.split("user=")[1]
+}
 
-function addRepositoryToTable(repo){
+function updateUserNameInPageTitle(username){
+    document.getElementById("currUser").innerHTML = username;
+}
+
+function addRepositoryToUserTable(repo){
         var markup = "<tr><td>"+repo.name+"</td><td>"+
             repo.activeBranch +"</td><td>" +
             repo.numOfBranches +"</td><td>" +
@@ -15,8 +24,19 @@ function addRepositoryToTable(repo){
         $("#myRepos").append(markup);
 }
 
+function addRepositoryToOthersTable(repo) {
+    var markup = "<tr><td>"+repo.name+"</td><td>"+
+        repo.activeBranch +"</td><td>" +
+        repo.numOfBranches +"</td><td>" +
+        repo.lastCommitTime +"</td><td>"+
+        repo.lastCommitMessage +"</td>" +
+        "<td><button onClick='fork(\"" + repo.name + "," + username + "," + getCurrUser() + "\")'>fork</button></td>" +
+        "</tr>";
+    $("#othersRepos").append(markup);
+}
+
+// TODO update to take from real data
 function addAllRepositoriesToOtherUserTable(username){
-    // TODO servlet to get all user's repo
     $.get("/usersRepos?username=" + username, function(response) {
         $("#othersRepos").append('<caption>'+ username + ' repositories' + '</caption>');
         var jsonRes = JSON.parse(response)["response"];
@@ -35,19 +55,20 @@ function addAllRepositoriesToOtherUserTable(username){
                 "lastCommitMessage": "this is the last second repo"
             }];
         for (i in repos) {
-            var repo = repos[i];
-            var markup = "<tr><td>"+repo.name+"</td><td>"+
-                repo.activeBranch +"</td><td>" +
-                repo.numOfBranches +"</td><td>" +
-                repo.lastCommitTime +"</td><td>"+
-                repo.lastCommitMessage +"</td></tr>";
-            $("#othersRepos").append(markup);
+            addRepositoryToOthersTable(repos[i]);
         }
     });
 }
 
-function addAllRepositoriesToTable(username){
-    // TODO servlet to get all user's repo
+
+
+function fork(repoName, fromUser, toUser) {
+ //TODO add servlet
+}
+
+// TODO update to take from real data
+function addAllRepositoriesToTable(){
+    var username =  getCurrUser();
     $.get("/usersRepos?username=" + username, function(response) {
         var jsonRes = JSON.parse(response)["response"];
         var repos = [{
@@ -65,19 +86,21 @@ function addAllRepositoriesToTable(username){
                 "lastCommitMessage": "this is the last second repo"
             }];
         for (i in jsonRes) {
-            addRepositoryToTable(repos[i]);
+            addRepositoryToUserTable(repos[i]);
         }
     });
 }
 
 function addAllUsersToList(){
     // TODO : change onlyCreated=true
-    // TODO: fix href
+    var currentUser = getCurrUser();
     $.get("/users?onlyCreated=false", function(response){
         var jsonRes = JSON.parse(response)["response"];
         for(i in jsonRes){
             var name = jsonRes[i]["username"];
-            $("#usersList").append('<li><a href="#" onClick="addAllRepositoriesToOtherUserTable(\'' + name + '\')"</a>'+name+'</li>');
+            if(name !== currentUser){
+                $("#usersList").append('<li><a href="#" onClick="addAllRepositoriesToOtherUserTable(\'' + name + '\')"</a>'+name+'</li>');
+                }
             }
         }
     );

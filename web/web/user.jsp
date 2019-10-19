@@ -5,13 +5,13 @@
 <script src="js/user.js"></script>
 
 <body>
-<h1 id="currUser" style="color: #5e9ca0;"><% out.print(request.getCookies()[0].getValue()); %></h1>
+<h1 id="currUser" style="color: #5e9ca0;"></h1>
 
 <form align="right" action="/index.html"><input type="submit" value="Logout"/></form>
 <h2 style="color: #2e6c80;">My repositories</h2>
 <link rel="stylesheet" type="text/css" href="reposTable.css">
 <table id="myRepos" class="reposTable">
-    <script>addAllRepositoriesToTable(request.getSession().getAttribute("user"))</script>
+    <script>addAllRepositoriesToTable()</script>
     <thead>
     <tr>
         <td>repository name</td>
@@ -38,6 +38,7 @@
         <td>num of branches</td>
         <td>last commit time</td>
         <td>last commit massage</td>
+        <td>action</td>
     </tr>
     </thead>
 </table>
