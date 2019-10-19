@@ -28,7 +28,7 @@ public class User {
         this.engine = new MainEngine(this.name);
     }
 
-    protected void addRepo(String repoName){
+    public void addRepo(String repoName){
         repos.add(repoName);
     }
 
