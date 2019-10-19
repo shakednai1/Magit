@@ -3,6 +3,7 @@
 // and http://docs.oracle.com/javaee/6/tutorial/doc/glraq.html
 import core.Settings;
 import exceptions.InvalidBranchNameError;
+import exceptions.NoActiveRepositoryError;
 import exceptions.UncommittedChangesError;
 import exceptions.XmlException;
 import user.User;
@@ -43,13 +44,12 @@ public class loadXml extends HttpServlet {
         try{
             user.getEngine().isXmlValid(content.toString());
             user.getEngine().loadRepositoryFromXML();
+            user.addRepo(user.getEngine().getCurrentRepoName());
         }
-        catch (UncommittedChangesError | InvalidBranchNameError | XmlException e){
+        catch (UncommittedChangesError | InvalidBranchNameError | XmlException | NoActiveRepositoryError e){
             // TODO handle
             e.printStackTrace();
         }
-
-//        response.sendRedirect(request.getRequestURL().toString().);
     }
 
     private StringBuilder loadXml(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException{

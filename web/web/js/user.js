@@ -83,3 +83,13 @@ function addAllUsersToList(){
     );
 }
 
+function loadXml(){
+    $.get("/upload");
+    addAllUsersToList();
+}
+
+function init(){
+    document.getElementById('load-xml').onsubmit = loadXml;
+}
+
+window.onload = init;

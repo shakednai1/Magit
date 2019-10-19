@@ -7,11 +7,11 @@
 <body>
 <h1 id="currUser" style="color: #5e9ca0;"><% out.print(request.getCookies()[0].getValue()); %></h1>
 
-<form align="right" action="/index.html"><input type="submit" value="Logout"/></form>
+<form align="right" action="/login.html"><input type="submit" value="Logout"/></form>
 <h2 style="color: #2e6c80;">My repositories</h2>
 <link rel="stylesheet" type="text/css" href="reposTable.css">
 <table id="myRepos" class="reposTable">
-    <script>addAllRepositoriesToTable(request.getSession().getAttribute("user"))</script>
+    <script>addAllRepositoriesToTable(request.getCookies()[0].getValue())</script>
     <thead>
     <tr>
         <td>repository name</td>
@@ -24,7 +24,7 @@
 </table>
 <p><strong>&nbsp;</strong></p>
 <p style="color: #2e6c80; font-size: 90%;">Load new repository:</p>
-<form action="upload" method="post" enctype='multipart/form-data'>
+<form class="load-xml" enctype='multipart/form-data'>
     <input accept="text/xml" name="xmlFile" type="file"/>
     <input type="submit" value="Load"/>
 </form>
