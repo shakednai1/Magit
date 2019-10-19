@@ -5,6 +5,8 @@ $(document).ready(function() {
     var currentUser = getCurrUser();
     updateUserNameInPageTitle(currentUser);
     addAllUsersToList();
+    document.getElementById('load-xml').onsubmit = loadXml;
+
 });
 
 function getCurrUser() {
@@ -107,8 +109,17 @@ function addAllUsersToList(){
 }
 
 function loadXml(){
-    $.get("/upload");
-    addAllUsersToList();
+    var itemData=new FormData($("#load-xml")[0]);
+
+    $.ajax("/upload",
+        {url: "/upload",
+            type: "POST",
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: itemData,
+            dataType: "json",
+            success:addAllRepositoriesToTable()});
 }
 
 function init(){

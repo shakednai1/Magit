@@ -24,7 +24,7 @@
 </table>
 <p><strong>&nbsp;</strong></p>
 <p style="color: #2e6c80; font-size: 90%;">Load new repository:</p>
-<form class="load-xml" enctype='multipart/form-data'>
+<form id="load-xml" enctype="multipart/form-data">
     <input accept="text/xml" name="xmlFile" type="file"/>
     <input type="submit" value="Load"/>
 </form>

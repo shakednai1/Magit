@@ -1,6 +1,5 @@
 package core;
 
-import com.sun.xml.internal.ws.api.config.management.policy.ManagementAssertion;
 import exceptions.*;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -240,4 +239,9 @@ public class MainEngine {
     public Repository getActiveRepo(){
         return repositoryManager.getActiveRepository();
     }
+
+//    public List<Notification> getUserNotifications(){
+
+//    }
+
 }
