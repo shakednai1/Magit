@@ -20,8 +20,13 @@ function addRepositoryToUserTable(repo){
             repo.activeBranch +"</td><td>" +
             repo.numOfBranches +"</td><td>" +
             repo.lastCommitTime +"</td><td>"+
-            repo.lastCommitMessage +"</td></tr>";
+            repo.lastCommitMessage +"</td>" +
+            "<td><button onClick='openRepoPage(\"" + repo.name +  "\")'>open repo</button></td></tr>";
         $("#myRepos").append(markup);
+}
+
+function openRepoPage(repoName) {
+    //TODO servlet to get repo page jsp
 }
 
 function addRepositoryToOthersTable(repo, username) {
@@ -34,9 +39,9 @@ function addRepositoryToOthersTable(repo, username) {
     $("#othersRepos").append(markup);
 }
 
-// TODO update to take from real data
 function addAllRepositoriesToOtherUserTable(username){
     var table = document.getElementById("othersRepos");
+    clearTable("othersRepos");
     table.deleteCaption();
     table.createCaption().innerHTML = username + " repositories";
     $.get("/usersRepos?username=" + username, function(response) {
@@ -63,11 +68,12 @@ function addAllRepositoriesToOtherUserTable(username){
 
 function fork(repoName, fromUser) {
     $.post('/fork', {fromUser: fromUser, repoName: repoName});
+    addAllRepositoriesToTable();
 }
 
-// TODO update to take from real data
 function addAllRepositoriesToTable(){
     var username =  getCurrUser();
+    clearTable("myRepos");
     $.get("/usersRepos?username=" + username, function(response) {
         var jsonRes = JSON.parse(response)["response"];
         var repos = [{
@@ -88,6 +94,14 @@ function addAllRepositoriesToTable(){
             addRepositoryToUserTable(jsonRes[i]);
         }
     });
+}
+
+function clearTable(tableId){
+    var table = document.getElementById(tableId);
+    for(var i = table.rows.length - 1; i > 0; i--)
+    {
+        table.deleteRow(i);
+    }
 }
 
 function addAllUsersToList(){

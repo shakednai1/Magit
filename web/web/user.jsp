@@ -19,6 +19,7 @@
         <td>num of branches</td>
         <td>last commit time</td>
         <td>last commit massage</td>
+        <td>action</td>
     </tr>
     </thead>
 </table>
