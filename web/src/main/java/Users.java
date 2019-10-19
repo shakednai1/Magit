@@ -38,6 +38,7 @@ public class Users extends HttpServlet {
             for(String repo: repos){
                 Map repoDetails = new HashMap();
                 repoDetails.put("name", repo);
+                // TODO add more repo data
                 usersRepos.add(repoDetails);
             }
             response.add(userData);

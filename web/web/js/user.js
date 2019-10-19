@@ -2,7 +2,6 @@
 //function() getCurrUser{$("h1").text('<%= Session["user"] %>')}
 
 $(document).ready(function() {
-    addAllRepositoriesToTable();
     addAllUsersToList();
 });
 
@@ -16,25 +15,28 @@ function addRepositoryToTable(repo){
         $("#myRepos").append(markup);
 }
 
-function addAllRepositoriesToTable() {
-    //ajax get all user repos
-    var repos = [{
-        "name": "repo1",
-        "activeBranch": "branch1",
-        "numOfBranches": 4,
-        "lastCommitTime": "12.10.2019 34:56:34",
-        "lastCommitMessage": "this is the last"
-    },
-        {
-            "name": "repo2",
-            "activeBranch": "branch2",
-            "numOfBranches": 7,
-            "lastCommitTime": "13.14.2019 35:23:33",
-            "lastCommitMessage": "this is the last second repo"
-        }];
-    for (i in repos) {
-        addRepositoryToTable(repos[i]);
-    }
+function addAllRepositoriesToTable(username){
+    // TODO servlet to get all user's repo
+    $.get("/usersRepo?username=" + username, function(response) {
+        var jsonRes = JSON.parse(response)["response"];
+        var repos = [{
+            "name": "repo1",
+            "activeBranch": "branch1",
+            "numOfBranches": 4,
+            "lastCommitTime": "12.10.2019 34:56:34",
+            "lastCommitMessage": "this is the last"
+        },
+            {
+                "name": "repo2",
+                "activeBranch": "branch2",
+                "numOfBranches": 7,
+                "lastCommitTime": "13.14.2019 35:23:33",
+                "lastCommitMessage": "this is the last second repo"
+            }];
+        for (i in jsonRes) {
+            addRepositoryToTable(repos[i]);
+        }
+    });
 }
 
 function addAllUsersToList(){
