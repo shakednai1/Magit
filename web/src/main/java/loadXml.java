@@ -45,10 +45,13 @@ public class loadXml extends HttpServlet {
             user.getEngine().isXmlValid(content.toString());
             user.getEngine().loadRepositoryFromXML();
             user.addRepo(user.getEngine().getCurrentRepoName());
+            response.setStatus(200);
         }
         catch (UncommittedChangesError | InvalidBranchNameError | XmlException | NoActiveRepositoryError e){
             // TODO handle
             e.printStackTrace();
+            response.setStatus(400);
+            response.getWriter().println(e.getMessage());
         }
     }
 

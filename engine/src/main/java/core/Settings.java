@@ -26,7 +26,7 @@ public class Settings {
     final public static String repositoryDetailsFile = magitFolder + "/repo";
     final public static String repositoryRemoteDetailsFile = magitFolder + "/remote_repo";
 
-    final static String delimiter = ",";
+    final public static String delimiter = ",";
     final public static String YNquestion = "Y/N";
 
     String userName;
