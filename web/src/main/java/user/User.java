@@ -11,7 +11,7 @@ public class User {
 
     MainEngine engine;
 
-    ArrayList repos = new ArrayList();
+    ArrayList<String> repos = new ArrayList();
 
     public String getName() {
         return name;

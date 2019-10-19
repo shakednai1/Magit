@@ -30,6 +30,17 @@
 </form>
 <h2 style="color: #2e6c80;">Magit users</h2>
 <ul id="usersList"></ul>
+<table id="othersRepos" class="reposTable">
+    <thead>
+    <tr>
+        <td>repository name</td>
+        <td>active branch</td>
+        <td>num of branches</td>
+        <td>last commit time</td>
+        <td>last commit massage</td>
+    </tr>
+    </thead>
+</table>
 <h2 style="color: #2e6c80;">Notifications</h2>
 <div style="height: 500px; width: 1200px; border: 1px solid #ccc; font: 16px/26px Georgia, Garamond, Serif; overflow: auto;">
     text here.... slkdfjsdgdhhhhhhhhh slkdfjsdgdhhhhhhhhh slkdfjsdgdhhhhhhhhh slkdfjsdgdhhhhhhhhh slkdfjsdgdhhhhhhhhh

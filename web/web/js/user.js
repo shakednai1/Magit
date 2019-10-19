@@ -15,9 +15,40 @@ function addRepositoryToTable(repo){
         $("#myRepos").append(markup);
 }
 
+function addAllRepositoriesToOtherUserTable(username){
+    // TODO servlet to get all user's repo
+    $.get("/usersRepos?username=" + username, function(response) {
+        $("#othersRepos").append('<caption>'+ username + ' repositories' + '</caption>');
+        var jsonRes = JSON.parse(response)["response"];
+        var repos = [{
+            "name": "repo1",
+            "activeBranch": "branch1",
+            "numOfBranches": 4,
+            "lastCommitTime": "12.10.2019 34:56:34",
+            "lastCommitMessage": "this is the last"
+        },
+            {
+                "name": "repo2",
+                "activeBranch": "branch2",
+                "numOfBranches": 7,
+                "lastCommitTime": "13.14.2019 35:23:33",
+                "lastCommitMessage": "this is the last second repo"
+            }];
+        for (i in repos) {
+            var repo = repos[i];
+            var markup = "<tr><td>"+repo.name+"</td><td>"+
+                repo.activeBranch +"</td><td>" +
+                repo.numOfBranches +"</td><td>" +
+                repo.lastCommitTime +"</td><td>"+
+                repo.lastCommitMessage +"</td></tr>";
+            $("#othersRepos").append(markup);
+        }
+    });
+}
+
 function addAllRepositoriesToTable(username){
     // TODO servlet to get all user's repo
-    $.get("/usersRepo?username=" + username, function(response) {
+    $.get("/usersRepos?username=" + username, function(response) {
         var jsonRes = JSON.parse(response)["response"];
         var repos = [{
             "name": "repo1",
@@ -45,7 +76,8 @@ function addAllUsersToList(){
     $.get("/users?onlyCreated=false", function(response){
         var jsonRes = JSON.parse(response)["response"];
         for(i in jsonRes){
-                $("#usersList").append('<li><a href="/stam">'+ jsonRes[i]["username"] +'</a></li>');
+            var name = jsonRes[i]["username"];
+            $("#usersList").append('<li><a href="#" onClick="addAllRepositoriesToOtherUserTable(\'' + name + '\')"</a>'+name+'</li>');
             }
         }
     );

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-@WebServlet(name = "usersRepos", urlPatterns = "/users")
+@WebServlet(name = "usersRepos", urlPatterns = "/usersRepos")
 public class usersRepos extends HttpServlet {
 
     @Override

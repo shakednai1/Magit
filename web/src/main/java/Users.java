@@ -32,15 +32,6 @@ public class Users extends HttpServlet {
         for(User user : users.values()){
             Map userData = new HashMap();
             userData.put("username", user.getName());
-            ArrayList<Map> usersRepos = new ArrayList<>();
-            userData.put("repositories", usersRepos);
-            List<String> repos = user.getRepos();
-            for(String repo: repos){
-                Map repoDetails = new HashMap();
-                repoDetails.put("name", repo);
-                // TODO add more repo data
-                usersRepos.add(repoDetails);
-            }
             response.add(userData);
         }
         Gson gson = new GsonBuilder().create();
@@ -48,6 +39,5 @@ public class Users extends HttpServlet {
         JsonObject jsonObject = new JsonObject();
         jsonObject.add("response", jarray);
         out.println(jsonObject.toString());
-
     }
 }
