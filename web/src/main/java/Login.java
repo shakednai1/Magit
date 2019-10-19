@@ -4,6 +4,7 @@ import user.UserManager;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,12 +27,11 @@ public class Login extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        request.getSession().setAttribute("user", username);
-
         User user = UserManager.addUser(username, password);
 
-        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/user.jsp");
-        dispatcher.forward(request, response);
+        Cookie userCookie = new Cookie("user", username);
+        response.addCookie(userCookie);
+        response.sendRedirect("http://localhost:8080/user.jsp");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

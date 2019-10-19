@@ -5,7 +5,7 @@
 <script src="js/user.js"></script>
 
 <body>
-<h1 id="currUser" style="color: #5e9ca0;"><% out.print(request.getSession().getAttribute("user")); %></h1>
+<h1 id="currUser" style="color: #5e9ca0;"><% out.print(request.getCookies()[0].getValue()); %></h1>
 
 <form align="right" action="/index.html"><input type="submit" value="Logout"/></form>
 <h2 style="color: #2e6c80;">My repositories</h2>
