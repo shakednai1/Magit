@@ -20,6 +20,7 @@ public class Settings {
     final public static String objectsFolder = magitFolder + "/objects/";
     final public static String branchFolder = magitFolder + "/branches/";
     final public static String remoteBranchFolder = magitFolder + "/remote_branches/";
+    final public static String notificationFolder = "notifications";
 
     final static String activeBranchFileName = "HEAD";
     final public static String activeBranchFile = branchFolder + activeBranchFileName;
@@ -50,7 +51,6 @@ public class Settings {
         this.userName = userName;
     }
 
-
     void setNewRepository(String repository ){
         // repository param : in web mode , repository = repositoryName
         // else: repository = repositoryPath
@@ -78,12 +78,25 @@ public class Settings {
     }
 
     public String getRepoPathByCurrentUser(String repoName){
+        return getRepoPathByUser(userName, repoName);
+    }
+
+    public static String getRepoPathByUser(String userName, String repoName){
         File repoFile =  new File(baseLocation, userName);
         repoFile = new File(repoFile, repoName);
         return repoFile.getAbsolutePath();
     }
 
+    public static File getBranchFolderByRepo(File repoPath){
+        return new File(repoPath, branchFolder);
+    }
+
     String getBranchFilePath(String branchName){
         return branchFolderPath + branchName + ".txt";
     }
+
+    public static File getNotificationPath(String repoPath, String notificationSha1){
+        return new File(new File(new File(repoPath, magitFolder), notificationFolder), notificationSha1 + ".txt");
+    }
+
 }

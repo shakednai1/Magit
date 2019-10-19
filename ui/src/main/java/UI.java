@@ -343,14 +343,12 @@ public class UI {
     }
 
     private static String getCurrentRepoName(){
-        String repoName = null;
         try {
-            repoName = engine.getCurrentRepoName();
+            return  engine.getCurrentRepoName();
         }
         catch (NoActiveRepositoryError e){
             return "";
         }
-        return repoName;
     }
 
 }

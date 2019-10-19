@@ -1,5 +1,3 @@
-// var getCurrUser = function(){$("#currUser").innerText(innerText"dadsg")}
-//function() getCurrUser{$("h1").text('<%= Session["user"] %>')}
 
 $(document).ready(function() {
     var currentUser = getCurrUser();
@@ -67,8 +65,19 @@ function addAllRepositoriesToOtherUserTable(username){
 }
 
 function fork(repoName, fromUser) {
-    $.post('/fork', {fromUser: fromUser, repoName: repoName});
-    addAllRepositoriesToTable();
+    $.ajax(
+        '/fork',
+        {url: '/fork',
+        type: "POST",
+        data: {fromUser: fromUser, repoName: repoName},
+        // contentType: "application/json",
+        success: function () {
+            addAllRepositoriesToTable();
+        }
+        }
+
+    )
+    // $.post('/fork', {fromUser: fromUser, repoName: repoName});
 }
 
 function addAllRepositoriesToTable(){
@@ -122,7 +131,7 @@ function addAllUsersToList(){
 function loadXml(){
     $.ajax("/upload",
         {url: "/upload",
-        type : "POST",
+        type: "POST",
         cache: false,
         contentType: false,
         processData: false,
@@ -135,8 +144,8 @@ function loadXml(){
 
 function init(){
     $("#load-xml").on('submit', function(e) {
-        loadXml();
         e.preventDefault();
+        loadXml();
     });
 }
 

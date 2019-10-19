@@ -19,7 +19,7 @@ public class RepositoryManager {
         return activeRepository;
     }
 
-    Settings getSettings() {return settings;}
+    public Settings getSettings() {return settings;}
 
     void createNewRepository(String repositoryFullPath, String name, boolean empty){
         settings.setNewRepository(settings.webMode? name: repositoryFullPath);

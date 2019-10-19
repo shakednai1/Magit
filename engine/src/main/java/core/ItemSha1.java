@@ -11,7 +11,7 @@ public class ItemSha1{
 
     Settings repoSettings;
 
-    ItemSha1(String strForSha1, boolean isContent, boolean saveContent, Settings repoSettings){
+    public ItemSha1(String strForSha1, boolean isContent, boolean saveContent, Settings repoSettings){
         sha1 = (isContent) ? getSha1FromContent(strForSha1): strForSha1;
         if(saveContent)
             content = strForSha1;

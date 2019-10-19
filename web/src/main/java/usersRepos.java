@@ -27,23 +27,38 @@ public class usersRepos extends HttpServlet {
         User user = UserManager.getUserByName(username);
         ArrayList<String> repos = user.getRepos();
         ArrayList<Map<String, String>> response = new ArrayList<>();
-        for (String repo: repos){
+        for (String repo : repos) {
             Map<String, String> repoDetails = new HashMap<>();
-            File repoFolder = new File(Settings.baseLocation + "/" + username, repo);
-            File branches = new File(repoFolder, "/.magit/branches");
-            File headBranch = new File(branches, "HEAD");
-            String aciveBranch = FSUtils.getFileLines(headBranch.getPath()).get(0);
+            File repoFolder = new File(Settings.getRepoPathByUser(username, repo));
+            System.out.println("repoFolder " + repoFolder.getAbsolutePath());
+            File branches = Settings.getBranchFolderByRepo(repoFolder);
+            System.out.println("branches " + branches.getAbsolutePath());
+
             Integer numOfBranches = branches.listFiles().length - 1;
-            File activeBranchFile = new File(branches, aciveBranch + ".txt");
+
+            File headBranch = new File(branches, "HEAD");
+            String activeBranch = FSUtils.getFileLines(headBranch.getPath()).get(0);
+            File activeBranchFile = new File(branches, activeBranch + ".txt");
             String lastCommit = FSUtils.getFileLines(activeBranchFile.getPath()).get(0).split(Settings.delimiter)[0];
-            List<String> content = FSUtils.getZippedContent(repoFolder + "/.magit/objects/", lastCommit);
-            String[] commitData = content.get(0).split(Settings.delimiter);
-            String[] msgParts = Arrays.copyOfRange(commitData, 3, commitData.length - 2);
-            String msg = String.join(Settings.delimiter, msgParts);
+
+            String commitTime;
+            String msg;
+            if (!lastCommit.equals("null")) {
+                List<String> content = FSUtils.getZippedContent(repoFolder + "/.magit/objects/", lastCommit);
+                String[] commitData = content.get(0).split(Settings.delimiter);
+                commitTime = commitData[commitData.length - 2];
+
+                String[] msgParts = Arrays.copyOfRange(commitData, 3, commitData.length - 2);
+                msg = String.join(Settings.delimiter, msgParts);
+            } else {
+                commitTime = "";
+                msg = "";
+            }
+
             repoDetails.put("name", repo);
-            repoDetails.put("activeBranch", aciveBranch);
+            repoDetails.put("activeBranch", activeBranch);
             repoDetails.put("numOfBranches", numOfBranches.toString());
-            repoDetails.put("lastCommitTime", commitData[commitData.length - 2]);
+            repoDetails.put("lastCommitTime", commitTime);
             repoDetails.put("lastCommitMessage", msg);
             response.add(repoDetails);
         }
@@ -53,4 +68,5 @@ public class usersRepos extends HttpServlet {
         jsonObject.add("response", jarray);
         out.println(jsonObject.toString());
     }
+
 }

@@ -48,7 +48,7 @@ public class loadXml extends HttpServlet {
             response.setStatus(200);
         }
         catch (UncommittedChangesError | InvalidBranchNameError | XmlException | NoActiveRepositoryError e){
-            // TODO handle
+            // TODO handle different errors
             e.printStackTrace();
             response.setStatus(400);
             response.getWriter().println(e.getMessage());

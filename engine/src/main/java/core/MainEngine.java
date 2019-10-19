@@ -239,9 +239,4 @@ public class MainEngine {
     public Repository getActiveRepo(){
         return repositoryManager.getActiveRepository();
     }
-
-//    public List<Notification> getUserNotifications(){
-
-//    }
-
 }
