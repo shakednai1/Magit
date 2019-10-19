@@ -24,13 +24,14 @@
 </table>
 <p><strong>&nbsp;</strong></p>
 <p style="color: #2e6c80; font-size: 90%;">Load new repository:</p>
-<form class="load-xml" enctype='multipart/form-data'>
+<form id="load-xml" enctype='multipart/form-data'>
     <input accept="text/xml" name="xmlFile" type="file"/>
     <input type="submit" value="Load"/>
 </form>
 <h2 style="color: #2e6c80;">Magit users</h2>
 <ul id="usersList"></ul>
 <table id="othersRepos" class="reposTable">
+    <caption>Others repositories</caption>
     <thead>
     <tr>
         <td>repository name</td>

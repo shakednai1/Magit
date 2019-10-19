@@ -24,13 +24,13 @@ function addRepositoryToUserTable(repo){
         $("#myRepos").append(markup);
 }
 
-function addRepositoryToOthersTable(repo) {
+function addRepositoryToOthersTable(repo, username) {
     var markup = "<tr><td>"+repo.name+"</td><td>"+
         repo.activeBranch +"</td><td>" +
         repo.numOfBranches +"</td><td>" +
         repo.lastCommitTime +"</td><td>"+
         repo.lastCommitMessage +"</td>" +
-        "<td><button onClick='fork(\"" + repo.name + "," + username + "," + getCurrUser() + "\")'>fork</button></td>" +
+        "<td><button onClick='fork(\"" + repo.name + "," + username + "\")'>fork</button></td>" +
         "</tr>";
     $("#othersRepos").append(markup);
 }
@@ -54,16 +54,17 @@ function addAllRepositoriesToOtherUserTable(username){
                 "lastCommitTime": "13.14.2019 35:23:33",
                 "lastCommitMessage": "this is the last second repo"
             }];
-        for (i in repos) {
-            addRepositoryToOthersTable(repos[i]);
+        for (i in jsonRes) {
+            addRepositoryToOthersTable(jsonRes[i], username);
         }
     });
 }
 
 
 
-function fork(repoName, fromUser, toUser) {
- //TODO add servlet
+function fork(repoName, fromUser) {
+    $.post("/fork?repoName=" + repoName + "&fromUser=" + fromUser, function(response){
+    });
 }
 
 // TODO update to take from real data
@@ -86,7 +87,7 @@ function addAllRepositoriesToTable(){
                 "lastCommitMessage": "this is the last second repo"
             }];
         for (i in jsonRes) {
-            addRepositoryToUserTable(repos[i]);
+            addRepositoryToUserTable(jsonRes[i]);
         }
     });
 }
@@ -107,7 +108,7 @@ function addAllUsersToList(){
 }
 
 function loadXml(){
-    $.get("/upload");
+    $.post("/upload");
     addAllUsersToList();
 }
 
