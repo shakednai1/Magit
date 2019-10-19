@@ -1,4 +1,5 @@
 import core.Settings;
+import org.apache.commons.io.FileUtils;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -12,14 +13,22 @@ public class appListener implements ServletContextListener{
     @Override
     public void contextDestroyed(ServletContextEvent arg0) {
         System.out.println("ServletContextListener destroyed");
-        Settings.baseLocation.delete();
+        try {
+            FileUtils.deleteDirectory(Settings.baseLocation);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     //Run this before web application is started
     @Override
     public void contextInitialized(ServletContextEvent arg0) {
         System.out.println("ServletContextListener started");
-        Settings.baseLocation.delete();
+        try {
+            FileUtils.deleteDirectory(Settings.baseLocation);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Settings.baseLocation.mkdir();
     }
 }
