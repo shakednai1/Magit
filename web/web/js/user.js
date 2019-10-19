@@ -30,15 +30,16 @@ function addRepositoryToOthersTable(repo, username) {
         repo.numOfBranches +"</td><td>" +
         repo.lastCommitTime +"</td><td>"+
         repo.lastCommitMessage +"</td>" +
-        "<td><button onClick='fork(\"" + repo.name + "," + username + "\")'>fork</button></td>" +
-        "</tr>";
+        "<td><button onClick='fork(\"" + repo.name +  "\",\"" + username + "\")'>fork</button></td></tr>";
     $("#othersRepos").append(markup);
 }
 
 // TODO update to take from real data
 function addAllRepositoriesToOtherUserTable(username){
+    var table = document.getElementById("othersRepos");
+    table.deleteCaption();
+    table.createCaption().innerHTML = username + " repositories";
     $.get("/usersRepos?username=" + username, function(response) {
-        $("#othersRepos").append('<caption>'+ username + ' repositories' + '</caption>');
         var jsonRes = JSON.parse(response)["response"];
         var repos = [{
             "name": "repo1",
@@ -60,11 +61,8 @@ function addAllRepositoriesToOtherUserTable(username){
     });
 }
 
-
-
 function fork(repoName, fromUser) {
-    $.post("/fork?repoName=" + repoName + "&fromUser=" + fromUser, function(response){
-    });
+    $.post('/fork', {fromUser: fromUser, repoName: repoName});
 }
 
 // TODO update to take from real data
