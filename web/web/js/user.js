@@ -19,7 +19,7 @@ function addRepositoryToUserTable(repo){
             repo.numOfBranches +"</td><td>" +
             repo.lastCommitTime +"</td><td>"+
             repo.lastCommitMessage +"</td>" +
-            "<td><form method='post' id='openRepoForm'><button type='submit' form='openRepoForm' value='Submit' onClick='openRepoPage(\"" + repo.name + "\")'>open Repo</button></td></tr>";
+            "<td><button onClick='openRepoPage(\"" + repo.name + "\")'>open Repo</button></td></tr>";
         $("#myRepos").append(markup);
 }
 

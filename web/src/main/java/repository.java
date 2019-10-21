@@ -1,5 +1,4 @@
 import core.Repository;
-import core.Settings;
 import user.User;
 
 import javax.servlet.ServletException;
@@ -8,11 +7,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
 
 @WebServlet(name = "repository", urlPatterns = "/repository")
 public class repository extends HttpServlet {
