@@ -3,7 +3,7 @@ $(document).ready(function() {
     var currentUser = getCurrUser();
     updateUserNameInPageTitle(currentUser);
     addAllUsersToList();
-    // setInterval(20, getNewNotificaion())
+    setInterval( function (){ setNotifications()}, 20000)
 });
 
 $(document).ajaxError(function(event, jqxhr, ajaxOptions, errorThrown) {
