@@ -34,6 +34,8 @@ public abstract class Notification implements Comparable<Notification> {
 
     public abstract String toString();
 
+    public NotificationType getType(){ return type; }
+
     private void setSha1(){
         sha1 = new ItemSha1(toString(), true, false, getNotificationFolder());
     }
@@ -62,13 +64,15 @@ public abstract class Notification implements Comparable<Notification> {
         return toString();
     }
 
+    public abstract String show();
+
     @Override
     public int compareTo(Notification other){
         if(this.time == other.time)
             return 0;
         if (this.time < other.time)
-            return -1;
-        return 1;
+            return 1;
+        return -1;
     }
 
 }

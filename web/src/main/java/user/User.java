@@ -77,7 +77,10 @@ public class User {
             File typeFolder = Settings.getNotificationFolder(ownerPath, type.name());
 
             List<File> notificationFiles = new ArrayList<>();
-            notificationFiles.addAll(Arrays.stream(typeFolder.listFiles()).collect(Collectors.toList()));
+
+            File[] files = typeFolder.listFiles();
+            if (files != null)
+                notificationFiles.addAll(Arrays.stream(files).collect(Collectors.toList()));
 
             notificationsSHA1.put(type, notificationFiles);
         }

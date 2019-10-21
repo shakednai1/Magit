@@ -5,7 +5,9 @@ import core.ItemSha1;
 import core.Settings;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class ForkNotification extends Notification {
 
@@ -20,13 +22,20 @@ public class ForkNotification extends Notification {
         time = Long.parseLong(fields[0]);
         repoName = fields[1];
         operatorUser = fields[2];
-        ownerUser = "";
-        sha1 = new ItemSha1(notificationPath.getName().split(".")[0], false, false, notificationPath.getParentFile());
+        ownerUser = Settings.getUserFromPath(notificationPath.getAbsolutePath());
+        type = NotificationType.FORK;
+        sha1 = new ItemSha1(notificationPath.getName().split(Pattern.quote("."))[0], false, false, notificationPath.getParentFile());
     }
 
     @Override
     public String toString(){
         return String.join(Settings.delimiter, Long.toString(time), repoName, operatorUser);
+    }
+
+    public String show(){
+        return "User " + operatorUser +
+            " forked repository " + repoName +
+            " at time " + new Date(time).toString();
     }
 
 }

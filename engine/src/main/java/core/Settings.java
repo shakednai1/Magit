@@ -1,11 +1,14 @@
 package core;
 
+import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.regex.Pattern;
 
 public class Settings {
 
@@ -109,6 +112,13 @@ public class Settings {
 
     public static File getNotificationFolder(File userPath, String notificationType){
         return new File(new File(userPath, notificationFolder), notificationType);
+    }
+
+    public static String getUserFromPath(String path) throws ValueException{
+        if(!path.startsWith(baseLocation.getAbsolutePath()))
+            throw new ValueException("Not magit path");
+
+        return path.split(Pattern.quote("\\"))[2];
     }
 
 }
