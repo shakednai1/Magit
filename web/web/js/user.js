@@ -30,7 +30,17 @@ function addRepositoryToUserTable(repo){
 }
 
 function openRepoPage(repoName) {
-    $.post("/repository", {repoName: repoName});
+    $.ajax(
+        '/repository',
+        {url: '/repository',
+            type: "POST",
+            cache: false,
+            data: {repoName: repoName},
+            success: function (data, textStatus, xhr) {
+                window.location.href = JSON.parse(data)["redirectUrl"];
+            }
+        }
+    );
 }
 
 function addRepositoryToOthersTable(repo, username) {

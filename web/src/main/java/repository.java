@@ -1,4 +1,7 @@
+import com.google.gson.*;
 import core.Repository;
+import models.BranchData;
+import org.json.simple.JSONObject;
 import user.User;
 
 import javax.servlet.ServletException;
@@ -7,7 +10,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @WebServlet(name = "repository", urlPatterns = "/repository")
 public class repository extends HttpServlet {
@@ -20,13 +29,40 @@ public class repository extends HttpServlet {
         user.getEngine().changeActiveRepository(repoName);
         Cookie userCookie = new Cookie("user", user.getName());
         resp.addCookie(userCookie);
-        resp.sendRedirect("http://localhost:8080/repository.jsp");
+        Gson gson = new GsonBuilder().create();
+        Map<String, String> map = new HashMap<>();
+        map.put("redirectUrl", "http://localhost:8080/repository.jsp");
+        resp.getWriter().println((gson.toJson(map)));
+
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Repository repository = WebUtils.getSessionUser(req).getEngine().getActiveRepository();
-        resp.getWriter().println(repository.getName());
-        // TODO return repo details.
+        JsonObject res = new JsonObject();
+        res.addProperty("repoName", repository.getName());
+        res.addProperty("head", repository.getActiveBranch().getName());
+        JsonArray localBranches = new JsonArray();
+        repository.getAllBranches().stream().forEach(b -> localBranches.add(b.getName()));
+        res.add("localBranches", localBranches);
+
+        if(repository.isRemote()){
+            JsonArray remoteBranches = new JsonArray();
+            repository.getAllRemoteBranches().stream().forEach(b -> remoteBranches.add(b.getName()));
+            res.add("remoteBranches", remoteBranches);
+            Path repoPath = Paths.get(repository.getRemoteRepositoryPath());
+            res.addProperty("remoteFrom", repoPath.getParent().getFileName().toString());
+            res.addProperty("remoteName", repository.getRemoteRepositoryName());
+        }
+        else{
+            res.add("remoteBranches", null);
+            res.add("remoteFrom", null);
+            res.add("remoteName", null);
+
+        }
+
+
+        resp.getWriter().println(res.toString());
+
     }
 }
