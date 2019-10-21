@@ -74,7 +74,7 @@ public class FSUtils {
 
     public static List<String> getZippedContent(String directory, String sha1){
         FSUtils.unzip(getZippedPath(directory, sha1), directory , sha1 + ".txt");
-        List<String > content = FSUtils.getFileLines(directory + sha1+ ".txt");
+        List<String > content = FSUtils.getFileLines(new File(directory, sha1+ ".txt").getAbsolutePath());
         FSUtils.deleteFile(directory + sha1 + ".txt");
         return content;
     }

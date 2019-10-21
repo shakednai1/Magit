@@ -54,7 +54,7 @@ public class Branch {
 
         File  rootFolderPath = new File(repoSettings.repositoryFullPath);
         rootFolder = new Folder(rootFolderPath,
-                new ItemSha1(this.head.getRootFolderSHA1(), false, false, repoSettings),
+                new ItemSha1(this.head.getRootFolderSHA1(), false, false, repoSettings.getRepositoryObjectsFullPath()),
                 head.getUserLastModified(),
                 head.getCommitTime(),
                 repoSettings);

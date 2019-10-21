@@ -1,19 +1,13 @@
 
 //taken from: http://www.servletworld.com/servlet-tutorials/servlet3/multipartconfig-file-upload-example.html
 // and http://docs.oracle.com/javaee/6/tutorial/doc/glraq.html
-import core.Settings;
+
 import exceptions.InvalidBranchNameError;
 import exceptions.NoActiveRepositoryError;
 import exceptions.UncommittedChangesError;
 import exceptions.XmlException;
 import user.User;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-
-import java.util.Scanner;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -21,6 +15,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.Scanner;
+
 
 @WebServlet("/upload")
 @MultipartConfig(fileSizeThreshold = 1024 * 1024,
@@ -37,7 +36,6 @@ public class loadXml extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html");
 
         StringBuilder content = loadXml(request, response);
         user = WebUtils.getSessionUser(request);
@@ -46,11 +44,13 @@ public class loadXml extends HttpServlet {
             user.getEngine().loadRepositoryFromXML();
             user.addRepo(user.getEngine().getCurrentRepoName());
             response.setStatus(200);
+//            response.getWriter().println("OK");
         }
         catch (UncommittedChangesError | InvalidBranchNameError | XmlException | NoActiveRepositoryError e){
             // TODO handle different errors
             e.printStackTrace();
             response.setStatus(400);
+            response.setContentType("text/plain");
             response.getWriter().println(e.getMessage());
         }
     }

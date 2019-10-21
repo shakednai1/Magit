@@ -20,7 +20,7 @@ public class Settings {
     final public static String objectsFolder = magitFolder + "/objects/";
     final public static String branchFolder = magitFolder + "/branches/";
     final public static String remoteBranchFolder = magitFolder + "/remote_branches/";
-    final public static String notificationFolder = "notifications";
+    final public static String notificationFolder = ".notifications";
 
     final static String activeBranchFileName = "HEAD";
     final public static String activeBranchFile = branchFolder + activeBranchFileName;
@@ -45,11 +45,15 @@ public class Settings {
         this.userName = userName;
     }
 
-    String getUser(){ return userName; }
+    public String getUser(){ return userName; }
     void setUser(String userName){
         // DO NOT USE IN WEB MODE
         this.userName = userName;
     }
+
+    public String getRepositoryFullPath(){ return repositoryFullPath; }
+
+    public File getRepositoryObjectsFullPath(){ return new File(objectsFolderPath); }
 
     void setNewRepository(String repository ){
         // repository param : in web mode , repository = repositoryName
@@ -95,8 +99,16 @@ public class Settings {
         return branchFolderPath + branchName + ".txt";
     }
 
-    public static File getNotificationPath(String repoPath, String notificationSha1){
-        return new File(new File(new File(repoPath, magitFolder), notificationFolder), notificationSha1 + ".txt");
+    public static File getUserPath(String userName){
+        return new File(baseLocation, userName);
+    }
+
+    public static File getNotificationPath(File notificationFolder, String notificationSha1){
+        return new File(notificationFolder, notificationSha1 + ".txt");
+    }
+
+    public static File getNotificationFolder(File userPath, String notificationType){
+        return new File(new File(userPath, notificationFolder), notificationType);
     }
 
 }

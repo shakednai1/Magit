@@ -20,7 +20,7 @@ public class Fork extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, String[]> params = request.getParameterMap();
 
-        // TODO - unable to get repoName for the new repo
+        // TODO - to get repoName for the new repo
 
         String repoName = params.get("repoName")[0];
         String fromUser = params.get("fromUser")[0];
@@ -31,8 +31,7 @@ public class Fork extends HttpServlet {
 
         new ForkNotification(repoName,
                 fromUser,
-                user.getName(),
-                user.getEngine().getRepositoryManager().getSettings()
+                user.getName()
         ).save();
     }
 }

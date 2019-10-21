@@ -134,7 +134,7 @@ public class FileChanges extends Blob{
     }
 
     public void setContent(String text) {
-        currentSHA1 = new ItemSha1(text, true, true, repoSettings);
+        currentSHA1 = new ItemSha1(text, true, true, repoSettings.getRepositoryObjectsFullPath());
         state = Common.FilesStatus.RESOLVED;
 
         resElement = new Blob(new File(fullPath), currentSHA1, "", "", repoSettings);
