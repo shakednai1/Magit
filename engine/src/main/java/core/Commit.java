@@ -129,7 +129,7 @@ public class Commit implements CommitRepresentative {
         return !firstPreviousCommitSHA1.equals("");
     }
 
-    static protected Map<String, Blob> getAllFilesOfCommit(String commitSha1, Settings repoSettings){
+    public static Map<String, Blob> getAllFilesOfCommit(String commitSha1, Settings repoSettings){
         Folder commitFolder = Commit.getCommitRootFolder(commitSha1, repoSettings);
         return commitFolder.getCommittedFilesState(false);
     }

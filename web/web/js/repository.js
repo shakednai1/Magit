@@ -84,12 +84,43 @@ function updateHeadBranchCommits() {
                commit.message +"</td><td>" +
                commit.commitTime +"</td><td>" +
                commit.committer +"</td><td>"+
-               commit.pointingBranches +"</td></tr>";
+               commit.pointingBranches +"</td><td>" +
+               "<button onClick='showCommitFileSystem(\"" + commit.sha1 + "\")'>show file system</button></td></tr>";
            $("#commits").append(markup);
        }
     });
 }
 
+function showCommitFileSystem(commitSha1) {
+    $.get('/commit', {commitSha1: commitSha1})
+        .success(function (response) {
+        var jsonRes =  JSON.parse(response);
+        openFSWindow(commitSha1, jsonRes);
+    });
+}
+
+function openFSWindow(commitSha1, jsonRes) {
+    var url = "fileSystem.jsp";
+    var width = 700;
+    var height = 600;
+    var left = parseInt((screen.availWidth/2) - (width/2));
+    var top = parseInt((screen.availHeight/2) - (height/2));
+    var windowFeatures = "width=" + width + ",height=" + height +
+        ",status,resizable,left=" + left + ",top=" + top +
+        "screenX=" + left + ",screenY=" + top + ",scrollbars=yes";
+    FSwindows = window.open(url, "subWind", windowFeatures);
+    FSwindows.window.onload = function (ev) {
+        FSwindows.document.getElementById("FStitle").innerHTML = commitSha1 + " commit file system";
+        for (i in jsonRes){
+            var ul = FSwindows.document.getElementById("files");
+            var li = FSwindows.document.createElement("li");
+            li.appendChild(document.createTextNode(jsonRes[i]));
+            ul.appendChild(li);
+        }
+    }
+    //FSwindows.document.body.innerHTML = "<h2> commit "+ commitSha1 + " file system <\h2><ul><li>first</li></ul>";
+
+}
 
 function clearTable(tableId){
     var table = document.getElementById(tableId);
@@ -98,3 +129,4 @@ function clearTable(tableId){
         table.deleteRow(i);
     }
 }
+
