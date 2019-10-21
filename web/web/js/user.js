@@ -5,6 +5,12 @@ $(document).ready(function() {
     addAllUsersToList();
 });
 
+$(document).ajaxError(function(event, jqxhr, ajaxOptions, errorThrown) {
+    var responseBody  = jqxhr.responseText;
+    alert(responseBody);
+});
+
+
 function getCurrUser() {
     return document.cookie.split("user=")[1]
 }
@@ -65,8 +71,17 @@ function addAllRepositoriesToOtherUserTable(username){
 }
 
 function fork(repoName, fromUser) {
-    $.post('/fork', {fromUser: fromUser, repoName: repoName});
-    addAllRepositoriesToTable();
+    $.ajax(
+        '/fork',
+        {url: '/fork',
+        type: "POST",
+        data: {fromUser: fromUser, repoName: repoName},
+        success: function () {
+            addAllRepositoriesToTable();
+        }
+        }
+
+    )
 }
 
 function addAllRepositoriesToTable(){
@@ -74,20 +89,6 @@ function addAllRepositoriesToTable(){
     clearTable("myRepos");
     $.get("/usersRepos", {username: username}, function(response) {
         var jsonRes = JSON.parse(response)["response"];
-        var repos = [{
-            "name": "repo1",
-            "activeBranch": "branch1",
-            "numOfBranches": 4,
-            "lastCommitTime": "12.10.2019 34:56:34",
-            "lastCommitMessage": "this is the last"
-        },
-            {
-                "name": "repo2",
-                "activeBranch": "branch2",
-                "numOfBranches": 7,
-                "lastCommitTime": "13.14.2019 35:23:33",
-                "lastCommitMessage": "this is the last second repo"
-            }];
         for (i in jsonRes) {
             addRepositoryToUserTable(jsonRes[i]);
         }
@@ -125,8 +126,10 @@ function loadXml(){
         contentType: false,
         processData: false,
         data: new FormData($("#load-xml")[0]),
-        success: function() { addAllRepositoriesToTable(); },
-        error: function (data) { alert(data); }});
+        success: function() { addAllRepositoriesToTable(); }
+        }).always(function () {
+        document.getElementById("load-xml").reset();
+        });
 }
 
 

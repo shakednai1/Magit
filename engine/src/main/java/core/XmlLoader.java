@@ -239,7 +239,7 @@ class XmlLoader {
                     MagitBlob magitBlob = blobMap.get(itemId);
 
                     Blob blob = new Blob(new File(path, magitBlob.getName()),
-                            new ItemSha1(magitBlob.getContent(), true, false, repositoryManager.getSettings()),
+                            new ItemSha1(magitBlob.getContent(), true, false, repositoryManager.getSettings().getRepositoryObjectsFullPath()),
                             magitBlob.getLastUpdater(),
                             magitBlob.getLastUpdateDate(),
                             repositoryManager.getSettings());

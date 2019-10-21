@@ -3,13 +3,15 @@ package user.notification;
 import core.ItemSha1;
 import core.Settings;
 import org.apache.commons.io.FileUtils;
+import sun.security.util.ArrayUtil;
 
+import javax.tools.DiagnosticListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
-public abstract class Notification {
-    static enum NotificationType {FORK, NEW_PULL_REQUEST, EDIT_PULL_REQUEST};
+public abstract class Notification implements Comparable<Notification> {
+    public static enum NotificationType {FORK, NEW_PULL_REQUEST, EDIT_PULL_REQUEST};
 
     long time;
     String repoName;
@@ -19,40 +21,54 @@ public abstract class Notification {
     NotificationType type;
     ItemSha1 sha1;
 
-    Settings repoSettings;
+    Notification(){}
 
-    Notification(String repoName, String ownerUser, String operatorUser, NotificationType type,
-                 Settings repoSettings){
+    Notification(String repoName, String ownerUser, String operatorUser, NotificationType type){
         this.repoName = repoName;
         this.ownerUser = ownerUser;
         this.operatorUser = operatorUser;
         this.type = type;
-        this.repoSettings = repoSettings;
         this.time = new Date().getTime();
         setSha1();
     }
 
-    private void setSha1(){
-        sha1 = new ItemSha1(toString(), true, false, repoSettings);
-    }
-
     public abstract String toString();
 
+    private void setSha1(){
+        sha1 = new ItemSha1(toString(), true, false, getNotificationFolder());
+    }
+
+    File getNotificationFolder(){
+        File ownerPath = Settings.getUserPath(ownerUser);
+        return Settings.getNotificationFolder(ownerPath, type.name());
+    }
+
     public void save(){
-        String ownerRepoPath = Settings.getRepoPathByUser(ownerUser, repoName);
-        String objStr = serialize();
-        File notificationPath = Settings.getNotificationPath(ownerRepoPath, sha1.toString());
+        File notificationPath = Settings.getNotificationPath(getNotificationFolder(), sha1.toString());
 
         try {
-            FileUtils.writeStringToFile(notificationPath, objStr, "utf-8");
+            FileUtils.writeStringToFile(notificationPath, serialize(), "utf-8");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    public void delete(){
+        File notificationPath = Settings.getNotificationPath(getNotificationFolder(), sha1.toString());
+        notificationPath.delete();
+    }
 
     protected String serialize(){
-        return sha1.toString();
+        return toString();
     }
-    protected abstract Object deserialize();
+
+    @Override
+    public int compareTo(Notification other){
+        if(this.time == other.time)
+            return 0;
+        if (this.time < other.time)
+            return -1;
+        return 1;
+    }
+
 }

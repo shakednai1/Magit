@@ -2,6 +2,7 @@ package core;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import java.io.File;
 import java.util.List;
 
 public class ItemSha1{
@@ -9,13 +10,13 @@ public class ItemSha1{
     String sha1;
     String content;
 
-    Settings repoSettings;
+    File contentFolder;
 
-    public ItemSha1(String strForSha1, boolean isContent, boolean saveContent, Settings repoSettings){
+    public ItemSha1(String strForSha1, boolean isContent, boolean saveContent, File contentFolder){
         sha1 = (isContent) ? getSha1FromContent(strForSha1): strForSha1;
         if(saveContent)
             content = strForSha1;
-        this.repoSettings = repoSettings;
+        this.contentFolder = contentFolder;
     }
 
     private static String getSha1FromContent(String content){
@@ -25,7 +26,7 @@ public class ItemSha1{
     String getContent(){
         if (content != null)
             return content;
-        return String.join("\n", FSUtils.getZippedContent(repoSettings.objectsFolderPath, sha1));
+        return String.join("\n", FSUtils.getZippedContent(contentFolder.getAbsolutePath(), sha1));
     }
 
     @Override

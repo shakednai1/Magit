@@ -1,8 +1,13 @@
 package user;
 
 import core.MainEngine;
+import core.Settings;
+import user.notification.ForkNotification;
+import user.notification.Notification;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class User {
 
@@ -36,4 +41,50 @@ public class User {
         return engine;
     }
 
+    public List<Notification> getNotifications(boolean reset, boolean sort){
+        List<Notification> notifications = new ArrayList<>();
+
+        Map<Notification.NotificationType, List<File>> notificationsSHA1 = getNotificationSHA1();
+
+        for(Notification.NotificationType type: notificationsSHA1.keySet()){
+            if(type == Notification.NotificationType.FORK){
+                for(File notificationPath: notificationsSHA1.get(type))
+                    notifications.add(new ForkNotification(notificationPath));
+            }
+
+        }
+
+        if (reset){
+            for(Notification notification: notifications)
+                notification.delete();
+        }
+
+        if(sort){
+            notifications = notifications.stream().sorted().collect(Collectors.toList());
+        }
+
+        return notifications;
+
+    }
+
+    private Map<Notification.NotificationType, List<File>> getNotificationSHA1(){
+
+        Map<Notification.NotificationType, List<File >> notificationsSHA1 = new HashMap<>();
+
+        File ownerPath = Settings.getUserPath(name);
+
+        for(Notification.NotificationType type: Notification.NotificationType.values()){
+            File typeFolder = Settings.getNotificationFolder(ownerPath, type.name());
+
+            List<File> notificationFiles = new ArrayList<>();
+            notificationFiles.addAll(Arrays.stream(typeFolder.listFiles()).collect(Collectors.toList()));
+
+            notificationsSHA1.put(type, notificationFiles);
+        }
+
+        return notificationsSHA1;
+    }
+
+
 }
+

@@ -21,18 +21,16 @@ import java.util.*;
 public class usersRepos extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        PrintWriter out = resp.getWriter();
+    protected void doGet(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
+        PrintWriter out = response.getWriter();
         String username = req.getParameter("username");
         User user = UserManager.getUserByName(username);
         ArrayList<String> repos = user.getRepos();
-        ArrayList<Map<String, String>> response = new ArrayList<>();
+        ArrayList<Map<String, String>> res = new ArrayList<>();
         for (String repo : repos) {
             Map<String, String> repoDetails = new HashMap<>();
             File repoFolder = new File(Settings.getRepoPathByUser(username, repo));
-            System.out.println("repoFolder " + repoFolder.getAbsolutePath());
             File branches = Settings.getBranchFolderByRepo(repoFolder);
-            System.out.println("branches " + branches.getAbsolutePath());
 
             Integer numOfBranches = branches.listFiles().length - 1;
 
@@ -60,10 +58,10 @@ public class usersRepos extends HttpServlet {
             repoDetails.put("numOfBranches", numOfBranches.toString());
             repoDetails.put("lastCommitTime", commitTime);
             repoDetails.put("lastCommitMessage", msg);
-            response.add(repoDetails);
+            res.add(repoDetails);
         }
         Gson gson = new GsonBuilder().create();
-        JsonArray jarray = gson.toJsonTree(response).getAsJsonArray();
+        JsonArray jarray = gson.toJsonTree(res).getAsJsonArray();
         JsonObject jsonObject = new JsonObject();
         jsonObject.add("response", jarray);
         out.println(jsonObject.toString());
