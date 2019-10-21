@@ -26,12 +26,22 @@ function addRepositoryToUserTable(repo){
             repo.numOfBranches +"</td><td>" +
             repo.lastCommitTime +"</td><td>"+
             repo.lastCommitMessage +"</td>" +
-            "<td><form method='post' id='openRepoForm'><button type='submit' form='openRepoForm' value='Submit' onClick='openRepoPage(\"" + repo.name + "\")'>open Repo</button></td></tr>";
+            "<td><button onClick='openRepoPage(\"" + repo.name + "\")'>open Repo</button></td></tr>";
         $("#myRepos").append(markup);
 }
 
 function openRepoPage(repoName) {
-    $.post("/repository", {repoName: repoName});
+    $.ajax(
+        '/repository',
+        {url: '/repository',
+            type: "POST",
+            cache: false,
+            data: {repoName: repoName},
+            success: function (data, textStatus, xhr) {
+                window.location.href = JSON.parse(data)["redirectUrl"];
+            }
+        }
+    );
 }
 
 function addRepositoryToOthersTable(repo, username) {

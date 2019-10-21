@@ -15,6 +15,7 @@ import models.BranchData;
 import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -209,8 +210,8 @@ public class Repository {
 
     String getFullPath(){ return fullPath; }
     public String getName(){ return name; }
-    Branch getActiveBranch(){ return activeBranch; }
-    ObservableList<BranchData> getAllBranches(){ return branches; }
+    public Branch getActiveBranch(){ return activeBranch; }
+    public ObservableList<BranchData> getAllBranches(){ return branches; }
     Merge getCurrentMerge(){ return currentMerge; }
 
 
@@ -265,6 +266,14 @@ public class Repository {
             }
             commits.get(c.getKey()).addContainingBranch(branch);
         }
+    }
+
+    public Map<String, CommitData> getBranchCommits(BranchData branch) {
+        Map<String, CommitData> res = new HashMap<>();
+        for (Map.Entry<String, Commit> c : Commit.loadAll(branch.getHeadSha1(), settings).entrySet()) {
+            res.put(c.getKey(), new CommitData(c.getValue()));
+        }
+        return res;
     }
 
     private void __setCommitDataInMasterMainChain(){
@@ -328,7 +337,7 @@ public class Repository {
         return activeBranch.getWorkingCopy();
     }
 
-    BranchData createNewBranch(String branchName, boolean checkout) throws UncommittedChangesError, InvalidBranchNameError{
+    public BranchData createNewBranch(String branchName, boolean checkout) throws UncommittedChangesError, InvalidBranchNameError{
         if (branchName.contains(" "))
             throw new InvalidBranchNameError("Branch name cannot contain spaces");
 
@@ -362,7 +371,7 @@ public class Repository {
         saveRepositoryActiveBranch();
     }
 
-    void checkoutBranch(String name, boolean force) throws UncommittedChangesError, InvalidBranchNameError {
+    public void checkoutBranch(String name, boolean force) throws UncommittedChangesError, InvalidBranchNameError {
         if (!validBranchName(name))
             throw new InvalidBranchNameError("InvalidBranchNameError");
 

@@ -3,7 +3,6 @@ package user.notification;
 import core.ItemSha1;
 import core.Settings;
 import org.apache.commons.io.FileUtils;
-import sun.security.util.ArrayUtil;
 
 import javax.tools.DiagnosticListener;
 import java.io.File;
