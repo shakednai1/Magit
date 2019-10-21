@@ -28,6 +28,7 @@ public class Fork extends HttpServlet {
         Path srcRepo = Paths.get(Settings.baseLocation.toString(), fromUser, repoName);
         Path dstRepo = Paths.get(Settings.baseLocation.toString(), user.getName(), repoName);
         user.getEngine().cloneRepo(srcRepo.toString(), dstRepo.toString(), repoName);
+        user.addRepo(repoName);
 
         new ForkNotification(repoName,
                 fromUser,
