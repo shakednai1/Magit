@@ -80,7 +80,7 @@ public class RepositoryManager {
         FSUtils.writeFile(destDir + Settings.repositoryRemoteDetailsFile, sourcePath + Settings.delimiter + remoteRepoName, false);
 
         createNewBranchFilsTrackingAfter(remoteBranchesPath, branchesPath);
-        switchActiveRepository(destPath);
+        switchActiveRepository(repoName);
     }
 
     public void createNewBranchFilsTrackingAfter(String remoteBranchesPath, String branchesPath){

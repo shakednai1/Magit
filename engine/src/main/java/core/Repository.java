@@ -208,7 +208,7 @@ public class Repository {
     }
 
     String getFullPath(){ return fullPath; }
-    String getName(){ return name; }
+    public String getName(){ return name; }
     Branch getActiveBranch(){ return activeBranch; }
     ObservableList<BranchData> getAllBranches(){ return branches; }
     Merge getCurrentMerge(){ return currentMerge; }

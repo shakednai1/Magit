@@ -19,12 +19,12 @@ function addRepositoryToUserTable(repo){
             repo.numOfBranches +"</td><td>" +
             repo.lastCommitTime +"</td><td>"+
             repo.lastCommitMessage +"</td>" +
-            "<td><button onClick='openRepoPage(\"" + repo.name +  "\")'>open repo</button></td></tr>";
+            "<td><form method='post' id='openRepoForm'><button type='submit' form='openRepoForm' value='Submit' onClick='openRepoPage(\"" + repo.name + "\")'>open Repo</button></td></tr>";
         $("#myRepos").append(markup);
 }
 
 function openRepoPage(repoName) {
-    //TODO servlet to get repo page jsp
+    $.post("/repository", {repoName: repoName});
 }
 
 function addRepositoryToOthersTable(repo, username) {
@@ -65,19 +65,8 @@ function addAllRepositoriesToOtherUserTable(username){
 }
 
 function fork(repoName, fromUser) {
-    $.ajax(
-        '/fork',
-        {url: '/fork',
-        type: "POST",
-        data: {fromUser: fromUser, repoName: repoName},
-        // contentType: "application/json",
-        success: function () {
-            addAllRepositoriesToTable();
-        }
-        }
-
-    )
-    // $.post('/fork', {fromUser: fromUser, repoName: repoName});
+    $.post('/fork', {fromUser: fromUser, repoName: repoName});
+    addAllRepositoriesToTable();
 }
 
 function addAllRepositoriesToTable(){

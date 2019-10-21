@@ -105,7 +105,7 @@ class XmlLoader {
                     magitRepository.getMagitRemoteReference().getLocation());
         }
 
-        repositoryManager.switchActiveRepository(Settings.webMode? magitRepository.getName() :repositoryPath);
+        //repositoryManager.switchActiveRepository(Settings.webMode? magitRepository.getName() :repositoryPath);
     }
 
     private void setFirstCommit() {
