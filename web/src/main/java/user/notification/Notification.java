@@ -28,7 +28,6 @@ public abstract class Notification implements Comparable<Notification> {
         this.operatorUser = operatorUser;
         this.type = type;
         this.time = new Date().getTime();
-        setSha1();
     }
 
     public abstract String toString();
@@ -45,6 +44,8 @@ public abstract class Notification implements Comparable<Notification> {
     }
 
     public void save(){
+        setSha1();
+
         File notificationPath = Settings.getNotificationPath(getNotificationFolder(), sha1.toString());
 
         try {

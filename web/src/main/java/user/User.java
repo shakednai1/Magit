@@ -2,7 +2,10 @@ package user;
 
 import core.MainEngine;
 import core.Settings;
+import exceptions.NoActiveRepositoryError;
+import pullRequest.PullRequest;
 import user.notification.ForkNotification;
+import user.notification.NewPRNotification;
 import user.notification.Notification;
 
 import java.io.File;
@@ -26,15 +29,30 @@ public class User {
         return repos;
     }
 
+
     User(String name, String password){
         this.name = name;
         this.password = password;
 
         this.engine = new MainEngine(this.name);
+        loadRepos();
     }
 
     public void addRepo(String repoName){
         repos.add(repoName);
+    }
+
+    public void loadRepos() {
+        File userPath = this.engine.getRepositoryManager().getSettings().getUserPath(name);
+        File[] repoDirs = userPath.listFiles();
+
+        if(repoDirs == null)
+            return;
+
+        for(File repoDir: repoDirs){
+            if(!repoDir.getName().equals(".notifications"))
+                repos.add(repoDir.getName());
+        }
     }
 
     public MainEngine getEngine(){
@@ -50,6 +68,10 @@ public class User {
             if(type == Notification.NotificationType.FORK){
                 for(File notificationPath: notificationsSHA1.get(type))
                     notifications.add(new ForkNotification(notificationPath));
+            }
+            else if(type == Notification.NotificationType.NEW_PULL_REQUEST){
+                for(File notificationPath: notificationsSHA1.get(type))
+                    notifications.add(new NewPRNotification(notificationPath));
             }
 
         }
@@ -79,15 +101,25 @@ public class User {
             List<File> notificationFiles = new ArrayList<>();
 
             File[] files = typeFolder.listFiles();
-            if (files != null)
+            if (files != null){
                 notificationFiles.addAll(Arrays.stream(files).collect(Collectors.toList()));
 
-            notificationsSHA1.put(type, notificationFiles);
+                notificationsSHA1.put(type, notificationFiles);
+            }
+
         }
 
         return notificationsSHA1;
     }
 
+    public List<PullRequest> getPullRequestsCurrentRepo() {
+        try {
+            return PullRequest.getRepoPullRequests(name, engine.getCurrentRepoName());
+        } catch (NoActiveRepositoryError e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }
 
