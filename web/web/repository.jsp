@@ -24,6 +24,8 @@
 <select id="checkout"></select><button onClick="checkoutBranch()">checkout</button>
 <br />
 <hr>
+
+<h2 style="color: #2e6c80;">Pull Requests</h2>
 <button id="EnablePullRequest" onclick="togglePullRequest()" value="Open Pull Request">Open Pull Request</button>
 
 <div id="PullRequest" >
@@ -36,7 +38,7 @@
 </div>
 
 <div id="repoPullRequests">
-    <table id="repoPullRequestsTable" class="pullRequestsTable">
+    <table id="repoPullRequestsTable" class="commitsTable">
         <script>addAllRepositoryPullRequests()</script>
         <thead>
         <tr>
