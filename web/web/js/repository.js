@@ -12,10 +12,13 @@ $(document).ready(function () {
         e.preventDefault();
         openPullRequest();
     });
+
+    setInterval( function (){ addAllRepositoryPullRequests()}, 20000);
+
 });
 
 function getCurrUser() {
-    return document.cookie.split("user=")[1]
+    return document.cookie.split("user=")[1];
 }
 
 function updateRepoDetails(response) {
@@ -185,7 +188,8 @@ function addAllRepositoryPullRequests() {
             clearTable("repoPullRequestsTable");
 
             var jsonRes = JSON.parse(response)["response"];
-            for (i in jsonRes) {
+            for(var i = 0; i < jsonRes.length ; i++)
+            {
                 addPullRequestToTable(JSON.parse(jsonRes[i]));
             }
         });
@@ -200,7 +204,7 @@ function addPullRequestToTable(pr) {
         pr.comment + "</td><td>" +
         pr.creationTime + "</td>" +
         "<td><button onClick='openPullRequestWindow(\"" + pr.sha1.sha1 + "\")'>Open</button></td></tr>";
-    $("#repoPullRequestsTable").append(markup);
+    $("#repoPullRequestsTable   > tbody:last-child").append(markup);
 }
 
 function openPullRequestWindow(prSha1) {

@@ -50,6 +50,7 @@
             <td>Action</td>
         </tr>
         </thead>
+        <tbody></tbody>
     </table>
 </div>
 
