@@ -49,8 +49,8 @@ function updateRepoDetails(response) {
 
     if (jsonRes.remoteFrom !== null) {
         var remoteFrom = jsonRes.remoteFrom.split("ex3")[1];
-        remoteFrom = remoteFrom.split(jsonRes.repoName)[0].substring(1);
-        document.getElementById("remoteFrom").innerHTML = "forked from : " + remoteFrom;
+        remoteFrom = remoteFrom.split(jsonRes.remoteName)[0];
+        document.getElementById("remoteFrom").innerHTML = "forked from : " + remoteFrom.substring(1, remoteFrom.length -1);
         document.getElementById("remoteRepoName").innerHTML = "remote repository name : " + jsonRes.remoteName;
     } else {
         document.getElementById("EnablePullRequest").style.display = "none";
