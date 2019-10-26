@@ -7,6 +7,7 @@ import exceptions.UncommittedChangesError;
 import models.BranchData;
 import models.CommitData;
 import org.json.simple.JSONObject;
+import user.User;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -35,10 +36,17 @@ public class branch extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Repository repository = WebUtils.getSessionUser(req).getEngine().getActiveRepository();
-        Map<String, CommitData> commitsHistory = repository.getBranchCommits(new BranchData(repository.getActiveBranch()));
-        Gson gson = new Gson();
-        String jsonStr = gson.toJson(commitsHistory);
-        resp.getWriter().println(jsonStr);
+        User user = WebUtils.getSessionUser(req);
+
+        try{
+            Repository repository = user.getEngine().getActiveRepository();
+            Map<String, CommitData> commitsHistory = repository.getBranchCommits(new BranchData(repository.getActiveBranch()));
+            Gson gson = new Gson();
+            String jsonStr = gson.toJson(commitsHistory);
+            resp.getWriter().println(jsonStr);
+        }
+        catch (NullPointerException e){
+            System.out.println(req.getRequestURI() + ": " +e.getMessage());
+        }
     }
 }

@@ -75,7 +75,7 @@ public class FileChanges extends Blob{
 
         this.fullPath = dataElement.fullPath;
         this.name = dataElement.name;
-        this.repoSettings = baseElement.repoSettings;
+        this.repoSettings = dataElement.repoSettings;
     }
 
 

@@ -1,6 +1,7 @@
 package core;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.RandomStringUtils;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -73,9 +74,11 @@ public class FSUtils {
     }
 
     public static List<String> getZippedContent(String directory, String sha1){
-        FSUtils.unzip(getZippedPath(directory, sha1), directory , sha1 + ".txt");
-        List<String > content = FSUtils.getFileLines(new File(directory, sha1+ ".txt").getAbsolutePath());
-        FSUtils.deleteFile(directory + sha1 + ".txt");
+        String tmpName = RandomStringUtils.random(10, true, true);
+
+        unzip(getZippedPath(directory, sha1), directory , tmpName + ".txt");
+        List<String > content = FSUtils.getFileLines(new File(directory, tmpName+ ".txt").getAbsolutePath());
+        FSUtils.deleteFile(directory + tmpName + ".txt");
         return content;
     }
 

@@ -116,9 +116,9 @@ public class User {
         try {
             return PullRequest.getRepoPullRequests(name, engine.getCurrentRepoName());
         } catch (NoActiveRepositoryError e) {
-            e.printStackTrace();
+            System.out.println("No Active Repo");
         }
-        return null;
+        return new ArrayList<>();
     }
 
 }

@@ -26,7 +26,7 @@ public class userNotifications extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         User user = WebUtils.getSessionUser(request);
-        List<Notification> notifications = user.getNotifications(true, true);
+        List<Notification> notifications = user.getNotifications(false, true);
 
         JsonObject res = new JsonObject();
         JsonArray notificationsRes = new JsonArray();

@@ -13,7 +13,7 @@ $(document).ready(function () {
         openPullRequest();
     });
 
-    setInterval( function (){ addAllRepositoryPullRequests()}, 20000);
+    setInterval( addAllRepositoryPullRequests, 20000);
     setInterval( updateHeadBranchCommits, 5000)
 
 });
@@ -55,6 +55,7 @@ function updateRepoDetails(response) {
     } else {
         document.getElementById("EnablePullRequest").style.display = "none";
         document.getElementById("PullRequest").style.display = "none";
+
     }
 }
 

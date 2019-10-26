@@ -25,11 +25,12 @@ public class pullRequests extends HttpServlet {
         JsonArray prsStr = new JsonArray();
         res.add("response", prsStr);
 
-        for(PullRequest pr: prs){
-            Gson gson = new Gson();
-            prsStr.add(gson.toJson(pr));
+        if(prs != null){
+            for(PullRequest pr: prs){
+                Gson gson = new Gson();
+                prsStr.add(gson.toJson(pr));
+            }
         }
-
         response.getWriter().println(res.toString());
 
     }

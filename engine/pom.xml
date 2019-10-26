@@ -37,6 +37,11 @@
             <scope>system</scope>
             <systemPath>C:/JavaDependencies/AncestorFinder.jar</systemPath>
        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
     </dependencies>
 
 <!--    <dependencies>-->

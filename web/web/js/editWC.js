@@ -12,13 +12,6 @@ function getCurrUser() {
     return document.cookie.split("user=")[1]
 }
 
-function getPathToDisplay(fullPath) {
-    return fullPath.split(getCurrUser())[1].substring(1)
-}
-
-function getPathToSendRequests(fullPath) {
-    return "c:\\magit-ex3\\" +getCurrUser() + "\\" + fullPath
-}
 
 function updateFilesTable() {
     clearTable("files");
@@ -26,7 +19,7 @@ function updateFilesTable() {
         var jsonRes = JSON.parse(response);
         for (i in jsonRes) {
             var fileName = jsonRes[i];
-            var markup = "<tr><td>" + getPathToDisplay(fileName) + "</td><td>" +
+            var markup = "<tr><td>" + fileName + "</td><td>" +
                 "<button onClick='viewFileContent(this)'>show content</button></td><td>" +
                 "<button onClick='editFile(this)'>edit</button></td><td>" +
                 "<button onClick='deleteFile(this)'>delete</button></td></tr>";
@@ -37,7 +30,7 @@ function updateFilesTable() {
 
 function viewFileContent(btn) {
     var filePath = $(btn).closest('tr').find('td:first').text();
-    $.get('/currentWC', {fileName : getPathToSendRequests(filePath)}).success(function (response) {
+    $.get('/currentWC', {fileName : filePath}).success(function (response) {
         var actionsResults =  $("#actionsResults");
         actionsResults.empty();
         var title = $("<p id='filePath' style='color: #2e6c80; font-size: 90%;'>"+ filePath + "</p>");
@@ -80,7 +73,7 @@ function updateFile() {
 
 function deleteFile(btn) {
     var filePath = $(btn).closest('tr').find('td:first').text();
-    filePath = getPathToSendRequests(filePath);
+    filePath = filePath;
     $.ajax({
         url: '/currentWC/' + filePath,
         type: 'DELETE',

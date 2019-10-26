@@ -26,7 +26,7 @@ public class commit extends HttpServlet {
         Settings settings = WebUtils.getSessionUser(req).getEngine().getRepositoryManager().getSettings();
         Set<String> files = Commit.getAllFilesOfCommit(commitSha1, settings).keySet();
         JsonArray jsonFiles = new JsonArray();
-        files.stream().forEach(f -> jsonFiles.add(f));
+        files.stream().forEach(f -> jsonFiles.add(settings.extractFilePath(f)));
         resp.getWriter().println(jsonFiles);
 
     }

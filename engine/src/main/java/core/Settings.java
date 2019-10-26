@@ -36,6 +36,7 @@ public class Settings {
     final public static String YNquestion = "Y/N";
 
     String userName;
+    String repositoryName;
     String repositoryFullPath = "";
     String objectsFolderPath = "";
     String branchFolderPath = "";
@@ -68,6 +69,7 @@ public class Settings {
             repoFile = new File(repoFile, repository);
             repoFile.mkdirs();
 
+            repositoryName = repository;
             repositoryFullPath = repoFile.getAbsolutePath();
         }
         else {
@@ -128,4 +130,25 @@ public class Settings {
         return path.split(Pattern.quote("\\"))[2];
     }
 
+    public static String buildRepoFilePath(String user, String repoName, String fileName){
+        String repoFolder = getRepoPathByUser(user, repoName);
+
+        return new File(repoFolder, fileName).getAbsolutePath();
+    }
+
+    public String extractFilePath(String fullPath) {
+
+        String repoFolder = getRepoPathByUser(userName, repositoryName);
+        File _path = new File(fullPath);
+
+        String filePath = _path.getName();
+        _path = _path.getParentFile();
+        while(!_path.getAbsolutePath().equals(repoFolder))  {
+            filePath = _path.getName() + "\\" +filePath;
+            _path = _path.getParentFile();
+        }
+
+        return filePath;
+
+    }
 }

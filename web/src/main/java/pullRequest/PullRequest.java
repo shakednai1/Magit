@@ -1,5 +1,6 @@
 package pullRequest;
 
+import com.google.gson.JsonObject;
 import core.*;
 import exceptions.InvalidBranchNameError;
 import javafx.collections.FXCollections;
@@ -34,24 +35,12 @@ public class PullRequest {
         return ownerUser;
     }
 
-    public String getComment() {
-        return comment;
-    }
-
     public String getFromBranch() {
         return fromBranch;
     }
 
     public String getToBranch() {
         return toBranch;
-    }
-
-    public Date getCreationTime() {
-        return creationTime;
-    }
-
-    public PRStatus getStatus() {
-        return status;
     }
 
     public void setStatus(PRStatus status) {
@@ -75,9 +64,9 @@ public class PullRequest {
     ItemSha1 sha1 ;
 
 
-    List<String> newFiles = new ArrayList<>();
-    List<String> updateFiles = new ArrayList<>();
-    List<String> deleteFiles = new ArrayList<>();
+    List<JsonObject> newFiles = new ArrayList<>();
+    List<JsonObject> updateFiles = new ArrayList<>();
+    List<JsonObject> deleteFiles = new ArrayList<>();
 
 
     static enum PRStatus {NEW, ACCEPTED, DECLINED};
@@ -177,7 +166,6 @@ public class PullRequest {
         File pullRequestsFolder = Settings.getPullRequestFolder(ownerUser, repoName);
         List<PullRequest> res = new ArrayList<>();
 
-
         if(pullRequestsFolder.exists()){
             for(File prSha1: pullRequestsFolder.listFiles()){
                 res.add(new PullRequest(ownerUser, repoName, prSha1.getName()));
@@ -190,26 +178,37 @@ public class PullRequest {
         BranchData fromBranch = repository.getBranchByName(this.fromBranch);
         BranchData toBranch = repository.getBranchByName(this.toBranch);
 
-        setFilesDeltaCommit(fromBranch.getHeadSha1(), toBranch.getHeadSha1());
+        setFilesDeltaCommit(fromBranch.getHeadSha1(), toBranch.getHeadSha1(), repository.getSettings());
     }
 
-    public void setFilesDeltaCommit(String commitSha1, String prevCommit){
-        FolderChanges folderChanges = CommitsDelta.getDiffBetweenCommits(commitSha1, prevCommit, null);
+    public void setFilesDeltaCommit(String commitSha1, String prevCommit, Settings settings){
+        FolderChanges folderChanges = CommitsDelta.getDiffBetweenCommits(commitSha1, prevCommit, settings);
 
         for(FileChanges file : folderChanges.getSubChangesFiles().values()){
             Common.FilesStatus status = file.getState();
-            String path = file.getFullPath();
+            String path = settings.extractFilePath(file.getFullPath());
+            String fileSha1 = Common.FilesStatus.DELETED == status ? "": file.getSha1();
+
+            JsonObject fileJson = new JsonObject();
+            fileJson.addProperty("path", path);
+            fileJson.addProperty("sha1", fileSha1);
+
             if(status == Common.FilesStatus.NEW) {
-                newFiles.add(path);
+                newFiles.add(fileJson);
             }
             else if(status == Common.FilesStatus.UPDATED) {
-                updateFiles.add(path);
+                updateFiles.add(fileJson);
             }
             else if(status == Common.FilesStatus.DELETED) {
-                deleteFiles.add(path);
+                deleteFiles.add(fileJson);
             }
         }
     }
 
+    public String getFileContent(String sha1,  Repository repository){
+        return String.join("\n",
+                FSUtils.getZippedContent(repository.getSettings().getRepositoryObjectsFullPath().getAbsolutePath(),
+                sha1));
+    }
 
 }

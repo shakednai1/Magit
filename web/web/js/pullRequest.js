@@ -8,6 +8,7 @@ $(document).ready(function () {
             updateChangedFiles(pr);
         });
 
+    document.getElementById("fileContent").style.display = "none";
 });
 
 function updatePRDetails(pr) {
@@ -19,12 +20,12 @@ function updatePRDetails(pr) {
     $("#repoName").append(pr.remoteRepoName);
 
     if(pr.status !== "NEW"){
-        $("#prActions").style.display = "none";
-        $("#prStatus").style.display = "block";
+        document.getElementById("prActions").style.display = "none";
+        document.getElementById("prStatus").style.display = "block";
         $("#prStatus").append("Pull request " + pr.state);
     }
     else{
-        $("#prActions").style.display = "block";
+        document.getElementById("prActions").style.display = "block";
     }
 
 }
@@ -45,20 +46,34 @@ function updateChangedFiles(pr) {
 }
 
 
-function addFileChangeToTable(path, state) {
+function addFileChangeToTable(changedFile, state) {
 
+    var path  = changedFile.path;
+    var sha1  = changedFile.sha1;
     var markup = "<tr><td>" + path + "</td><td>" + state + "</td>";
 
     if(state === "NEW" || state === "UPDATE")
-        var extra = "<td><button onClick='getContent(\"" + path + "\")'>Show Content</button></td></tr>";
+        var extra = "<td><button onClick='getContent(\"" + sha1 + "\",\"" + path +"\" )'>Show Content</button></td></tr>";
     else
         var extra = "<td></td></tr>" ;
 
-    markup += extra;
+    markup = markup + extra;
 
     $("#changedFiles   > tbody:last-child").append(markup);
 }
 
-function getContent(path){
+function getContent(sha1, path){
+    $.get("/file", {sha1: sha1, path: path})
+        .success(
+            function (response) {
+                document.getElementById("fileContent").style.display = "block";
+                updateFileContent(response);
+            }
+        );
+}
 
+function updateFileContent(response) {
+    var res = JSON.parse(response);
+    document.getElementById("fileContentPath").append(res.path);
+    document.getElementById("fileContentText").append(res.content);
 }

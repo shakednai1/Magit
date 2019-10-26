@@ -21,6 +21,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="module-library">
       <library name="Maven: com.sirolf2009:fxgraph:0.0.3">
         <CLASSES>

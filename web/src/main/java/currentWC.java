@@ -1,6 +1,7 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import core.*;
+import exceptions.NoActiveRepositoryError;
 import user.User;
 
 import javax.servlet.ServletException;
@@ -23,9 +24,14 @@ public class currentWC extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if(req.getParameterMap().isEmpty()){
-            files = WebUtils.getSessionUser(req).getEngine().getAllFilesContentOfCurrentWC();
+            User user =  WebUtils.getSessionUser(req);
+
+            Settings settings = user.getEngine().getRepositoryManager().getSettings();
+
+            files = user.getEngine().getAllFilesContentOfCurrentWC();
             JsonArray jsonFiles = new JsonArray();
-            files.keySet().stream().forEach(f -> jsonFiles.add(f));
+            files.keySet().stream()
+                    .forEach(f -> jsonFiles.add(settings.extractFilePath(f)));
             resp.getWriter().println(jsonFiles);
         }
         else{
@@ -41,8 +47,18 @@ public class currentWC extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
             String content = req.getParameter("content");
             String filePath = req.getParameter("fileName");
-            String repoPath = WebUtils.getSessionUser(req).getEngine().getRepositoryManager().getSettings().getRepositoryFullPath();
-            String fullPath = repoPath + "\\" + filePath;
+
+            User user = WebUtils.getSessionUser(req);
+            String repoName;
+            try {
+                repoName = user.getEngine().getCurrentRepoName();
+            }
+            catch (NoActiveRepositoryError e) {
+                System.out.println("No Active Repository Error");
+                return;
+            }
+
+            String fullPath = Settings.buildRepoFilePath(user.getName(), repoName, filePath);
             File file = new File(fullPath);
             if(file.exists()){
                 FSUtils.writeFile(fullPath, content, false);
@@ -56,7 +72,19 @@ public class currentWC extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String filePath = req.getRequestURI().split("currentWC/")[1];
         filePath = filePath.replace("%20", " ");
-        FSUtils.deleteFile(filePath);
+
+        User user =    WebUtils.getSessionUser(req);
+        String repoName;
+        try {
+            repoName = user.getEngine().getCurrentRepoName();
+        }
+        catch (NoActiveRepositoryError e){
+            System.out.println("No Active Repository Error");
+            return;
+        }
+        String fullPath = Settings.buildRepoFilePath(user.getName(), repoName, filePath);
+
+        FSUtils.deleteFile(fullPath);
     }
 
 }

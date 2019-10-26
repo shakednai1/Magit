@@ -1,5 +1,6 @@
 
 <link rel="stylesheet" type="text/css" href="commitsTable.css">
+<link rel="stylesheet" type="text/css" href="common.css">
 <script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>
 <script src="js/pullRequest.js"></script>
 
@@ -29,4 +30,9 @@
         </thead>
         <tbody> </tbody>
     </table>
+    <p></p>
+    <div id="fileContent">
+        <p>Content of <span id="fileContentPath"></span></p>
+        <textarea id="fileContentText" readonly=true></textarea>
+    </div>
 </div>

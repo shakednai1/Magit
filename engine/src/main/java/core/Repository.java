@@ -191,7 +191,7 @@ public class Repository {
         saveRepositoryActiveBranch();
     }
 
-    Settings getSettings(){ return settings; }
+    public Settings getSettings(){ return settings; }
 
     private void loadRemoteRepoDetails(){
         if(isRemote()){
