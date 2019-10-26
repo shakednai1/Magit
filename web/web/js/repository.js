@@ -25,13 +25,21 @@ function getCurrUser() {
 function push() {
     $.post('/collaboration', {action: "push"})
         .success(function () {
+            $.get('/repository').success(function (response) {
+                updateRepoBranches(response);
+            });
         });
 }
 
 function pull() {
     $.post('/collaboration', {action: "pull"})
         .success(function () {
+            $.get('/repository').success(function (response) {
+                updateRepoBranches(response);
+            });
         });
+
+
 }
 
 function updateRepoDetails(response) {
@@ -40,7 +48,9 @@ function updateRepoDetails(response) {
     document.getElementById("currRepo").innerHTML = jsonRes.repoName;
 
     if (jsonRes.remoteFrom !== null) {
-        document.getElementById("remoteFrom").innerHTML = "forked from : " + jsonRes.remoteFrom;
+        var remoteFrom = jsonRes.remoteFrom.split("ex3")[1];
+        remoteFrom = remoteFrom.split(jsonRes.repoName)[0].substring(1);
+        document.getElementById("remoteFrom").innerHTML = "forked from : " + remoteFrom;
         document.getElementById("remoteRepoName").innerHTML = "remote repository name : " + jsonRes.remoteName;
     } else {
         document.getElementById("EnablePullRequest").style.display = "none";
@@ -71,12 +81,12 @@ function _updateCollaboration() {
 function _updateRepoBranchesMain() {
 
     function _updateBranchesInnerList(listElement, itemCls, listValue) {
-        listElement.remove(itemCls);
+        //listElement.remove(itemCls);
+        listElement.empty();
         for (i in listValue) {
             listElement.append('<li class=${itemCls}>' + listValue[i] + '</li>');
         }
     }
-
     _updateBranchesInnerList($("#branchesList"), "branchNameItem", currBranchesNames.local);
     _updateBranchesInnerList($("#remoteBranchesList"), "remoteBranchNameItem", currBranchesNames.remote);
 
@@ -100,6 +110,8 @@ function _updateRepoBranchesCheckout() {
 
 
 function _updateRepoBranchesPullRequest() {
+    $("#prFromBranch").empty();
+    $("#prToBranch").empty();
     for (i in currBranchesNames.local)
         $("#prFromBranch").append('<option>' + currBranchesNames.local[i] + '</option>');
 
