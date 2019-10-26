@@ -116,8 +116,8 @@ function saveNewFile() {
     var filePath = $("#filePath").val();
     $.post('/currentWC' , {content : newContent, fileName: filePath}).success(function () {
         updateFilesTable();
-        $("#createNewFile").show();
-    })
+    });
+    $("#createNewFile").show();
 
 }
 
@@ -138,7 +138,7 @@ function prepareCommit() {
 function commit() {
     var commitMsg = $("#commitMsg").val();
     $.post('/commit', {commitMsg : commitMsg}).error(function (xhRequest, errorText, thrownError) {
-        alert(xhRequest.errorText);
+        alert("There are no changes to commit");
     })
     $("#prepareCommitForm").show();
     $("#commitMsgForm").remove();

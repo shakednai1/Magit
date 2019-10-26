@@ -116,8 +116,8 @@ function saveNewFile() {
     var filePath = $("#filePath").val();
     $.post('/currentWC' , {content : newContent, fileName: filePath}).success(function () {
         updateFilesTable();
-        $("#createNewFile").show();
-    })
+    });
+    $("#createNewFile").show();
 
 }
 
