@@ -37,6 +37,27 @@ public class Repository {
 
     Merge currentMerge;
 
+    public Map<String, String> getAllCurrentWCFiles() {
+        Map<String, String> res = new HashMap<>();
+        File rootFolder = new File(settings.getRepositoryFullPath());
+        getAllFiles(rootFolder, res);
+        return res;
+    }
+
+    private void getAllFiles(File folder,Map<String, String> res) {
+        for(File item : folder.listFiles()){
+            String itemPath = item.getPath();
+            if(!item.getName().equals(".magit")) {
+                if (item.isFile()) {
+                    res.put(itemPath, String.join("\n", FSUtils.getFileLines(itemPath)));
+                }
+                if (item.isDirectory()) {
+                    getAllFiles(new File(itemPath), res);
+                }
+            }
+        }
+    }
+
     class BranchHeadCommitListener implements ChangeListener<String> {
 
         final private BranchData branchData;

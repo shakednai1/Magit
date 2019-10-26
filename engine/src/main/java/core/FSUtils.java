@@ -99,7 +99,7 @@ public class FSUtils {
         }
     }
 
-    static boolean deleteFile(String filePath){
+    public static boolean deleteFile(String filePath){
         try{
             return Files.deleteIfExists(Paths.get(filePath));
         }
@@ -110,7 +110,7 @@ public class FSUtils {
         return false;
     }
 
-    static void writeFile(String fullPath, String fileContent, boolean append){
+    public static void writeFile(String fullPath, String fileContent, boolean append){
         try{
             FileWriter fileWriter = new FileWriter(fullPath, append);
             fileWriter.write(fileContent);

@@ -4,6 +4,8 @@ import core.Blob;
 import core.Commit;
 import core.Repository;
 import core.Settings;
+import exceptions.NoActiveRepositoryError;
+import exceptions.NoChangesToCommitError;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -26,6 +28,16 @@ public class commit extends HttpServlet {
         JsonArray jsonFiles = new JsonArray();
         files.stream().forEach(f -> jsonFiles.add(f));
         resp.getWriter().println(jsonFiles);
+
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            WebUtils.getSessionUser(req).getEngine().commit(req.getParameter("commitMsg"));
+        } catch (NoActiveRepositoryError | NoChangesToCommitError e) {
+            resp.sendError(400, e.getMessage());
+        }
 
     }
 }

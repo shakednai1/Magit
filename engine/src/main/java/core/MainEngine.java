@@ -239,4 +239,8 @@ public class MainEngine {
     public Repository getActiveRepo(){
         return repositoryManager.getActiveRepository();
     }
+
+    public Map<String, String> getAllFilesContentOfCurrentWC(){
+        return repositoryManager.getActiveRepository().getAllCurrentWCFiles();
+    }
 }
