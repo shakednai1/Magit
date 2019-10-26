@@ -9,7 +9,7 @@ $(document).ready(function() {
 });
 
 function getCurrUser() {
-    return document.cookie.split("user=")[1]
+    return document.cookie.split("user=")[1];
 }
 
 
