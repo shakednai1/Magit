@@ -20,15 +20,15 @@ public class Fork extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, String[]> params = request.getParameterMap();
 
-        // TODO - to get repoName for the new repo
 
         String repoName = params.get("repoName")[0];
         String fromUser = params.get("fromUser")[0];
+        String forkName = params.get("forkName")[0];
         User user = WebUtils.getSessionUser(request);
         Path srcRepo = Paths.get(Settings.baseLocation.toString(), fromUser, repoName);
-        Path dstRepo = Paths.get(Settings.baseLocation.toString(), user.getName(), repoName);
-        user.getEngine().cloneRepo(srcRepo.toString(), dstRepo.toString(), repoName);
-        user.addRepo(repoName);
+        Path dstRepo = Paths.get(Settings.baseLocation.toString(), user.getName(), forkName);
+        user.getEngine().cloneRepo(srcRepo.toString(), dstRepo.toString(), forkName);
+        user.addRepo(forkName);
 
         new ForkNotification(repoName,
                 fromUser,

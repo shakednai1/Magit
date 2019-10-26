@@ -14,11 +14,24 @@ $(document).ready(function () {
     });
 
     setInterval( function (){ addAllRepositoryPullRequests()}, 20000);
+    setInterval( updateHeadBranchCommits, 5000)
 
 });
 
 function getCurrUser() {
     return document.cookie.split("user=")[1];
+}
+
+function push() {
+    $.post('/collaboration', {action: "push"})
+        .success(function () {
+        });
+}
+
+function pull() {
+    $.post('/collaboration', {action: "pull"})
+        .success(function () {
+        });
 }
 
 function updateRepoDetails(response) {
@@ -46,6 +59,13 @@ function updateRepoBranches(response) {
     _updateRepoBranchesMain();
     _updateRepoBranchesCheckout();
     _updateRepoBranchesPullRequest();
+    _updateCollaboration();
+}
+
+function _updateCollaboration() {
+    if(currBranchesNames.remote != null){
+        $("#collaboration").show();
+    }
 }
 
 function _updateRepoBranchesMain() {
@@ -100,7 +120,9 @@ function checkoutBranch() {
 
 function createNewBranch() {
     var branchName = document.getElementById("createNewBranch").elements.namedItem("branchName").value
-    $.post('/branch', {branchName: branchName});
+    $.post('/branch', {branchName: branchName}).error(function (xhr, status, error) {
+        alert(xhr.responseText);
+    });
 }
 
 function updateHeadBranchCommits() {

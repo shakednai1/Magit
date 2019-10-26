@@ -27,7 +27,9 @@ public class branch extends HttpServlet {
         try {
             repository.createNewBranch(branchName, false);
         } catch (UncommittedChangesError | InvalidBranchNameError e) {
-            e.printStackTrace();
+            resp.setStatus(400);
+            resp.setContentType("text/plain");
+            resp.getWriter().println(e.getMessage());
         }
     }
 

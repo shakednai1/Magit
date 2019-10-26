@@ -52,7 +52,7 @@ function addRepositoryToOthersTable(repo, username) {
         repo.numOfBranches +"</td><td>" +
         repo.lastCommitTime +"</td><td>"+
         repo.lastCommitMessage +"</td>" +
-        "<td><button onClick='fork(\"" + repo.name +  "\",\"" + username + "\")'>fork</button></td></tr>";
+        "<td><button onClick='prepareFork(this,\"" + username + "\")'>fork</button></td></tr>";
     $("#othersRepos").append(markup);
 }
 
@@ -83,18 +83,35 @@ function addAllRepositoriesToOtherUserTable(username){
     });
 }
 
-function fork(repoName, fromUser) {
+function prepareFork(btn, fromUser) {
+    var repoName = $(btn).closest('tr').find('td:first').text();
+    $(btn).closest('tr').find('td:last').find('button').hide();
+    var forkNameForm = $("<form id='forkNameForm'>" +
+        "please provide repo name: <input id='forkName' type='text' name='forkName' >" +
+        "<input type='submit' value='fork'>" +
+        "</form>");
+    $(btn).closest('tr').find('td:last').append(forkNameForm);
+    $("#forkNameForm").on('submit', function(e) {
+        e.preventDefault();
+        fork(btn, repoName, fromUser);
+    });
+
+}
+
+function fork(btn, repoName, fromUser) {
+    var forkName = $("#forkName").val();
     $.ajax(
         '/fork',
         {url: '/fork',
         type: "POST",
-        data: {fromUser: fromUser, repoName: repoName},
+        data: {fromUser: fromUser, repoName: repoName, forkName: forkName},
         success: function () {
             addAllRepositoriesToTable();
+            $("#forkNameForm").remove();
+            $(btn).closest('tr').find('td:last').find('button').show();
+            }
         }
-        }
-
-    )
+    );
 }
 
 function addAllRepositoriesToTable(){

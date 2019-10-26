@@ -23,6 +23,12 @@
 <p style="color: #2e6c80; font-size: 90%;">checkout branch:</p>
 <select id="checkout"></select><button onClick="checkoutBranch()">checkout</button>
 <br />
+<div id="collaboration" style="display:none">
+    <p>Collaboration actions:</p>
+    <button onClick="push()">push</button>
+    <button onClick="pull()">pull</button>
+</div>
+
 <hr>
 
 <h2 style="color: #2e6c80;">Pull Requests</h2>
@@ -55,6 +61,8 @@
 </div>
 
 <hr>
+<button onClick="openWCwindow()">edit current WC</button>
+<br>
 
 <h2 style="color: #2e6c80;">Head branch commits</h2>
 <table id="commits" class="commitsTable">
@@ -69,6 +77,5 @@
     </tr>
     </thead>
 </table>
-<button onClick="openWCwindow()">edit current WC</button>
 </body>
 </html>
