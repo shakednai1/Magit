@@ -463,7 +463,7 @@ public class Repository {
     String getRemoteRepositoryName(){
         return remoteRepository.name;
     }
-    String getRemoteRepositoryPath(){
+    public String getRemoteRepositoryPath(){
         return remoteRepository.path.getAbsolutePath();
     }
 

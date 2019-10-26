@@ -55,8 +55,6 @@ function updateRepoDetails(response) {
     } else {
         document.getElementById("EnablePullRequest").style.display = "none";
         document.getElementById("PullRequest").style.display = "none";
-        // document.getElementById("PullRequestForm").style.display = "none";
-
     }
 }
 
@@ -110,13 +108,13 @@ function _updateRepoBranchesCheckout() {
 
 
 function _updateRepoBranchesPullRequest() {
+
     $("#prFromBranch").empty();
     $("#prToBranch").empty();
-    for (i in currBranchesNames.local)
-        $("#prFromBranch").append('<option>' + currBranchesNames.local[i] + '</option>');
-
-    for (i in currBranchesNames.remote)
+    for (i in currBranchesNames.remote){
+        $("#prFromBranch").append('<option>' + currBranchesNames.remote[i] + '</option>');
         $("#prToBranch").append('<option>' + currBranchesNames.remote[i] + '</option>');
+    }
 
 }
 
@@ -253,7 +251,15 @@ function addPullRequestToTable(pr) {
 }
 
 function openPullRequestWindow(prSha1) {
-
+    var url = "pullRequest.jsp?id="+prSha1;
+    var width = 700;
+    var height = 600;
+    var left = parseInt((screen.availWidth/2) - (width/2));
+    var top = parseInt((screen.availHeight/2) - (height/2));
+    var windowFeatures = "width=" + width + ",height=" + height +
+        ",status,resizable,left=" + left + ",top=" + top +
+        "screenX=" + left + ",screenY=" + top + ",scrollbars=yes";
+    window.open(url, "subWind", windowFeatures);
 }
 
 

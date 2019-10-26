@@ -1,18 +1,17 @@
 package pullRequest;
 
-import core.FSUtils;
-import core.ItemSha1;
-import core.RemoteBranch;
-import core.Settings;
+import core.*;
+import exceptions.InvalidBranchNameError;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import models.BranchData;
 import org.apache.commons.io.FileUtils;
 import user.notification.NewPRNotification;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static user.notification.Notification.NotificationType.NEW_PULL_REQUEST;
@@ -75,6 +74,12 @@ public class PullRequest {
     PRStatus status;
     ItemSha1 sha1 ;
 
+
+    List<String> newFiles = new ArrayList<>();
+    List<String> updateFiles = new ArrayList<>();
+    List<String> deleteFiles = new ArrayList<>();
+
+
     static enum PRStatus {NEW, ACCEPTED, DECLINED};
 
     public PullRequest(String repoName,
@@ -98,19 +103,18 @@ public class PullRequest {
     }
 
 
-    public PullRequest(String ownerUser, String remoteRepoName, File prFolder){
-
+    public PullRequest(String ownerUser, String remoteRepoName, String sha1){
         this.ownerUser = ownerUser;
         this.remoteRepoName = remoteRepoName;
-        setSha1(prFolder);
+        setSha1(sha1);
 
         setDetailsFromFile();
         setStateFromFile();
     }
 
 
-    private void setSha1(File prFolder){
-        sha1 = new ItemSha1(prFolder.getName(), false, false,getPullRequestFolder());
+    private void setSha1(String sha1){
+        this.sha1 = new ItemSha1(sha1, false, false, getPullRequestFolder());
     }
 
     private void setDetailsFromFile(){
@@ -173,10 +177,39 @@ public class PullRequest {
         File pullRequestsFolder = Settings.getPullRequestFolder(ownerUser, repoName);
         List<PullRequest> res = new ArrayList<>();
 
-        for(File prSha1: pullRequestsFolder.listFiles()){
-            res.add(new PullRequest(ownerUser, repoName, prSha1));
+
+        if(pullRequestsFolder.exists()){
+            for(File prSha1: pullRequestsFolder.listFiles()){
+                res.add(new PullRequest(ownerUser, repoName, prSha1.getName()));
+            }
         }
         return res;
     }
+
+    public void setFileChanges(Repository repository){
+        BranchData fromBranch = repository.getBranchByName(this.fromBranch);
+        BranchData toBranch = repository.getBranchByName(this.toBranch);
+
+        setFilesDeltaCommit(fromBranch.getHeadSha1(), toBranch.getHeadSha1());
+    }
+
+    public void setFilesDeltaCommit(String commitSha1, String prevCommit){
+        FolderChanges folderChanges = CommitsDelta.getDiffBetweenCommits(commitSha1, prevCommit, null);
+
+        for(FileChanges file : folderChanges.getSubChangesFiles().values()){
+            Common.FilesStatus status = file.getState();
+            String path = file.getFullPath();
+            if(status == Common.FilesStatus.NEW) {
+                newFiles.add(path);
+            }
+            else if(status == Common.FilesStatus.UPDATED) {
+                updateFiles.add(path);
+            }
+            else if(status == Common.FilesStatus.DELETED) {
+                deleteFiles.add(path);
+            }
+        }
+    }
+
 
 }

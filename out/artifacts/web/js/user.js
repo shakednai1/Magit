@@ -5,7 +5,7 @@ $(document).ready(function() {
     addAllUsersToList();
     setNotifications();
 
-    setInterval( function (){ setNotifications()}, 20000)
+    setInterval( setNotifications, 20000)
 });
 
 $(document).ajaxError(function(event, jqxhr, ajaxOptions, errorThrown) {

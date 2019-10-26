@@ -56,7 +56,7 @@ public class RemoteRepository {
         loadRemoteBranches();
     }
 
-    void loadRemoteBranches(){
+    public void loadRemoteBranches(){
         remoteBranches = new LinkedList<>();
         File remoteBranchesFolder = new File(repoSettings.remoteBranchesPath);
         for(File branch : remoteBranchesFolder.listFiles()){

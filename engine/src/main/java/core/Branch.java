@@ -93,7 +93,7 @@ public class Branch {
 
     Folder getRootFolder(){ return rootFolder; }
 
-    static Branch load(Settings repoSettings, String branchName, boolean rewriteWC){
+    public static Branch load(Settings repoSettings, String branchName, boolean rewriteWC){
         // TODO deprecate load function and build constractor that knows how to handle only branch name
 
         List<String> branchData = FSUtils.getFileLines(repoSettings.getBranchFilePath(branchName));

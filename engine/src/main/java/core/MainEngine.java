@@ -225,6 +225,7 @@ public class MainEngine {
     public void push() throws IllegalArgumentException{
         if(getActiveRepository().isRemote()){
             getActiveRepository().push();
+            getActiveRepository().getRemoteRepository().loadRemoteBranches();
             canPull = true;
         }
         else{
