@@ -12,6 +12,7 @@ public class RepositoryManager {
     private Repository activeRepository = null;
 
     RepositoryManager(String userName){
+
         settings = new Settings(userName);
     }
 

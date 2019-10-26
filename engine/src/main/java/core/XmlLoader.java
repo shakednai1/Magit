@@ -98,14 +98,13 @@ class XmlLoader {
             repositoryManager.getActiveRepository().checkoutBranch(magitBranches.getHead(), true);
         }
 
-        if (magitRepository.getMagitRemoteReference() != null) {
-            repositoryManager.getActiveRepository().setRemoteRepositoryName(
-                    magitRepository.getMagitRemoteReference().getName());
-            repositoryManager.getActiveRepository().setRemoteRepositoryPath(
-                    magitRepository.getMagitRemoteReference().getLocation());
+        if (magitRepository.getMagitRemoteReference() != null && !Settings.webMode) {
+            repositoryManager.getActiveRepository().setRemoteRepository(
+                    magitRepository.getMagitRemoteReference().getName(),
+                    magitRepository.getMagitRemoteReference().getLocation()
+            );
         }
 
-        //repositoryManager.switchActiveRepository(Settings.webMode? magitRepository.getName() :repositoryPath);
     }
 
     private void setFirstCommit() {
@@ -169,7 +168,7 @@ class XmlLoader {
         if (!pointingRemoteBranches.isEmpty()) {
             for (MagitSingleBranch pointingRemoteBranch : pointingRemoteBranches) {
                 RemoteBranch remoteBranch = new RemoteBranch(pointingRemoteBranch.getName().split("/")[1], commit.getSha1());
-                repositoryManager.getActiveRepository().addRemoteBranch(remoteBranch);
+                repositoryManager.getActiveRepository().getRemoteRepository().addRemoteBranch(remoteBranch);
             }
         }
 

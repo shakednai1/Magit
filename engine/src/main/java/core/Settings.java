@@ -23,7 +23,9 @@ public class Settings {
     final public static String objectsFolder = magitFolder + "/objects/";
     final public static String branchFolder = magitFolder + "/branches/";
     final public static String remoteBranchFolder = magitFolder + "/remote_branches/";
+    final public static String pullRequestFolder = magitFolder + "/pull_requests/";
     final public static String notificationFolder = ".notifications";
+
 
     final static String activeBranchFileName = "HEAD";
     final public static String activeBranchFile = branchFolder + activeBranchFileName;
@@ -96,6 +98,11 @@ public class Settings {
 
     public static File getBranchFolderByRepo(File repoPath){
         return new File(repoPath, branchFolder);
+    }
+
+    public static File getPullRequestFolder(String userName, String repoName){
+        File repoFile = new File(getRepoPathByUser(userName, repoName));
+        return new File(repoFile, pullRequestFolder);
     }
 
     String getBranchFilePath(String branchName){

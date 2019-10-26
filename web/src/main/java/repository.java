@@ -1,4 +1,5 @@
 import com.google.gson.*;
+import core.RemoteRepository;
 import core.Repository;
 import models.BranchData;
 import org.json.simple.JSONObject;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.rmi.Remote;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -50,9 +52,11 @@ public class repository extends HttpServlet {
             JsonArray remoteBranches = new JsonArray();
             repository.getAllRemoteBranches().stream().forEach(b -> remoteBranches.add(b.getName()));
             res.add("remoteBranches", remoteBranches);
-            Path repoPath = Paths.get(repository.getRemoteRepositoryPath());
-            res.addProperty("remoteFrom", repoPath.getParent().getFileName().toString());
-            res.addProperty("remoteName", repository.getRemoteRepositoryName());
+
+            RemoteRepository remoteRepository = repository.getRemoteRepository();
+
+            res.addProperty("remoteFrom", remoteRepository.getPath().getAbsolutePath());
+            res.addProperty("remoteName", remoteRepository.getName());
         }
         else{
             res.add("remoteBranches", null);
@@ -61,8 +65,6 @@ public class repository extends HttpServlet {
 
         }
 
-
         resp.getWriter().println(res.toString());
-
     }
 }

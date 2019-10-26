@@ -3,6 +3,8 @@ $(document).ready(function() {
     var currentUser = getCurrUser();
     updateUserNameInPageTitle(currentUser);
     addAllUsersToList();
+    setNotifications();
+
     setInterval( function (){ setNotifications()}, 20000)
 });
 
