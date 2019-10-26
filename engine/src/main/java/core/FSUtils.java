@@ -83,7 +83,7 @@ public class FSUtils {
         return new File(directory, fileName+".txt").getAbsolutePath();
     }
 
-    static void createNewFile(String fileName, String content){
+    public static void createNewFile(String fileName, String content){
         File file = new File(fileName);
         try {
 

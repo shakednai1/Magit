@@ -36,7 +36,9 @@ public class commit extends HttpServlet {
         try {
             WebUtils.getSessionUser(req).getEngine().commit(req.getParameter("commitMsg"));
         } catch (NoActiveRepositoryError | NoChangesToCommitError e) {
-            resp.sendError(400, e.getMessage());
+            resp.setStatus(400);
+            resp.setContentType("text/plain");
+            resp.getWriter().println(e.getMessage());
         }
 
     }

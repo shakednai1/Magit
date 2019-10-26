@@ -16,6 +16,10 @@ function getPathToDisplay(fullPath) {
     return fullPath.split(getCurrUser())[1].substring(1)
 }
 
+function getPathToSendRequests(fullPath) {
+    return "c:\\magit-ex3\\" +getCurrUser() + "\\" + fullPath
+}
+
 function updateFilesTable() {
     clearTable("files");
     $.get('/currentWC').success(function (response) {
@@ -33,10 +37,10 @@ function updateFilesTable() {
 
 function viewFileContent(btn) {
     var filePath = $(btn).closest('tr').find('td:first').text();
-    $.get('/currentWC', {fileName : filePath}).success(function (response) {
+    $.get('/currentWC', {fileName : getPathToSendRequests(filePath)}).success(function (response) {
         var actionsResults =  $("#actionsResults");
         actionsResults.empty();
-        var title = $("<p id='filePath' style='color: #2e6c80; font-size: 90%;'>"+ getPathToDisplay(filePath) + "</p>");
+        var title = $("<p id='filePath' style='color: #2e6c80; font-size: 90%;'>"+ filePath + "</p>");
         var textArea = $("<textarea id='fileContent' readonly='readonly' style='height: 250px; width: 250px; border: 1px solid #ccc; font: 16px/26px Georgia, Garamond, Serif; overflow:auto; '></textarea>");
         response = JSON.parse(response);
         var content = response.replace("\\", "\\\\");
@@ -51,10 +55,10 @@ function viewFileContent(btn) {
 
 function editFile(btn) {
     var filePath = $(btn).closest('tr').find('td:first').text();
-    $.get('/currentWC', {fileName : filePath}).success(function (response) {
+    $.get('/currentWC', {fileName : getPathToSendRequests(filePath)}).success(function (response) {
         var actionsResults =  $("#actionsResults");
         actionsResults.empty();
-        var title = $("<p id='filePath' style='color: #2e6c80; font-size: 90%;'>"+ getPathToDisplay(filePath) + "</p>");
+        var title = $("<p id='filePath' style='color: #2e6c80; font-size: 90%;'>"+ filePath + "</p>");
         var textArea = $("<textarea id='fileContent' style='height: 250px; width: 250px; border: 1px solid #ccc; font: 16px/26px Georgia, Garamond, Serif; overflow:auto;'></textarea>");
         response = JSON.parse(response);
         var content = response.replace("\\", "\\\\");
@@ -70,13 +74,15 @@ function editFile(btn) {
 function updateFile() {
     var newContent = $("#fileContent").val();
     var filePath = $("#filePath").text();
-    $.post('/currentWC/' + filePath , {content : newContent}).success(function (response) {
+    $.post('/currentWC' , {content : newContent, fileName: filePath}).success(function (response) {
     })
 }
 
 function deleteFile(btn) {
+    var filePath = $(btn).closest('tr').find('td:first').text();
+    filePath = getPathToSendRequests(filePath);
     $.ajax({
-        url: '/currentWC/' + $(btn).closest('tr').find('td:first').text(),
+        url: '/currentWC/' + filePath,
         type: 'DELETE',
         success: function() {
             updateFilesTable();
@@ -108,7 +114,7 @@ function createNewFile() {
 function saveNewFile() {
     var newContent = $("#fileContent").val();
     var filePath = $("#filePath").val();
-    $.post('/currentWC/' + filePath , {content : newContent, fileName: filePath}).success(function () {
+    $.post('/currentWC' , {content : newContent, fileName: filePath}).success(function () {
         updateFilesTable();
         $("#createNewFile").show();
     })
@@ -116,6 +122,7 @@ function saveNewFile() {
 }
 
 function prepareCommit() {
+    $("#prepareCommitForm").hide();
     var form = $("<form id='commitMsgForm'>" +
         "please provide commit message: <input id='commitMsg' type='text' name='commitMsg' >" +
         "<input type='submit' value='commit'>" +
@@ -130,7 +137,9 @@ function prepareCommit() {
 
 function commit() {
     var commitMsg = $("#commitMsg").val();
-    $.post('/commit', {commitMsg : commitMsg}).error(function (response) {
-        alert(response.error())
+    $.post('/commit', {commitMsg : commitMsg}).error(function (xhRequest, errorText, thrownError) {
+        alert("There are no changes to commit");
     })
+    $("#prepareCommitForm").show();
+    $("#commitMsgForm").remove();
 }

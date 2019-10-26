@@ -39,18 +39,17 @@ public class currentWC extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if(req.getParameter("fileName") == null){
-            String content = req.getParameter("content");
-            String filePath = req.getRequestURI().split("currentWC/")[1];
-            filePath = filePath.replace("%20", " ");
-            FSUtils.writeFile(filePath, content, false);
-        }
-        else{
             String content = req.getParameter("content");
             String filePath = req.getParameter("fileName");
             String repoPath = WebUtils.getSessionUser(req).getEngine().getRepositoryManager().getSettings().getRepositoryFullPath();
-            FSUtils.writeFile(repoPath + "\\" + filePath, content, false);
-        }
+            String fullPath = repoPath + "\\" + filePath;
+            File file = new File(fullPath);
+            if(file.exists()){
+                FSUtils.writeFile(fullPath, content, false);
+            }
+            else{
+                FSUtils.createNewFile(fullPath, content);
+            }
     }
 
     @Override
