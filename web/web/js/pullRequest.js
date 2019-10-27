@@ -1,3 +1,5 @@
+var prUID = "";
+
 $(document).ready(function () {
     var url = new URL(document.location.href);
     $.get('/pull_request', {id: url.searchParams.get("id")})
@@ -6,12 +8,15 @@ $(document).ready(function () {
 
             updatePRDetails(pr);
             updateChangedFiles(pr);
+
         });
 
     document.getElementById("fileContent").style.display = "none";
 });
 
 function updatePRDetails(pr) {
+    prUID = pr.sha1.sha1;
+
     $("#prID").append(pr.sha1.sha1);
     $("#prTime").append(pr.creationTime);
     $("#prUser").append(pr.requestingUser);
@@ -19,15 +24,20 @@ function updatePRDetails(pr) {
     $("#comment").append(pr.comment);
     $("#repoName").append(pr.remoteRepoName);
 
-    if(pr.status !== "NEW"){
+
+    setStatus(pr.status);
+}
+
+
+function setStatus(status){
+    if(status !== "NEW"){
         document.getElementById("prActions").style.display = "none";
         document.getElementById("prStatus").style.display = "block";
-        $("#prStatus").append("Pull request " + pr.state);
+        $("#prStatus").append("Pull request " + status);
     }
     else{
         document.getElementById("prActions").style.display = "block";
     }
-
 }
 
 function updateChangedFiles(pr) {
@@ -76,4 +86,16 @@ function updateFileContent(response) {
     var res = JSON.parse(response);
     document.getElementById("fileContentPath").append(res.path);
     document.getElementById("fileContentText").append(res.content);
+}
+
+function updateStatus(status){
+    $.ajax("/pull_request",
+    {url: "/pull_request",
+        type: "PUT",
+        contentType: "application/json",
+        processData: false,
+        data: JSON.stringify({'status': status, 'prID':prUID})
+    }).success( function(){
+        setStatus(status);
+    });
 }

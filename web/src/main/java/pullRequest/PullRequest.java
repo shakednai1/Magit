@@ -15,7 +15,6 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static user.notification.Notification.NotificationType.NEW_PULL_REQUEST;
 
 public class PullRequest {
 
@@ -43,8 +42,11 @@ public class PullRequest {
         return toBranch;
     }
 
+    public PRStatus getStatus(){ return status; }
+
     public void setStatus(PRStatus status) {
         this.status = status;
+        writeStateToFile();
     }
 
     public ItemSha1 getSha1() {
@@ -69,7 +71,7 @@ public class PullRequest {
     List<JsonObject> deleteFiles = new ArrayList<>();
 
 
-    static enum PRStatus {NEW, ACCEPTED, DECLINED};
+    public static enum PRStatus {NEW, ACCEPTED, DECLINED};
 
     public PullRequest(String repoName,
                        String remoteRepoName,
@@ -126,6 +128,11 @@ public class PullRequest {
     private void setStateFromFile(){
         List<String> content = FSUtils.getFileLines(getPRStateFile().getAbsolutePath());
         status = PRStatus.valueOf(content.get(0));
+    }
+
+    private void writeStateToFile(){
+        String stateFile = getPRStateFile().getAbsolutePath();
+        FSUtils.writeFile(stateFile, status.name(), false);
     }
 
     private File getPullRequestFolder(){

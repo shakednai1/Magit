@@ -4,6 +4,7 @@ import core.MainEngine;
 import core.Settings;
 import exceptions.NoActiveRepositoryError;
 import pullRequest.PullRequest;
+import user.notification.EditPRNotification;
 import user.notification.ForkNotification;
 import user.notification.NewPRNotification;
 import user.notification.Notification;
@@ -73,7 +74,10 @@ public class User {
                 for(File notificationPath: notificationsSHA1.get(type))
                     notifications.add(new NewPRNotification(notificationPath));
             }
-
+            else if(type == Notification.NotificationType.EDIT_PULL_REQUEST){
+                for(File notificationPath: notificationsSHA1.get(type))
+                    notifications.add(new EditPRNotification(notificationPath));
+            }
         }
 
         if (reset){

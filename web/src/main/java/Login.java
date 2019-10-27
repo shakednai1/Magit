@@ -23,7 +23,10 @@ public class Login extends HttpServlet {
         Cookie userCookie = new Cookie("user", username);
         response.addCookie(userCookie);
 
-        response.sendRedirect("http://localhost:8080/user.jsp");
+//        response.sendRedirect("http://localhost:8080/user.jsp");
+        user.getEngine().changeActiveRepository("repo 11");
+        response.sendRedirect("http://localhost:8080/pullRequest.jsp?id=a1734bf9853903d2116d13df34f4f747f3a65adc");
+
     }
 
     @Override

@@ -2,8 +2,12 @@ import com.google.gson.Gson;
 import core.RemoteRepository;
 import core.Repository;
 import exceptions.NoActiveRepositoryError;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import user.User;
 import pullRequest.PullRequest;
+import user.notification.EditPRNotification;
 import user.notification.NewPRNotification;
 
 import javax.servlet.ServletException;
@@ -13,8 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
-import java.net.URLDecoder;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 @WebServlet("/pull_request")
@@ -72,4 +76,45 @@ public class pullRequest extends HttpServlet {
         new NewPRNotification(pr).save();
     }
 
-}
+    @Override
+    public void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Map<String, String[]> params = request.getParameterMap();
+
+        String data = request.getReader().lines().collect(Collectors.toList()).get(0);
+
+        JSONObject json;
+        try {
+            JSONParser parser = new JSONParser();
+            json = (JSONObject) parser.parse(data);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        PullRequest.PRStatus status = PullRequest.PRStatus.valueOf(json.get("status").toString());
+        String prID = json.get("prID").toString();
+
+        User user = WebUtils.getSessionUser(request);
+
+        try{
+            PullRequest pr = new PullRequest(user.getName(),
+                    user.getEngine().getCurrentRepoName(),
+                    prID);
+
+            pr.setStatus(status);
+
+            EditPRNotification prNoti = new EditPRNotification(pr);
+            prNoti.save();
+
+            // TODO if accept - merge
+        }
+        catch (NoActiveRepositoryError e){
+            System.out.println(request.getRequestURI() +":"+ e.getMessage());
+        }
+
+
+
+    }
+
+
+    }

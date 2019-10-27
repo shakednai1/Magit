@@ -14,8 +14,8 @@
     <textarea id="comment" readonly=true></textarea>
 </div>
 <div id="prActions" align="left">
-    <button id="accept" type="submit"> Accept </button>
-    <button id="decline" type="submit"> Decline </button>
+    <button id="acceptBtn" type="submit" onclick="updateStatus('ACCEPTED')"> Accept </button>
+    <button id="declineBtn" type="submit" onclick="updateStatus('DECLINED')"> Decline </button>
 </div>
 <p id="prStatus"> </p>
 <div id="changes">
