@@ -23,6 +23,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="module-library">
       <library name="Maven: AncestorFinder:AncestorFinder:1.0">
         <CLASSES>

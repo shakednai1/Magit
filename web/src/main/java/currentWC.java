@@ -23,11 +23,9 @@ public class currentWC extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        User user =  WebUtils.getSessionUser(req);
+        Settings settings = user.getEngine().getRepositoryManager().getSettings();
         if(req.getParameterMap().isEmpty()){
-            User user =  WebUtils.getSessionUser(req);
-
-            Settings settings = user.getEngine().getRepositoryManager().getSettings();
-
             files = user.getEngine().getAllFilesContentOfCurrentWC();
             JsonArray jsonFiles = new JsonArray();
             files.keySet().stream()
@@ -36,7 +34,7 @@ public class currentWC extends HttpServlet {
         }
         else{
             files = WebUtils.getSessionUser(req).getEngine().getAllFilesContentOfCurrentWC();
-            String content= files.get(req.getParameter("fileName"));
+            String content= files.get(settings.getRepositoryFullPath()+ "\\"+ req.getParameter("fileName"));
             Gson gson = new Gson();
             String jsonStr = gson.toJson(content);
             resp.getWriter().println(jsonStr);

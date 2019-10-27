@@ -13,10 +13,50 @@ $(document).ready(function () {
         openPullRequest();
     });
 
+    setNotifications();
+
+    setInterval( setNotifications, 20000)
     setInterval( addAllRepositoryPullRequests, 20000);
     setInterval( updateHeadBranchCommits, 5000)
 
 });
+
+function setNotifications() {
+    $.ajax("/userNotifications",
+        {
+            url:"/userNotifications",
+            method: "GET",
+            dataType: "json"
+        }).done(function (data, text, xhr){
+        _setNotifications(data);
+    });
+}
+
+function _setNotifications(notifications){
+    var ol = document.getElementById("userNotificationList");
+
+    var currItems = ol.getElementsByTagName("li");
+
+    var newNotifications = [];
+
+    for (i in notifications) {
+        var entry = document.createElement('li');
+        entry.appendChild(document.createTextNode(notifications[i].show));
+        newNotifications.push(entry);
+    }
+
+    for (var i = 0; i < currItems.length; i++){
+        var entry = document.createElement('li');
+        entry.appendChild(document.createTextNode(currItems[i].innerHTML));
+        newNotifications.push(entry);
+    }
+
+    ol.innerHTML = "";
+
+    for (j in newNotifications) {
+        ol.appendChild(newNotifications[j]);
+    }
+}
 
 function getCurrUser() {
     return document.cookie.split("user=")[1];

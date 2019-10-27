@@ -48,7 +48,7 @@ function viewFileContent(btn) {
 
 function editFile(btn) {
     var filePath = $(btn).closest('tr').find('td:first').text();
-    $.get('/currentWC', {fileName : getPathToSendRequests(filePath)}).success(function (response) {
+    $.get('/currentWC', {fileName : filePath}).success(function (response) {
         var actionsResults =  $("#actionsResults");
         actionsResults.empty();
         var title = $("<p id='filePath' style='color: #2e6c80; font-size: 90%;'>"+ filePath + "</p>");

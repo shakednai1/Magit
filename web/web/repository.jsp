@@ -80,5 +80,10 @@
     </tr>
     </thead>
 </table>
+<h2 style="color: #2e6c80;">Notifications</h2>
+<button id="refreshNotification" onclick="setNotifications()">refresh</button>
+<div id="userNotification" style="height: 500px; width: 1200px; border: 1px solid #ccc; font: 16px/26px Georgia, Garamond, Serif; overflow: auto;">
+    <ol id="userNotificationList"></ol>
+</div>
 </body>
 </html>
