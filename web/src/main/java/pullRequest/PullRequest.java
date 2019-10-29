@@ -233,7 +233,7 @@ public class PullRequest {
     }
 
     public void accept(Repository repository){
-        Merge merge = repository.getMerge(fromBranch, toBranch);
+        Merge merge = repository.getMerge(fromBranch, toBranch, null);
 
         if(merge.isFastForwardSha1())
             repository.makeFFMergeWebMode(toBranch);

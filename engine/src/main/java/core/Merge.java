@@ -31,7 +31,7 @@ public class Merge {
         this.firstCommitSha1 = firstCommitSha1;
         this.secondCommitSha1 = secondCommitSha1;
         this.activeBranch = activeBranch;
-        this.repoSettings = activeBranch.getRepoSettings();
+        this.repoSettings = repoSettings;
 
         setFastForward();
         if (fastForwardSha1 == null) {

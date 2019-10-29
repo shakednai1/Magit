@@ -510,7 +510,7 @@ public class Repository {
         return true;
     }
 
-    public Merge getMerge(String fromBranch, String toBranch) throws ValueException{
+    public Merge getMerge(String fromBranch, String toBranch, Branch mergeBranch) throws ValueException{
 
         BranchData fromMergeBranch = getBranchByName(fromBranch);
         if (fromMergeBranch == null) throw new ValueException("Invalid branch From name");
@@ -523,7 +523,7 @@ public class Repository {
 
         currentMerge = new Merge(fromCommitSha1, toCommitSha1,
                 fromBranch, toMergeBranch.getName(),
-                settings, activeBranch);
+                settings, mergeBranch);
         return currentMerge;
     }
 
