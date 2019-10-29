@@ -41,6 +41,7 @@ public class FolderChanges extends Folder {
 
         this.fullPath = dataElement.fullPath;
         this.name = dataElement.name;
+        this.repoSettings = dataElement.repoSettings;
     }
 
     private void setSubFilesChanges() {
@@ -155,7 +156,6 @@ public class FolderChanges extends Folder {
         for(FolderChanges folder: subChangesFolders.values()){
             boolean subFolderChanged = folder.commit(commitUser, commitTime);
             subItemsChanged = subItemsChanged || subFolderChanged;
-
 
             if(folder.getFolderDeleted()) {
                 continue;

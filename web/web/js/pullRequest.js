@@ -29,29 +29,28 @@ function updatePRDetails(pr) {
 }
 
 
-function setStatus(status, reason){
-    if(status !== "NEW"){
+function setStatus(status, reason) {
+    if (status !== "NEW") {
         document.getElementById("prActions").style.display = "none";
         document.getElementById("prStatus").style.display = "block";
         $("#prStatus").append("Pull request " + status);
         $("#prStatus").append("<br>Reason: " + reason);
-    }
-    else{
+    } else {
         document.getElementById("prActions").style.display = "block";
     }
 }
 
 function updateChangedFiles(pr) {
 
-    for (var i=0; i < pr.newFiles.length; i++){
+    for (var i = 0; i < pr.newFiles.length; i++) {
         addFileChangeToTable(pr.newFiles[i], "NEW");
     }
 
-    for (var i=0; i < pr.updateFiles.length; i++){
+    for (var i = 0; i < pr.updateFiles.length; i++) {
         addFileChangeToTable(pr.updateFiles[i], "UPDATE");
     }
 
-    for (var i=0; i < pr.deleteFiles.length; i++){
+    for (var i = 0; i < pr.deleteFiles.length; i++) {
         addFileChangeToTable(pr.deleteFiles[i], "DELETE");
     }
 }
@@ -59,21 +58,21 @@ function updateChangedFiles(pr) {
 
 function addFileChangeToTable(changedFile, state) {
 
-    var path  = changedFile.path;
-    var sha1  = changedFile.sha1;
+    var path = changedFile.path;
+    var sha1 = changedFile.sha1;
     var markup = "<tr><td>" + path + "</td><td>" + state + "</td>";
 
-    if(state === "NEW" || state === "UPDATE")
-        var extra = "<td><button onClick='getContent(\"" + sha1 + "\",\"" + path +"\" )'>Show Content</button></td></tr>";
+    if (state === "NEW" || state === "UPDATE")
+        var extra = "<td><button onClick='getContent(\"" + sha1 + "\",\"" + path + "\" )'>Show Content</button></td></tr>";
     else
-        var extra = "<td></td></tr>" ;
+        var extra = "<td></td></tr>";
 
     markup = markup + extra;
 
     $("#changedFiles   > tbody:last-child").append(markup);
 }
 
-function getContent(sha1, path){
+function getContent(sha1, path) {
     $.get("/file", {sha1: sha1, path: path})
         .success(
             function (response) {
@@ -89,31 +88,33 @@ function updateFileContent(response) {
     $("#fileContentText").val(res.content);
 }
 
-function updateStatus(status){
+function updateStatus(status) {
     var reason = $("#message").val();
     $.ajax("/pull_request",
-    {url: "/pull_request",
-        type: "PUT",
-        contentType: "application/json",
-        processData: false,
-        data: JSON.stringify({'status': status, 'prID':prUID, 'reason': reason})
-    }).success( function(){
-        setStatus(status, reason);
-        $("#prActions").find('form').remove();
+        {
+            url: "/pull_request",
+            type: "PUT",
+            contentType: "application/json",
+            processData: false,
+            data: JSON.stringify({'status': status, 'prID': prUID, 'reason': reason})
+        })
+        .success(function () {
+            var reason = $("#message").val();
+            setStatus(status, reason);
+            $("#prActions").find('form').remove();
     });
 }
 
-function prepareFinalStatus(status){
+function prepareFinalStatus(status) {
     $("#acceptBtn").hide();
     $("#declineBtn").hide();
-    var statusChangeTextForm = $("<form id='statusChangeTextForm'><textarea name='message' id='message' rows='5' cols='20'>"+
-        "</textarea> <br> <input type='submit'> </form>");
+    var statusChangeTextForm = $("<form id='statusChangeTextForm'><textarea name='message' id='message' rows='5' cols='20'>" +
+        "</textarea><input type='submit'></form>");
     $("#prActions").append("you chose to " + status + " please add the reason for your choice: ");
     $("#prActions").append(statusChangeTextForm);
-    $("#statusChangeTextForm").on('submit', function(e) {
-        e.preventDefault();
-        updateStatus(status);
-    });
-
-
+    $("#statusChangeTextForm").on('submit',
+        function (e) {
+            e.preventDefault();
+            updateStatus(status);
+        });
 }

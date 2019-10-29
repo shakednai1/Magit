@@ -296,7 +296,7 @@ public class Repository {
         // this function is for assert that branch details at `branches` object will stay updated
 
         Commit commit = activeBranch.commit(msg, null);
-        CommitData commitData = __createCommitData(commit);
+        CommitData commitData = __createCommitData(commit, getActiveBranch().getName());
         updateActiveBranchDataInHistory();
         commits.put(commitData.getSha1(), commitData);
 
@@ -304,9 +304,9 @@ public class Repository {
         return commitData;
     }
 
-    private CommitData __createCommitData(Commit commit){
+    private CommitData __createCommitData(Commit commit, String branchName){
         CommitData commitData = new CommitData(commit);
-        if (activeBranch.getName().equals("master"))
+        if (branchName.equals("master"))
             commitData.setInMasterChain();
         return commitData;
     }
@@ -565,8 +565,9 @@ public class Repository {
         if(merge.getConflicts().size() != 0){ return; }
 
         Commit commit = merge.commit();
-        CommitData commitData = __createCommitData(commit);
-        updateActiveBranchDataInHistory();
+        CommitData commitData = __createCommitData(commit, merge.toBranch);
+        if(merge.activeBranch !=  null)
+            updateActiveBranchDataInHistory();
         commits.put(commitData.getSha1(), commitData);
 
         currentMerge = null;
@@ -582,7 +583,7 @@ public class Repository {
             // load all new commits to repo
             for(Commit commit: Commit.loadAll(pointingCommitOfRemoteBranch, settings).values()){
                 if (commits.get(commit.getSha1()) == null){
-                    commits.put(commit.getSha1(), __createCommitData(commit));
+                    commits.put(commit.getSha1(), __createCommitData(commit, getActiveBranch().getName()));
                 }
             }
 

@@ -159,9 +159,14 @@ public class Branch {
         return com;
     }
 
-    void mergeCommit(Merge merge){
+    void mergeCommit(Merge merge, boolean rewriteFolder){
         merge.folderChanges.commit(repoSettings.getUser(), merge.mergeTime);
 
+        if (rewriteFolder)
+            rewriteFolderByMerge(merge);
+    }
+
+    void rewriteFolderByMerge(Merge merge){
         rootFolder = merge.folderChanges.getResFolder();
         rootFolder.rewriteFS();
         currentStateOfFiles = rootFolder.getCommittedFilesState(false);

@@ -197,8 +197,12 @@ public class PullRequest {
 
     public void setFilesDeltaCommit(String commitSha1, String prevCommit, Settings settings){
         FolderChanges folderChanges = CommitsDelta.getDiffBetweenCommits(commitSha1, prevCommit, settings);
+        getFilesState(folderChanges, settings);
+    }
 
-        for(FileChanges file : folderChanges.getSubChangesFiles().values()){
+
+    public void getFilesState(FolderChanges folder, Settings settings){
+        for(FileChanges file : folder.getSubChangesFiles().values()){
             Common.FilesStatus status = file.getState();
             String path = settings.extractFilePath(file.getFullPath());
             String fileSha1 = file.getSha1();
@@ -217,6 +221,9 @@ public class PullRequest {
                 deleteFiles.add(fileJson);
             }
         }
+        for(FolderChanges subFolder: folder.getSubChangesFolders().values()){
+            getFilesState(subFolder, settings);
+        }
     }
 
     public String getFileContent(String sha1,  Repository repository){
@@ -227,7 +234,12 @@ public class PullRequest {
 
     public void accept(Repository repository){
         Merge merge = repository.getMerge(fromBranch, toBranch);
-        repository.makeFFMergeWebMode(toBranch);
+
+        if(merge.isFastForwardSha1())
+            repository.makeFFMergeWebMode(toBranch);
+        else{
+            repository.makeMerge(merge);
+        }
     }
 
 }

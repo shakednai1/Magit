@@ -73,7 +73,7 @@ public class Merge {
 
     public Commit commit(){
         mergeTime = Settings.commitDateFormat.format(new Date());
-        activeBranch.mergeCommit(this);
+        folderChanges.commit(repoSettings.getUser(), mergeTime);
 
         Commit com = new Commit(getCommitMsg(), folderChanges.getSha1(),
                 folderChanges.userLastModified, mergeTime,
@@ -81,7 +81,11 @@ public class Merge {
                 repoSettings);
         com.zipCommit();
 
-        activeBranch.setHead(com);
+        if (activeBranch != null){
+            activeBranch.rewriteFolderByMerge(this);
+            activeBranch.setHead(com);
+        }
+
         return com;
     }
 
