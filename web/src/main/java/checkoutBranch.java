@@ -36,6 +36,8 @@ public class checkoutBranch extends HttpServlet {
 
             repository.checkoutBranch(branchName, false);
         } catch (UncommittedChangesError | InvalidBranchNameError e) {
+            System.out.println("branchName "+ branchName);
+            e.printStackTrace();
             // TODO return exception
         }
     }

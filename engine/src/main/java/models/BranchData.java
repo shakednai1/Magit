@@ -50,7 +50,7 @@ public class BranchData {
     public void writeBranchInfoFile(Settings repoSettings){
         // taken from Branch.java - ugly as life
         String branchFileContentTracking = (trackingAfter == null) ? "null" : trackingAfter;
-        String content = String.join(Settings.delimiter, headSha1.toString(), branchFileContentTracking);
+        String content = String.join(Settings.delimiter, headSha1.getValue(), branchFileContentTracking);
         FSUtils.writeFile(repoSettings.getBranchFilePath(name), content, false);
     }
 
