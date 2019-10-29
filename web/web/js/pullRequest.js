@@ -84,8 +84,8 @@ function getContent(sha1, path){
 
 function updateFileContent(response) {
     var res = JSON.parse(response);
-    document.getElementById("fileContentPath").append(res.path);
-    document.getElementById("fileContentText").append(res.content);
+    $("#fileContentPath").html(res.path);
+    $("#fileContentText").val(res.content);
 }
 
 function updateStatus(status){

@@ -19,6 +19,12 @@ public class pullRequests extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         User user = WebUtils.getSessionUser(request);
+
+        if(user == null){
+            System.out.println(request.getRequestURI() + ": No user given");
+            return;
+        }
+
         List<PullRequest> prs = user.getPullRequestsCurrentRepo();
 
         JsonObject res = new JsonObject();

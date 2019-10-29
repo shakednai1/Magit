@@ -65,7 +65,6 @@ public class NewPRNotification extends Notification{
                 Long.toString(time),
                 repoName,
                 operatorUser,
-                repoName,
                 operatorRepoName,
                 toBranch,
                 fromBranch,

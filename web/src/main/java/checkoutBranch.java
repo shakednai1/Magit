@@ -1,3 +1,4 @@
+import core.MainEngine;
 import core.Repository;
 import exceptions.InvalidBranchNameError;
 import exceptions.UncommittedChangesError;
@@ -16,8 +17,23 @@ public class checkoutBranch extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String branchName = req.getParameter("branchName");
-        Repository repository = WebUtils.getSessionUser(req).getEngine().getActiveRepository();
+
+        MainEngine engine = WebUtils.getSessionUser(req).getEngine();
+        Repository repository = engine.getActiveRepository();
+
         try {
+
+            try{
+                repository.isValidBranchName(branchName);
+            }
+            catch (InvalidBranchNameError e){
+                // not local branch - maybe remote?
+                if (repository.getRemoteRepository().getBranchByName(branchName) != null) {
+                    String sha1 = engine.getSha1FromRemoteBranch(branchName);
+                    engine.createNewBranchFromSha1(branchName, sha1, true);
+                }
+            }
+
             repository.checkoutBranch(branchName, false);
         } catch (UncommittedChangesError | InvalidBranchNameError e) {
             // TODO return exception

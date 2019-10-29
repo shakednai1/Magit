@@ -1,7 +1,6 @@
 import commitTree.CommitTree;
 import core.*;
 import exceptions.*;
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -23,12 +22,10 @@ import models.BranchData;
 import models.CommitData;
 import models.RepositoryModel;
 import utils.BaseController;
-import workingCopy.WorkingCopyCell;
 import workingCopy.WorkingCopyStage;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.NoRouteToHostException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -512,8 +509,9 @@ public class AppController extends BaseController {
                 return;
             };
 
-            Merge merge = engine.getActiveRepository().getMerge(getBranchToMerge());
-            if(merge.isFastForward()){
+            Merge merge = engine.getActiveRepository().getMerge(engine.getActiveRepository().getActiveBranch().getName(),
+                    getBranchToMerge());
+            if(merge.isFastForwardSha1()){
                 Dialog d =new Dialog();
                 d.setContentText("Fast Forward merge done");
                 ButtonType okBtn = new ButtonType("OK", ButtonBar.ButtonData.APPLY);
@@ -596,7 +594,7 @@ public class AppController extends BaseController {
         try{
             Merge merge = engine.pull();
             if(merge != null){
-                if(merge.isFastForward())
+                if(merge.isFastForwardSha1())
                     engine.getActiveRepo().makeFFMerge(merge);
                 else
                     handleConflicts(merge);

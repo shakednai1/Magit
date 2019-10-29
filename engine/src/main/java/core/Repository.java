@@ -429,7 +429,7 @@ public class Repository {
     }
 
     boolean validBranchName(String branchName) {
-        return branches.stream().
+         return branches.stream().
                 map(BranchData::getName).
                 anyMatch(name -> name.equals(branchName));
     }
@@ -503,29 +503,27 @@ public class Repository {
     }
 
     public boolean isValidBranchName(String name) throws InvalidBranchNameError {
-        if(branches.stream().anyMatch(branch-> branch.getName().equals(name)) ||
+        if(!branches.stream().anyMatch(branch-> branch.getName().equals(name)) ||
                 name.contains(" ")){
             throw new InvalidBranchNameError("");
         }
         return true;
     }
 
-    public Merge getMerge(String branchName) throws ValueException{
-        String commitSha1 = "";
-        List<BranchData> branchesData = getAllBranches();
-        BranchData mergeBranch = null;
+    public Merge getMerge(String fromBranch, String toBranch) throws ValueException{
 
-        for(BranchData branchData: branchesData){
-            if(branchData.getName().equals(branchName)){
-                commitSha1 = branchData.getHeadSha1();
-                mergeBranch = branchData;
-                break;
-            }
-        }
+        BranchData fromMergeBranch = getBranchByName(fromBranch);
+        if (fromMergeBranch == null) throw new ValueException("Invalid branch From name");
+        String fromCommitSha1 = fromMergeBranch.getHeadSha1();
 
-        if (mergeBranch == null) throw new ValueException("Invalid branch name");
+        BranchData toMergeBranch = getBranchByName(toBranch);
+        if (toMergeBranch == null) throw new ValueException("Invalid branch To name");
+        String toCommitSha1 = toMergeBranch.getHeadSha1();
 
-        currentMerge = new Merge(getActiveBranch().getHead().getSha1(), commitSha1, activeBranch, mergeBranch.getName());
+
+        currentMerge = new Merge(fromCommitSha1, toCommitSha1,
+                fromBranch, toMergeBranch.getName(),
+                settings, activeBranch);
         return currentMerge;
     }
 
@@ -541,6 +539,22 @@ public class Repository {
                 updateActiveBranchDataInHistory();
             }
 
+        }
+        currentMerge = null;
+    }
+
+
+    public void makeFFMergeWebMode(String toBranchName){
+
+        if(currentMerge.isFastForwardSha1()){
+            BranchData toBranch = getBranchByName(toBranchName);
+            toBranch.setHeadSha1(currentMerge.getFastForward());
+            toBranch.writeBranchInfoFile(settings);
+
+            // update active branch if needed
+            if(getActiveBranch().getName().equals(toBranchName)){
+                activeBranch.setHead(new Commit(currentMerge.getFastForward(), settings));
+            }
         }
         currentMerge = null;
     }
@@ -572,7 +586,9 @@ public class Repository {
                 }
             }
 
-            currentMerge = new Merge(getActiveBranch().getHead().getSha1(), pointingCommitOfRemoteBranch, activeBranch, trackingAfterBranchName);
+            currentMerge = new Merge(getActiveBranch().getHead().getSha1(), pointingCommitOfRemoteBranch,
+                    activeBranch.getName(), trackingAfterBranchName,
+                    settings, activeBranch);
             return currentMerge;
         }
         return null;

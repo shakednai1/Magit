@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 public class UserManager {
 
+    private static Integer prSerialNumber = 0;
     static Map<String, User> users = new HashMap<>();
 
     public static User addUser(String name, String password){
@@ -31,6 +32,11 @@ public class UserManager {
 
     public static User getUserByName(String username){
         return users.get(username);
+    }
+
+    public static Integer generatePRNumber(){
+        prSerialNumber += 1;
+        return prSerialNumber;
     }
 
 }

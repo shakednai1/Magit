@@ -78,8 +78,6 @@ public class pullRequest extends HttpServlet {
 
     @Override
     public void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Map<String, String[]> params = request.getParameterMap();
-
         String data = request.getReader().lines().collect(Collectors.toList()).get(0);
 
         JSONObject json;
@@ -101,12 +99,13 @@ public class pullRequest extends HttpServlet {
                     user.getEngine().getCurrentRepoName(),
                     prID);
 
+            if(status.name().equals("ACCEPTED"))
+                pr.accept(user.getEngine().getActiveRepo());
+
             pr.setStatus(status);
 
             EditPRNotification prNoti = new EditPRNotification(pr);
             prNoti.save();
-
-            // TODO if accept - merge
         }
         catch (NoActiveRepositoryError e){
             System.out.println(request.getRequestURI() +":"+ e.getMessage());

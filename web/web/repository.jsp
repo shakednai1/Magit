@@ -45,7 +45,7 @@
         <input type="submit" value="Create">
     </form>
 </div>
-
+<br>
 <div id="repoPullRequests">
     <table id="repoPullRequestsTable" class="commitsTable">
         <script>addAllRepositoryPullRequests()</script>

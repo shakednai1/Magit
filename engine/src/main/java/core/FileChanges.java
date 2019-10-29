@@ -121,7 +121,11 @@ public class FileChanges extends Blob{
     }
 
     @Override
-    public String getSha1(){ return resElement.getSha1(); }
+    public String getSha1(){
+        if (resElement != null )
+            return resElement.getSha1();
+        return "";
+    }
 
     @Override
     public void zip(){

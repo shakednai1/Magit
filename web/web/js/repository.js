@@ -2,11 +2,8 @@ var currBranchesNames = {local: [], remote: []};
 
 
 $(document).ready(function () {
-    $.get('/repository').success(function (response) {
-        updateRepoDetails(response);
-        updateRepoBranches(response);
-        updateHeadBranchCommits();
-    });
+
+    updateRepositoryData();
 
     $("#PullRequestForm").on('submit', function (e) {
         e.preventDefault();
@@ -15,24 +12,34 @@ $(document).ready(function () {
 
     setNotifications();
 
-    setInterval( setNotifications, 20000)
-    setInterval( addAllRepositoryPullRequests, 20000);
-    setInterval( updateHeadBranchCommits, 5000)
+    setInterval(addAllRepositoryPullRequests, 20000);
+    setInterval(updateHeadBranchCommits, 5000)
+
+    document.getElementById("PullRequest").style.display = "none";
 
 });
+
+function updateRepositoryData() {
+    $.get('/repository')
+        .success(function (response) {
+            updateRepoDetails(response);
+            updateRepoBranches(response);
+            updateHeadBranchCommits();
+        });
+}
 
 function setNotifications() {
     $.ajax("/userNotifications",
         {
-            url:"/userNotifications",
+            url: "/userNotifications",
             method: "GET",
             dataType: "json"
-        }).done(function (data, text, xhr){
+        }).done(function (data, text, xhr) {
         _setNotifications(data);
     });
 }
 
-function _setNotifications(notifications){
+function _setNotifications(notifications) {
     var ol = document.getElementById("userNotificationList");
 
     var currItems = ol.getElementsByTagName("li");
@@ -45,7 +52,7 @@ function _setNotifications(notifications){
         newNotifications.push(entry);
     }
 
-    for (var i = 0; i < currItems.length; i++){
+    for (var i = 0; i < currItems.length; i++) {
         var entry = document.createElement('li');
         entry.appendChild(document.createTextNode(currItems[i].innerHTML));
         newNotifications.push(entry);
@@ -90,7 +97,7 @@ function updateRepoDetails(response) {
     if (jsonRes.remoteFrom !== null) {
         var remoteFrom = jsonRes.remoteFrom.split("ex3")[1];
         remoteFrom = remoteFrom.split(jsonRes.remoteName)[0];
-        document.getElementById("remoteFrom").innerHTML = "forked from : " + remoteFrom.substring(1, remoteFrom.length -1);
+        document.getElementById("remoteFrom").innerHTML = "forked from : " + remoteFrom.substring(1, remoteFrom.length - 1);
         document.getElementById("remoteRepoName").innerHTML = "remote repository name : " + jsonRes.remoteName;
     } else {
         document.getElementById("EnablePullRequest").style.display = "none";
@@ -112,7 +119,7 @@ function updateRepoBranches(response) {
 }
 
 function _updateCollaboration() {
-    if(currBranchesNames.remote != null){
+    if (currBranchesNames.remote != null) {
         $("#collaboration").show();
     }
 }
@@ -126,6 +133,7 @@ function _updateRepoBranchesMain() {
             listElement.append('<li class=${itemCls}>' + listValue[i] + '</li>');
         }
     }
+
     _updateBranchesInnerList($("#branchesList"), "branchNameItem", currBranchesNames.local);
     _updateBranchesInnerList($("#remoteBranchesList"), "remoteBranchNameItem", currBranchesNames.remote);
 
@@ -152,7 +160,7 @@ function _updateRepoBranchesPullRequest() {
 
     $("#prFromBranch").empty();
     $("#prToBranch").empty();
-    for (i in currBranchesNames.remote){
+    for (i in currBranchesNames.remote) {
         $("#prFromBranch").append('<option>' + currBranchesNames.remote[i] + '</option>');
         $("#prToBranch").append('<option>' + currBranchesNames.remote[i] + '</option>');
     }
@@ -165,7 +173,17 @@ function checkoutBranch() {
     $.post('/branch/checkout', {branchName: branchName})
         .success(function () {
             document.getElementById("head").innerHTML = "head branch : " + branchName;
-            updateHeadBranchCommits();
+
+            updateRepositoryData();
+            //
+            // updateHeadBranchCommits();
+            // // TODO if checkout to remote - add to local branch
+        })
+        .error(function (xhr, status, error) {
+            alert(xhr.responseText);
+            alert(status);
+            alert(error);
+
         });
 }
 
@@ -220,15 +238,14 @@ function openFSWindow(commitSha1, jsonRes) {
             ul.appendChild(li);
         }
     }
-    //FSwindows.document.body.innerHTML = "<h2> commit "+ commitSha1 + " file system <\h2><ul><li>first</li></ul>";
 }
 
 function openWCwindow() {
     var url = "editWC.jsp";
     var width = 700;
     var height = 600;
-    var left = parseInt((screen.availWidth/2) - (width/2));
-    var top = parseInt((screen.availHeight/2) - (height/2));
+    var left = parseInt((screen.availWidth / 2) - (width / 2));
+    var top = parseInt((screen.availHeight / 2) - (height / 2));
     var windowFeatures = "width=" + width + ",height=" + height +
         ",status,resizable,left=" + left + ",top=" + top +
         "screenX=" + left + ",screenY=" + top + ",scrollbars=yes";
@@ -263,7 +280,12 @@ function openPullRequest() {
 
     $.post("/pull_request",
         {fromBranch: fromBranch, toBranch: toBranch, comment: prDescription})
-        .success(alert("PR published"));
+        .success( function () {
+                alert("PR published");
+                $("#prDescription").val("");
+                togglePullRequest();
+            }
+        );
 }
 
 function addAllRepositoryPullRequests() {
@@ -272,8 +294,7 @@ function addAllRepositoryPullRequests() {
             clearTable("repoPullRequestsTable");
 
             var jsonRes = JSON.parse(response)["response"];
-            for(var i = 0; i < jsonRes.length ; i++)
-            {
+            for (var i = 0; i < jsonRes.length; i++) {
                 addPullRequestToTable(JSON.parse(jsonRes[i]));
             }
         });
@@ -292,11 +313,11 @@ function addPullRequestToTable(pr) {
 }
 
 function openPullRequestWindow(prSha1) {
-    var url = "pullRequest.jsp?id="+prSha1;
+    var url = "pullRequest.jsp?id=" + prSha1;
     var width = 700;
     var height = 600;
-    var left = parseInt((screen.availWidth/2) - (width/2));
-    var top = parseInt((screen.availHeight/2) - (height/2));
+    var left = parseInt((screen.availWidth / 2) - (width / 2));
+    var top = parseInt((screen.availHeight / 2) - (height / 2));
     var windowFeatures = "width=" + width + ",height=" + height +
         ",status,resizable,left=" + left + ",top=" + top +
         "screenX=" + left + ",screenY=" + top + ",scrollbars=yes";

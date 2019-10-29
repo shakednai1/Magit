@@ -197,7 +197,8 @@ public class MainEngine {
     }
 
     public String getSha1FromRemoteBranch(String remote){
-        return FSUtils.getFileLines(repositoryManager.getSettings().remoteBranchesPath + remote + ".txt").get(0).split(Settings.delimiter)[0];
+        return FSUtils.getFileLines(repositoryManager.getSettings().remoteBranchesPath + remote + ".txt")
+                .get(0).split(Settings.delimiter)[0];
     }
 
     public List<String> getFileLines(String fileSha1){
@@ -206,7 +207,7 @@ public class MainEngine {
 
 
     public String getBranchMergeName(){
-        return getActiveRepository().getCurrentMerge().getMergingBranchName();
+        return getActiveRepository().getCurrentMerge().getToBranch();
     }
 
     public Merge pull(){

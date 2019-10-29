@@ -2,6 +2,8 @@ package models;
 
 import core.Branch;
 import core.Commit;
+import core.FSUtils;
+import core.Settings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -44,6 +46,14 @@ public class BranchData {
     public void setHeadSha1(String headSha1) {
         this.headSha1.setValue(headSha1);
     }
+
+    public void writeBranchInfoFile(Settings repoSettings){
+        // taken from Branch.java - ugly as life
+        String branchFileContentTracking = (trackingAfter == null) ? "null" : trackingAfter;
+        String content = String.join(Settings.delimiter, headSha1.toString(), branchFileContentTracking);
+        FSUtils.writeFile(repoSettings.getBranchFilePath(name), content, false);
+    }
+
 
     public void setHeadMsg(String headMsg) {
         this.headMsg = headMsg;

@@ -107,7 +107,7 @@ public class Settings {
         return new File(repoFile, pullRequestFolder);
     }
 
-    String getBranchFilePath(String branchName){
+    public String getBranchFilePath(String branchName){
         return branchFolderPath + branchName + ".txt";
     }
 

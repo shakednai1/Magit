@@ -1,10 +1,5 @@
 package core;
 
-import exceptions.NoActiveRepositoryError;
-import exceptions.NoChangesToCommitError;
-import models.BranchData;
-import models.CommitData;
-
 import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedList;
@@ -19,22 +14,27 @@ public class Merge {
     List<FileChanges> conflicts = new LinkedList<>();
     FolderChanges folderChanges;
     Branch activeBranch;
-    String mergingBranchName;
-    String fastForward = null;
+    String fromBranch;
+    String toBranch;
+    String fastForwardSha1 = null;
     Settings repoSettings;
 
     private String commitMsg = "";
 
 
-    public Merge(String firstCommitSha1, String secondCommitSha1, Branch activeBranch, String branchToMerge){
-        this.mergingBranchName = branchToMerge;
+    public Merge(String firstCommitSha1, String secondCommitSha1,
+                 String fromBranch, String toBranch,
+                 Settings repoSettings, Branch activeBranch){
+
+        this.fromBranch = fromBranch;
+        this.toBranch = toBranch;
         this.firstCommitSha1 = firstCommitSha1;
         this.secondCommitSha1 = secondCommitSha1;
         this.activeBranch = activeBranch;
         this.repoSettings = activeBranch.getRepoSettings();
 
         setFastForward();
-        if (fastForward == null) {
+        if (fastForwardSha1 == null) {
             folderChanges = CommitsDelta.getDiffBetweenCommits(firstCommitSha1, secondCommitSha1, repoSettings);
             if (folderChanges.getHasConflicts()) {
                 setConflictFiles();
@@ -42,7 +42,7 @@ public class Merge {
         }
     }
 
-    public String getMergingBranchName(){ return mergingBranchName; }
+    public String getToBranch(){ return toBranch; }
     public String getCommitMsg(){ return commitMsg;}
     public String getFirstCommitSha1(){ return firstCommitSha1;}
     public String getSecondCommitSha1(){ return secondCommitSha1;}
@@ -106,23 +106,23 @@ public class Merge {
         if(firstCommitTime.after(secondCommitTime) || firstCommitTime.equals(secondCommitTime)){
             commitParents = Commit.loadAll(firstCommit.getSha1(), repoSettings);
             if(commitParents.containsKey(secondCommitSha1)){
-                fastForward = firstCommitSha1;
+                fastForwardSha1 = firstCommitSha1;
             }
         }
         else if(firstCommitTime.before(secondCommitTime)){
             commitParents = Commit.loadAll(secondCommit.getSha1(), repoSettings);
             if(commitParents.containsKey(firstCommitSha1)){
-                fastForward = secondCommitSha1;
+                fastForwardSha1 = secondCommitSha1;
             }
         }
     }
 
     public String getFastForward(){
-        return fastForward;
+        return fastForwardSha1;
     }
 
-    public boolean isFastForward(){
-        return fastForward !=null;
+    public boolean isFastForwardSha1(){
+        return fastForwardSha1 !=null;
     }
 
 }

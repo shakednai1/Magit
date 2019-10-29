@@ -4,8 +4,6 @@ $(document).ready(function() {
     updateUserNameInPageTitle(currentUser);
     addAllUsersToList();
     setNotifications();
-
-    setInterval( setNotifications, 20000)
 });
 
 $(document).ajaxError(function(event, jqxhr, ajaxOptions, errorThrown) {

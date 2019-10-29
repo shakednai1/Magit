@@ -7,6 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import models.BranchData;
 import org.apache.commons.io.FileUtils;
+import user.UserManager;
 import user.notification.NewPRNotification;
 
 import java.io.File;
@@ -90,7 +91,8 @@ public class PullRequest {
         this.creationTime = new Date();
         status = PRStatus.NEW;
 
-        sha1 = new ItemSha1(toString(), true, false, getPullRequestFolder());
+        sha1 = new ItemSha1(UserManager.generatePRNumber().toString(),
+                false, false, getPullRequestFolder());
     }
 
 
@@ -194,7 +196,7 @@ public class PullRequest {
         for(FileChanges file : folderChanges.getSubChangesFiles().values()){
             Common.FilesStatus status = file.getState();
             String path = settings.extractFilePath(file.getFullPath());
-            String fileSha1 = Common.FilesStatus.DELETED == status ? "": file.getSha1();
+            String fileSha1 = file.getSha1();
 
             JsonObject fileJson = new JsonObject();
             fileJson.addProperty("path", path);
@@ -216,6 +218,11 @@ public class PullRequest {
         return String.join("\n",
                 FSUtils.getZippedContent(repository.getSettings().getRepositoryObjectsFullPath().getAbsolutePath(),
                 sha1));
+    }
+
+    public void accept(Repository repository){
+        Merge merge = repository.getMerge(fromBranch, toBranch);
+        repository.makeFFMergeWebMode(toBranch);
     }
 
 }
