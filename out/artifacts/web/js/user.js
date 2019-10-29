@@ -5,7 +5,9 @@ $(document).ready(function() {
     addAllUsersToList();
     setNotifications();
 
-    setInterval( setNotifications, 20000)
+    setInterval(addAllUsersToList, 5000);
+    setInterval(setNotifications, 5000);
+
 });
 
 $(document).ajaxError(function(event, jqxhr, ajaxOptions, errorThrown) {
@@ -134,6 +136,7 @@ function clearTable(tableId){
 }
 
 function addAllUsersToList(){
+    $("#usersList").empty();
     // TODO : change onlyCreated=true
     var currentUser = getCurrUser();
     $.get("/users?onlyCreated=false", function(response){

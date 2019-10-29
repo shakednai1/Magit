@@ -12,8 +12,9 @@ $(document).ready(function () {
 
     setNotifications();
 
-    setInterval(addAllRepositoryPullRequests, 20000);
+    setInterval(addAllRepositoryPullRequests, 5000);
     setInterval(updateHeadBranchCommits, 5000)
+    setInterval(setNotifications, 5000)
 
     document.getElementById("PullRequest").style.display = "none";
 
