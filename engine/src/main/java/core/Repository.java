@@ -276,7 +276,7 @@ public class Repository {
     public Map<String, CommitData> getBranchCommits(BranchData branch) {
         Map<String, CommitData> res = new HashMap<>();
         for (Map.Entry<String, Commit> c : Commit.loadAll(branch.getHeadSha1(), settings).entrySet()) {
-            res.put(c.getKey(), new CommitData(c.getValue()));
+            res.put(c.getKey(), commits.get(c.getKey()));
         }
         return res;
     }

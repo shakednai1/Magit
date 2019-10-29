@@ -18,6 +18,14 @@ import java.util.stream.Collectors;
 public class WebUtils {
 
     static User getSessionUser(HttpServletRequest request){
+
+        Cookie[] cookies =request.getCookies() ;
+
+        int i;
+        if (cookies == null)
+            i=1;
+
+
         Cookie userCookie = Arrays.stream(request.getCookies()).filter(cookie -> cookie.getName().equals("user")).collect(Collectors.toList()).get(0);
 
         return UserManager.getUserByName(userCookie.getValue());

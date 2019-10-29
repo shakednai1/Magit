@@ -205,12 +205,25 @@ function updateHeadBranchCommits() {
                 commit.message + "</td><td>" +
                 commit.commitTime + "</td><td>" +
                 commit.committer + "</td><td>" +
-                commit.pointingBranches + "</td><td>" +
+                getPointingBranchesStr(commit.pointingBranches) + "</td><td>" +
                 "<button onClick='showCommitFileSystem(\"" + commit.sha1 + "\")'>show file system</button></td></tr>";
             $("#commits").append(markup);
         }
     });
 }
+
+function getPointingBranchesStr(pointingBranches) {
+    var branches = "";
+    for(var i =0; i< pointingBranches.length; i++){
+        if (i===0)
+            branches = pointingBranches[i].name;
+        else
+            branches += ", " + pointingBranches[i].name;
+    }
+
+    return branches;
+}
+
 
 function showCommitFileSystem(commitSha1) {
     $.get('/commit', {commitSha1: commitSha1})

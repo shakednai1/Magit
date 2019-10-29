@@ -46,7 +46,7 @@ public class branch extends HttpServlet {
             resp.getWriter().println(jsonStr);
         }
         catch (NullPointerException e){
-            System.out.println(req.getRequestURI() + ": " +e.getMessage());
+            System.out.println(req.getRequestURI() + ": " +e.getCause());
         }
     }
 }
