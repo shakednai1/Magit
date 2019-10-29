@@ -25,15 +25,16 @@ function updatePRDetails(pr) {
     $("#repoName").append(pr.remoteRepoName);
 
 
-    setStatus(pr.status);
+    setStatus(pr.status, pr.reason);
 }
 
 
-function setStatus(status){
+function setStatus(status, reason){
     if(status !== "NEW"){
         document.getElementById("prActions").style.display = "none";
         document.getElementById("prStatus").style.display = "block";
         $("#prStatus").append("Pull request " + status);
+        $("#prStatus").append("<br>Reason: " + reason);
     }
     else{
         document.getElementById("prActions").style.display = "block";
@@ -89,13 +90,30 @@ function updateFileContent(response) {
 }
 
 function updateStatus(status){
+    var reason = $("#message").val();
     $.ajax("/pull_request",
     {url: "/pull_request",
         type: "PUT",
         contentType: "application/json",
         processData: false,
-        data: JSON.stringify({'status': status, 'prID':prUID})
+        data: JSON.stringify({'status': status, 'prID':prUID, 'reason': reason})
     }).success( function(){
-        setStatus(status);
+        setStatus(status, reason);
+        $("#prActions").find('form').remove();
     });
+}
+
+function prepareFinalStatus(status){
+    $("#acceptBtn").hide();
+    $("#declineBtn").hide();
+    var statusChangeTextForm = $("<form id='statusChangeTextForm'><textarea name='message' id='message' rows='5' cols='20'>"+
+        "</textarea> <br> <input type='submit'> </form>");
+    $("#prActions").append("you chose to " + status + " please add the reason for your choice: ");
+    $("#prActions").append(statusChangeTextForm);
+    $("#statusChangeTextForm").on('submit', function(e) {
+        e.preventDefault();
+        updateStatus(status);
+    });
+
+
 }

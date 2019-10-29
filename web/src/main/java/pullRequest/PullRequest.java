@@ -45,8 +45,9 @@ public class PullRequest {
 
     public PRStatus getStatus(){ return status; }
 
-    public void setStatus(PRStatus status) {
+    public void setStatusAndReason(PRStatus status, String reason) {
         this.status = status;
+        this.reason = reason;
         writeStateToFile();
     }
 
@@ -65,6 +66,7 @@ public class PullRequest {
     Date creationTime;
     PRStatus status;
     ItemSha1 sha1 ;
+    String reason;
 
 
     List<JsonObject> newFiles = new ArrayList<>();
@@ -129,12 +131,14 @@ public class PullRequest {
 
     private void setStateFromFile(){
         List<String> content = FSUtils.getFileLines(getPRStateFile().getAbsolutePath());
-        status = PRStatus.valueOf(content.get(0));
+        String[] data = content.get(0).split(Settings.delimiter);
+        status = PRStatus.valueOf(data[0]);
+        reason = String.join( Settings.delimiter, Arrays.copyOfRange(data, 1, data.length));
     }
 
     private void writeStateToFile(){
         String stateFile = getPRStateFile().getAbsolutePath();
-        FSUtils.writeFile(stateFile, status.name(), false);
+        FSUtils.writeFile(stateFile, status.name() + Settings.delimiter + this.reason, false);
     }
 
     private File getPullRequestFolder(){

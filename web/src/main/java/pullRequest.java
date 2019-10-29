@@ -91,6 +91,8 @@ public class pullRequest extends HttpServlet {
 
         PullRequest.PRStatus status = PullRequest.PRStatus.valueOf(json.get("status").toString());
         String prID = json.get("prID").toString();
+        String reason = json.get("reason").toString();
+
 
         User user = WebUtils.getSessionUser(request);
 
@@ -102,7 +104,7 @@ public class pullRequest extends HttpServlet {
             if(status.name().equals("ACCEPTED"))
                 pr.accept(user.getEngine().getActiveRepo());
 
-            pr.setStatus(status);
+            pr.setStatusAndReason(status, reason);
 
             EditPRNotification prNoti = new EditPRNotification(pr);
             prNoti.save();
