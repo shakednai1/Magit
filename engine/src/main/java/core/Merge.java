@@ -74,7 +74,7 @@ public class Merge {
     public Commit commit(){
         mergeTime = Settings.commitDateFormat.format(new Date());
         folderChanges.commit(repoSettings.getUser(), mergeTime);
-
+        this.commitMsg = "merge commit from " + fromBranch + " to " + toBranch;
         Commit com = new Commit(getCommitMsg(), folderChanges.getSha1(),
                 folderChanges.userLastModified, mergeTime,
                 getFirstCommitSha1(), getSecondCommitSha1(),
