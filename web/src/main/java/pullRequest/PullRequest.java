@@ -126,7 +126,8 @@ public class PullRequest {
 
         fromBranch = fields[3];
         toBranch = fields[4];
-        comment = fields[5];
+        comment = String.join( Settings.delimiter, Arrays.copyOfRange(fields, 5, fields.length));
+        
     }
 
     private void setStateFromFile(){
