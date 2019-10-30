@@ -1,6 +1,8 @@
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import core.Branch;
+import core.Commit;
+import core.CommitDataComperator;
 import core.Repository;
 import exceptions.InvalidBranchNameError;
 import exceptions.UncommittedChangesError;
@@ -15,8 +17,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @WebServlet(name = "branch", urlPatterns = "/branch")
 public class branch extends HttpServlet {
@@ -41,8 +45,14 @@ public class branch extends HttpServlet {
         try{
             Repository repository = user.getEngine().getActiveRepository();
             Map<String, CommitData> commitsHistory = repository.getBranchCommits(new BranchData(repository.getActiveBranch()));
+
+            List<CommitData> sortedCommits = commitsHistory.values()
+                    .stream()
+                    .sorted(Comparator.reverseOrder())
+                    .collect(Collectors.toList());
+
             Gson gson = new Gson();
-            String jsonStr = gson.toJson(commitsHistory);
+            String jsonStr = gson.toJson(sortedCommits);
             resp.getWriter().println(jsonStr);
         }
         catch (NullPointerException e){

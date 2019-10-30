@@ -76,9 +76,10 @@ public class FSUtils {
     public static List<String> getZippedContent(String directory, String sha1){
         String tmpName = RandomStringUtils.random(10, true, true);
 
-        unzip(getZippedPath(directory, sha1), directory , tmpName + ".txt");
-        List<String > content = FSUtils.getFileLines(new File(directory, tmpName+ ".txt").getAbsolutePath());
-        FSUtils.deleteFile(new File(directory, tmpName + ".txt").getAbsolutePath());
+        String zipOpenToDirectory = new File(directory, "zipped").getAbsolutePath();
+        unzip(getZippedPath(directory, sha1), zipOpenToDirectory, tmpName + ".txt");
+        List<String > content = FSUtils.getFileLines(new File(zipOpenToDirectory, tmpName+ ".txt").getAbsolutePath());
+        FSUtils.deleteFile(new File(zipOpenToDirectory, tmpName + ".txt").getAbsolutePath());
         return content;
     }
 

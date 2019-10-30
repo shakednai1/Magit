@@ -139,7 +139,7 @@ function addAllUsersToList(){
     $("#usersList").empty();
     // TODO : change onlyCreated=true
     var currentUser = getCurrUser();
-    $.get("/users?onlyCreated=false", function(response){
+    $.get("/users?onlyCreated=true", function(response){
         var jsonRes = JSON.parse(response)["response"];
         for(i in jsonRes){
             var name = jsonRes[i]["username"];

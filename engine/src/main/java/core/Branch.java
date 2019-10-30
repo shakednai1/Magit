@@ -76,6 +76,11 @@ public class Branch {
 
     public String getTrackingAfter(){ return trackingAfter; }
 
+    protected void setTrackingAfter(String RBbranchName){
+        trackingAfter = RBbranchName;
+        writeBranchInfoFile();
+    }
+
     protected Settings getRepoSettings(){ return repoSettings;}
 
     private void addCommitToHistory(Commit commit){

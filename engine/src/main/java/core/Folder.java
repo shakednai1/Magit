@@ -10,8 +10,8 @@ public class Folder extends Item {
     protected Map<String, Blob> subFiles = new HashMap<>();
     protected Map<String, Folder> subFolders = new HashMap<>();
 
-    private Map<String, Blob> curSubFiles = new HashMap<>();
-    private Map<String, Folder> curSubFolders = new HashMap<>();
+    protected Map<String, Blob> curSubFiles = new HashMap<>();
+    protected Map<String, Folder> curSubFolders = new HashMap<>();
 
 
     Folder(){}

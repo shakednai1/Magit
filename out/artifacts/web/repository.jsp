@@ -27,9 +27,7 @@
 <select id="checkout"></select><button onClick="checkoutBranch()">checkout</button>
 <br />
 <div id="collaboration" style="display:none">
-    <p>Collaboration actions:</p>
-    <button onClick="push()">push</button>
-    <button onClick="pull()">pull</button>
+    <p>Collaboration actions: <button onClick="push()">push</button>   <button onClick="pull()">pull</button></p>
 </div>
 
 <hr>
@@ -56,6 +54,7 @@
             <td>To Branch</td>
             <td>Comment</td>
             <td>Time</td>
+            <td>Status</td>
             <td>Action</td>
         </tr>
         </thead>

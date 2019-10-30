@@ -24,7 +24,6 @@ function updatePRDetails(pr) {
     $("#comment").append(pr.comment);
     $("#repoName").append(pr.remoteRepoName);
 
-
     setStatus(pr.status, pr.reason);
 }
 
@@ -96,6 +95,7 @@ function updateStatus(status) {
             type: "PUT",
             contentType: "application/json",
             processData: false,
+            cache: false,
             data: JSON.stringify({'status': status, 'prID': prUID, 'reason': reason})
         })
         .success(function () {

@@ -1,14 +1,19 @@
 package models;
 
 import core.Commit;
+import core.Item;
+import core.Settings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.text.ParseException;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
-public class CommitData {
+public class CommitData implements Comparable <CommitData>{
 
     private String sha1;
     private String message;
@@ -72,4 +77,21 @@ public class CommitData {
         return pointingBranches.stream().map(BranchData::getName).sorted().collect(Collectors.toList());
     }
 
+    public Date getCommitTimeDate() {
+        try {
+            return Settings.commitDateFormat.parse(commitTime);
+        }
+        catch (ParseException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public int compareTo(CommitData other) {
+        return getCommitTimeDate().compareTo(other.getCommitTimeDate());
+    }
+
 }
+
+

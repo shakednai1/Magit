@@ -214,7 +214,12 @@ public class Repository {
     public Branch getActiveBranch(){ return activeBranch; }
     public ObservableList<BranchData> getAllBranches(){ return branches; }
     public BranchData getBranchByName(String name){
-        return branches.stream().filter(b ->b.getName().equals(name)).collect(Collectors.toList()).get(0);
+        List<BranchData> branchesByName = branches.stream().filter(b ->b.getName().equals(name)).collect(Collectors.toList());
+
+        if (branchesByName.size() > 0)
+            return branchesByName.get(0);
+
+        return null;
     }
 
     Merge getCurrentMerge(){ return currentMerge; }
@@ -475,6 +480,19 @@ public class Repository {
         return remoteRepository != null;
     }
 
+    protected void setBranchesTrackingAfterSameName(){
+        if(!isRemote()) return;
+
+        for(RemoteBranch remoteBranch: remoteRepository.getRemoteBranches()){
+            BranchData repoBranch = getBranchByName(remoteBranch.name);
+            if(repoBranch== null) continue;
+
+            repoBranch.setTrackingAfter(remoteBranch.name);
+            repoBranch.writeBranchInfoFile(settings);
+        }
+
+    }
+
     public void fetch(){
         File branchesDir = new File(getRemoteRepositoryPath() + Settings.branchFolder);
         File remoteBranchesDir = new File(settings.remoteBranchesPath);
@@ -520,7 +538,6 @@ public class Repository {
         if (toMergeBranch == null) throw new ValueException("Invalid branch To name");
         String toCommitSha1 = toMergeBranch.getHeadSha1();
 
-
         currentMerge = new Merge(fromCommitSha1, toCommitSha1,
                 fromBranch, toMergeBranch.getName(),
                 settings, mergeBranch);
@@ -554,6 +571,7 @@ public class Repository {
             // update active branch if needed
             if(getActiveBranch().getName().equals(toBranchName)){
                 activeBranch.setHead(new Commit(currentMerge.getFastForward(), settings));
+                activeBranch.setRootFolder(Commit.getCommitRootFolder(currentMerge.getFastForward(), settings), true);
             }
         }
         currentMerge = null;
@@ -566,8 +584,13 @@ public class Repository {
 
         Commit commit = merge.commit();
         CommitData commitData = __createCommitData(commit, merge.toBranch);
-        if(merge.activeBranch !=  null)
+        if(merge.activeBranch !=  null){
             updateActiveBranchDataInHistory();
+
+            activeBranch.setRootFolder(Commit.getCommitRootFolder(commit.getSha1(), settings),
+                    true);
+        }
+
         commits.put(commitData.getSha1(), commitData);
 
         currentMerge = null;
@@ -598,7 +621,9 @@ public class Repository {
     public void push(){
         if(!getActiveBranch().isTracking()){
             String branchFilePath = settings.branchFolderPath + getActiveBranch().getName() + ".txt";
-            FSUtils.writeFile(branchFilePath, getActiveBranch().getHead().getSha1() + Settings.delimiter + getActiveBranch().getName(), false);
+            FSUtils.writeFile(branchFilePath,
+                    getActiveBranch().getHead().getSha1() + Settings.delimiter + getActiveBranch().getName(),
+                    false);
             RemoteBranch remoteBranch = new RemoteBranch(getActiveBranch().getName(), getActiveBranch().getHead().getSha1());
             getActiveBranch().trackingAfter = remoteBranch.name;
             remoteRepository.addRemoteBranch(remoteBranch);
@@ -606,6 +631,7 @@ public class Repository {
         String RBbranchName = getActiveBranch().isTracking() ? getActiveBranch().getTrackingAfter() : getActiveBranch().getName();
         pushObjectsToRemote();
         updateRBDataFromLocal(RBbranchName);
+        getActiveBranch().setTrackingAfter(RBbranchName);
         rewriteRemoteFSIfNeeded();
     }
 
@@ -638,6 +664,8 @@ public class Repository {
         File sourceObjFolder = new File(settings.objectsFolderPath);
         try {
             for (File file : sourceObjFolder.listFiles()) {
+                if(file.getName().equals("zipped"))
+                    continue;
                 File destFile = new File(getRemoteRepositoryPath() + Settings.objectsFolder + "/" + file.getName());
                 FileUtils.copyFile(file, destFile);
             }
@@ -651,6 +679,7 @@ public class Repository {
         File sourceObjFolder = new File(getRemoteRepositoryPath() + Settings.objectsFolder);
         try {
             for (File file : sourceObjFolder.listFiles()) {
+                if(file.getName().equals(Settings.zippedDir)) continue;
                 File destFile = new File(settings.objectsFolderPath + "/" + file.getName());
                 FileUtils.copyFile(file, destFile);
             }

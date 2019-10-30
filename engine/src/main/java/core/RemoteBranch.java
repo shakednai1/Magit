@@ -14,4 +14,8 @@ public class RemoteBranch {
         return name;
     }
 
+    public String getPointedCommitSha1(){
+        return pointedCommitSha1;
+    }
+
 }

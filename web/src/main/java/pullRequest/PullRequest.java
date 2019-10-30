@@ -2,22 +2,16 @@ package pullRequest;
 
 import com.google.gson.JsonObject;
 import core.*;
-import exceptions.InvalidBranchNameError;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import models.BranchData;
 import org.apache.commons.io.FileUtils;
 import user.UserManager;
-import user.notification.NewPRNotification;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.regex.Pattern;
 
 
-public class PullRequest {
+public class PullRequest implements Comparable<PullRequest> {
 
     public String getRepoName() {
         return repoName;
@@ -61,8 +55,10 @@ public class PullRequest {
     String requestingUser;
     String ownerUser;
     String comment;
-    String  fromBranch;
+    String fromBranch;
+    String fromCommitSha1;
     String toBranch;
+    String toCommitSha1;
     Date creationTime;
     PRStatus status;
     ItemSha1 sha1 ;
@@ -89,7 +85,10 @@ public class PullRequest {
         this.ownerUser = ownerUser;
         this.comment = comment;
         this.fromBranch = fromBranch.getName();
+        this.fromCommitSha1 = fromBranch.getHeadSha1();
         this.toBranch = toBranch.getName();
+        this.toCommitSha1 = toBranch.getPointedCommitSha1();
+
         this.creationTime = new Date();
         status = PRStatus.NEW;
 
@@ -125,8 +124,10 @@ public class PullRequest {
         repoName = fields[2];
 
         fromBranch = fields[3];
-        toBranch = fields[4];
-        comment = String.join( Settings.delimiter, Arrays.copyOfRange(fields, 5, fields.length));
+        fromCommitSha1 = fields[4];
+        toBranch = fields[5];
+        toCommitSha1 = fields[6];
+        comment = String.join( Settings.delimiter, Arrays.copyOfRange(fields, 7, fields.length));
         
     }
 
@@ -172,7 +173,9 @@ public class PullRequest {
                 Long.toString(creationTime.getTime()),
                 repoName,
                 fromBranch,
+                fromCommitSha1,
                 toBranch,
+                toCommitSha1,
                 comment);
     }
 
@@ -189,10 +192,7 @@ public class PullRequest {
     }
 
     public void setFileChanges(Repository repository){
-        BranchData fromBranch = repository.getBranchByName(this.fromBranch);
-        BranchData toBranch = repository.getBranchByName(this.toBranch);
-
-        setFilesDeltaCommit(fromBranch.getHeadSha1(), toBranch.getHeadSha1(), repository.getSettings());
+        setFilesDeltaCommit(fromCommitSha1, toCommitSha1, repository.getSettings());
     }
 
     public void setFilesDeltaCommit(String commitSha1, String prevCommit, Settings settings){
@@ -233,13 +233,28 @@ public class PullRequest {
     }
 
     public void accept(Repository repository){
-        Merge merge = repository.getMerge(fromBranch, toBranch, null);
+
+        Branch branchToUpdateMerge = null;
+        if(repository.getActiveBranch().getName().equals(toBranch))
+            branchToUpdateMerge = repository.getActiveBranch();
+
+        Merge merge = repository.getMerge(fromBranch, toBranch, branchToUpdateMerge);
 
         if(merge.isFastForwardSha1())
             repository.makeFFMergeWebMode(toBranch);
         else{
             repository.makeMerge(merge);
         }
+    }
+
+
+    public Date getCreationTime() {
+        return creationTime;
+    }
+
+    @Override
+    public int compareTo(PullRequest other) {
+        return creationTime.compareTo(other.getCreationTime());
     }
 
 }

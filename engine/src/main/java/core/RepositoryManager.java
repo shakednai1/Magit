@@ -65,6 +65,9 @@ public class RepositoryManager {
         File destDir = new File(destPath);
         try {
             FileUtils.copyDirectory(srcDir,destDir);
+
+            File copiesSrcPullRequests = new File(destDir ,Settings.pullRequestFolder);
+            FileUtils.deleteDirectory(copiesSrcPullRequests);
         }
         catch (IOException e){
         }
@@ -82,6 +85,7 @@ public class RepositoryManager {
 
         createNewBranchFilsTrackingAfter(remoteBranchesPath, branchesPath);
         switchActiveRepository(repoName);
+        getActiveRepository().setBranchesTrackingAfterSameName();
     }
 
     public void createNewBranchFilsTrackingAfter(String remoteBranchesPath, String branchesPath){

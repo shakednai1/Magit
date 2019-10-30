@@ -321,7 +321,8 @@ function addPullRequestToTable(pr) {
         pr.fromBranch + "</td><td>" +
         pr.toBranch + "</td><td>" +
         pr.comment + "</td><td>" +
-        pr.creationTime + "</td>" +
+        pr.creationTime + "</td><td>" +
+        pr.status + "</td>" +
         "<td><button onClick='openPullRequestWindow(\"" + pr.sha1.sha1 + "\")'>Open</button></td></tr>";
     $("#repoPullRequestsTable   > tbody:last-child").append(markup);
 }

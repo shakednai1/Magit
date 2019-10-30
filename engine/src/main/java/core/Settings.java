@@ -19,6 +19,7 @@ public class Settings {
 
     final public static DateFormat commitDateFormat = new SimpleDateFormat("dd.MM.yyyy-HH:mm:ss:SSS");
 
+    final public static String zippedDir = "zipped";
     final public static String magitFolder = "/.magit";
     final public static String objectsFolder = magitFolder + "/objects/";
     final public static String branchFolder = magitFolder + "/branches/";
