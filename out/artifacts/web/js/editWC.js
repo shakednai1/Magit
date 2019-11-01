@@ -15,7 +15,7 @@ function getCurrUser() {
 
 function updateFilesTable() {
     clearTable("files");
-    $.get('/currentWC').success(function (response) {
+    $.get('/Magit/currentWC').success(function (response) {
         var jsonRes = JSON.parse(response);
         for (i in jsonRes) {
             var fileName = jsonRes[i];
@@ -30,7 +30,7 @@ function updateFilesTable() {
 
 function viewFileContent(btn) {
     var filePath = $(btn).closest('tr').find('td:first').text();
-    $.get('/currentWC', {fileName : filePath}).success(function (response) {
+    $.get('/Magit/currentWC', {fileName : filePath}).success(function (response) {
         var actionsResults =  $("#actionsResults");
         actionsResults.empty();
         var title = $("<p id='filePath' style='color: #2e6c80; font-size: 90%;'>"+ filePath + "</p>");
@@ -48,7 +48,7 @@ function viewFileContent(btn) {
 
 function editFile(btn) {
     var filePath = $(btn).closest('tr').find('td:first').text();
-    $.get('/currentWC', {fileName : filePath}).success(function (response) {
+    $.get('/Magit/currentWC', {fileName : filePath}).success(function (response) {
         var actionsResults =  $("#actionsResults");
         actionsResults.empty();
         var title = $("<p id='filePath' style='color: #2e6c80; font-size: 90%;'>"+ filePath + "</p>");
@@ -67,7 +67,7 @@ function editFile(btn) {
 function updateFile() {
     var newContent = $("#fileContent").val();
     var filePath = $("#filePath").text();
-    $.post('/currentWC' , {content : newContent, fileName: filePath}).success(function (response) {
+    $.post('/Magit/currentWC' , {content : newContent, fileName: filePath}).success(function (response) {
     })
 }
 
@@ -75,7 +75,7 @@ function deleteFile(btn) {
     var filePath = $(btn).closest('tr').find('td:first').text();
     filePath = filePath;
     $.ajax({
-        url: '/currentWC/' + filePath,
+        url: '/Magit/currentWC/' + filePath,
         type: 'DELETE',
         success: function() {
             updateFilesTable();
@@ -107,7 +107,7 @@ function createNewFile() {
 function saveNewFile() {
     var newContent = $("#fileContent").val();
     var filePath = $("#filePath").val();
-    $.post('/currentWC' , {content : newContent, fileName: filePath}).success(function () {
+    $.post('/Magit/currentWC' , {content : newContent, fileName: filePath}).success(function () {
         updateFilesTable();
     });
     $("#createNewFile").show();
@@ -130,7 +130,7 @@ function prepareCommit() {
 
 function commit() {
     var commitMsg = $("#commitMsg").val();
-    $.post('/commit', {commitMsg : commitMsg}).error(function (xhRequest, errorText, thrownError) {
+    $.post('/Magit/commit', {commitMsg : commitMsg}).error(function (xhRequest, errorText, thrownError) {
         alert("There are no changes to commit");
     })
     $("#prepareCommitForm").show();

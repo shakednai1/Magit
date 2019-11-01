@@ -21,7 +21,7 @@ $(document).ready(function () {
 });
 
 function updateRepositoryData() {
-    $.get('/repository')
+    $.get('/Magit/repository')
         .success(function (response) {
             updateRepoDetails(response);
             updateRepoBranches(response);
@@ -30,9 +30,9 @@ function updateRepositoryData() {
 }
 
 function setNotifications() {
-    $.ajax("/userNotifications",
+    $.ajax("/Magit/userNotifications",
         {
-            url: "/userNotifications",
+            url: "/Magit/userNotifications",
             method: "GET",
             dataType: "json"
         }).done(function (data, text, xhr) {
@@ -71,18 +71,18 @@ function getCurrUser() {
 }
 
 function push() {
-    $.post('/collaboration', {action: "push"})
+    $.post('/Magit/collaboration', {action: "push"})
         .success(function () {
-            $.get('/repository').success(function (response) {
+            $.get('/Magit/repository').success(function (response) {
                 updateRepoBranches(response);
             });
         });
 }
 
 function pull() {
-    $.post('/collaboration', {action: "pull"})
+    $.post('/Magit/collaboration', {action: "pull"})
         .success(function () {
-            $.get('/repository').success(function (response) {
+            $.get('/Magit/repository').success(function (response) {
                 updateRepoBranches(response);
             });
         });
@@ -171,7 +171,7 @@ function _updateRepoBranchesPullRequest() {
 function checkoutBranch() {
     var e = document.getElementById("checkout");
     var branchName = e.options[e.selectedIndex].text;
-    $.post('/branch/checkout', {branchName: branchName})
+    $.post('/Magit/branch/checkout', {branchName: branchName})
         .success(function () {
             document.getElementById("head").innerHTML = "head branch : " + branchName;
 
@@ -190,14 +190,14 @@ function checkoutBranch() {
 
 function createNewBranch() {
     var branchName = document.getElementById("createNewBranch").elements.namedItem("branchName").value
-    $.post('/branch', {branchName: branchName}).error(function (xhr, status, error) {
+    $.post('/Magit/branch', {branchName: branchName}).error(function (xhr, status, error) {
         alert(xhr.responseText);
     });
 }
 
 function updateHeadBranchCommits() {
     clearTable("commits");
-    $.get('/branch').success(function (response) {
+    $.get('/Magit/branch').success(function (response) {
         var jsonRes = JSON.parse(response);
         for (i in jsonRes) {
             var commit = jsonRes[i];
@@ -226,7 +226,7 @@ function getPointingBranchesStr(pointingBranches) {
 
 
 function showCommitFileSystem(commitSha1) {
-    $.get('/commit', {commitSha1: commitSha1})
+    $.get('/Magit/commit', {commitSha1: commitSha1})
         .success(function (response) {
             var jsonRes = JSON.parse(response);
             openFSWindow(commitSha1, jsonRes);
@@ -234,7 +234,7 @@ function showCommitFileSystem(commitSha1) {
 }
 
 function openFSWindow(commitSha1, jsonRes) {
-    var url = "fileSystem.jsp";
+    var url = "/Magit/fileSystem.jsp";
     var width = 700;
     var height = 600;
     var left = parseInt((screen.availWidth / 2) - (width / 2));
@@ -255,7 +255,7 @@ function openFSWindow(commitSha1, jsonRes) {
 }
 
 function openWCwindow() {
-    var url = "editWC.jsp";
+    var url = "/Magit/editWC.jsp";
     var width = 700;
     var height = 600;
     var left = parseInt((screen.availWidth / 2) - (width / 2));
@@ -292,7 +292,7 @@ function openPullRequest() {
     var toBranch = x.find("#prToBranch").val();
     var prDescription = x.find("#prDescription").val();
 
-    $.post("/pull_request",
+    $.post("/Magit/pull_request",
         {fromBranch: fromBranch, toBranch: toBranch, comment: prDescription})
         .success( function () {
                 alert("PR published");
@@ -303,7 +303,7 @@ function openPullRequest() {
 }
 
 function addAllRepositoryPullRequests() {
-    $.get("/pull_requests")
+    $.get("/Magit/pull_requests")
         .success(function (response) {
             clearTable("repoPullRequestsTable");
 
@@ -328,7 +328,7 @@ function addPullRequestToTable(pr) {
 }
 
 function openPullRequestWindow(prSha1) {
-    var url = "pullRequest.jsp?id=" + prSha1;
+    var url = "/Magit/pullRequest.jsp?id=" + prSha1;
     var width = 700;
     var height = 600;
     var left = parseInt((screen.availWidth / 2) - (width / 2));

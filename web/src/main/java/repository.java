@@ -33,7 +33,8 @@ public class repository extends HttpServlet {
         resp.addCookie(userCookie);
         Gson gson = new GsonBuilder().create();
         Map<String, String> map = new HashMap<>();
-        map.put("redirectUrl", "http://localhost:8080/repository.jsp");
+        //map.put("redirectUrl", "http://localhost:8080/repository.jsp");
+        map.put("redirectUrl", req.getContextPath() + "/repository.jsp");
         resp.getWriter().println((gson.toJson(map)));
 
     }

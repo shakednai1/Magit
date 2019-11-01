@@ -2,7 +2,7 @@ var prUID = "";
 
 $(document).ready(function () {
     var url = new URL(document.location.href);
-    $.get('/pull_request', {id: url.searchParams.get("id")})
+    $.get('/Magit/pull_request', {id: url.searchParams.get("id")})
         .success(function (response) {
             var pr = JSON.parse(response);
 
@@ -72,7 +72,7 @@ function addFileChangeToTable(changedFile, state) {
 }
 
 function getContent(sha1, path) {
-    $.get("/file", {sha1: sha1, path: path})
+    $.get("/Magit/file", {sha1: sha1, path: path})
         .success(
             function (response) {
                 document.getElementById("fileContent").style.display = "block";
@@ -89,9 +89,9 @@ function updateFileContent(response) {
 
 function updateStatus(status) {
     var reason = $("#message").val();
-    $.ajax("/pull_request",
+    $.ajax("/Magit/pull_request",
         {
-            url: "/pull_request",
+            url: "/Magit/pull_request",
             type: "PUT",
             contentType: "application/json",
             processData: false,

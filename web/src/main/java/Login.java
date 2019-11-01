@@ -23,7 +23,8 @@ public class Login extends HttpServlet {
         Cookie userCookie = new Cookie("user", username);
         response.addCookie(userCookie);
 
-        response.sendRedirect("http://localhost:8080/user.jsp");
+        //response.sendRedirect("http://localhost:8080/Magit/user.jsp");
+        response.sendRedirect(request.getContextPath() + "/user.jsp");
 //        user.getEngine().changeActiveRepository("repo 1");
 //        response.sendRedirect("http://localhost:8080/pullRequest.jsp?id=1");
 

@@ -39,6 +39,8 @@ public class PullRequest implements Comparable<PullRequest> {
 
     public PRStatus getStatus(){ return status; }
 
+    public String getReason(){ return reason; }
+
     public void setStatusAndReason(PRStatus status, String reason) {
         this.status = status;
         this.reason = reason;

@@ -7,7 +7,7 @@
 <body>
 <h1 id="currUser" style="color: #5e9ca0;"></h1>
 
-<form align="right" action="/index.html"><input type="submit" value="Logout"/></form>
+<form align="right" action="/Magit/index.html"><input type="submit" value="Logout"/></form>
 
 <p style="color: #2e6c80; font-size: 90%;">Load new repository:</p>
 <form id="load-xml" enctype="multipart/form-data">

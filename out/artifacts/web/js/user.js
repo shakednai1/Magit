@@ -36,8 +36,8 @@ function addRepositoryToUserTable(repo){
 
 function openRepoPage(repoName) {
     $.ajax(
-        '/repository',
-        {url: '/repository',
+        '/Magit/repository',
+        {url: '/Magit/repository',
             type: "POST",
             cache: false,
             data: {repoName: repoName},
@@ -63,7 +63,7 @@ function addAllRepositoriesToOtherUserTable(username){
     clearTable("othersRepos");
     table.deleteCaption();
     table.createCaption().innerHTML = username + " repositories";
-    $.get("/usersRepos?username=" + username, function(response) {
+    $.get("/Magit/usersRepos?username=" + username, function(response) {
         var jsonRes = JSON.parse(response)["response"];
         var repos = [{
             "name": "repo1",
@@ -103,8 +103,8 @@ function prepareFork(btn, fromUser) {
 function fork(btn, repoName, fromUser) {
     var forkName = $("#forkName").val();
     $.ajax(
-        '/fork',
-        {url: '/fork',
+        '/Magit/fork',
+        {url: '/Magit/fork',
         type: "POST",
         data: {fromUser: fromUser, repoName: repoName, forkName: forkName},
         success: function () {
@@ -119,7 +119,7 @@ function fork(btn, repoName, fromUser) {
 function addAllRepositoriesToTable(){
     var username =  getCurrUser();
     clearTable("myRepos");
-    $.get("/usersRepos", {username: username}, function(response) {
+    $.get("/Magit/usersRepos", {username: username}, function(response) {
         var jsonRes = JSON.parse(response)["response"];
         for (i in jsonRes) {
             addRepositoryToUserTable(jsonRes[i]);
@@ -139,7 +139,7 @@ function addAllUsersToList(){
     $("#usersList").empty();
     // TODO : change onlyCreated=true
     var currentUser = getCurrUser();
-    $.get("/users?onlyCreated=true", function(response){
+    $.get("/Magit/users?onlyCreated=true", function(response){
         var jsonRes = JSON.parse(response)["response"];
         for(i in jsonRes){
             var name = jsonRes[i]["username"];
@@ -152,9 +152,9 @@ function addAllUsersToList(){
 }
 
 function setNotifications() {
-    $.ajax("/userNotifications",
+    $.ajax("/Magit/userNotifications",
         {
-            url:"/userNotifications",
+            url:"/Magit/userNotifications",
             method: "GET",
             dataType: "json"
         }).done(function (data, text, xhr){
@@ -190,8 +190,8 @@ function _setNotifications(notifications){
 
 
 function loadXml(){
-    $.ajax("/upload",
-        {url: "/upload",
+    $.ajax("/Magit/upload",
+        {url: "/Magit/upload",
         type: "POST",
         cache: false,
         contentType: false,

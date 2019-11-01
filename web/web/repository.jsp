@@ -9,8 +9,8 @@
 <body>
 <p>&nbsp;</p>
 <h1 id="currRepo" style="color: #5e9ca0;">&nbsp;</h1>
-<form align="right" action="/index.html"><input type="submit" value="Logout" /></form>
-<form align="right" action="user.jsp"><input type="submit" value="Back to all user's repositories" /></form>
+<form align="right" action="/Magit/index.html"><input type="submit" value="Logout" /></form>
+<form align="right" action="/Magit/user.jsp"><input type="submit" value="Back to all user's repositories" /></form>
 <h2 id="remoteFrom" style="color: #5e9ca0;"></h2>
 <h2 id="remoteRepoName" style="color: #5e9ca0;"></h2>
 
